@@ -3210,7 +3210,7 @@ ACT.wipe=()=>ask('سيُمسح كل شيء: المهام والسجلات وال
 
 /* ========== المساعد الذكي ========== */
 const AI_ON=()=>!!(window.INJAZ&&window.INJAZ.supabaseUrl&&window.INJAZ.aiEnabled);
-const AI_LIMIT=7,AI_WIN=5*3600e3;
+const AI_LIMIT=100,AI_WIN=5*3600e3;
 const aiWin=()=>Math.floor(Date.now()/AI_WIN);
 const aiReset=()=>new Date((aiWin()+1)*AI_WIN).toLocaleTimeString('ar-EG',{hour:'numeric',minute:'2-digit'});
 let aiBusy=false;
