@@ -4413,7 +4413,7 @@ const HB_CH=['P1','P2','P3','P4','P5','P6','E1','E2','E3','S1','H'];
 function hbBase(S){return S.stage==='prim'?'P'+S.grade:S.stage==='prep'?'E'+S.grade:(S.stage==='sec'&&S.grade===1)?'S1':'H'}
 const hbD=S=>({b:-1,m:0,h:1})[S.lv||'m'];
 function hbLevel(S){const i=HB_CH.indexOf(hbBase(S));return HB_CH[Math.max(0,Math.min(HB_CH.length-1,i+hbD(S)))]}
-const hbSlice=(S,a)=>{const n=a.length,f=S.lv==='b'?1/3:S.lv==='h'?1:2/3;return a.slice(0,Math.max(1,Math.ceil(n*f)))};
+const hbSlice=(S,a)=>{const n=a.length,f=S.lv==='b'?1/3:S.lv==='h'?1:2/3;return n<=4?a:a.slice(0,Math.max(1,Math.ceil(n*f)))};
 /* ---- مولّدات الرياضيات حسب الصف (كلها بإجابات محسوبة) ---- */
 const HQ=(r,s,q,c,w,y)=>elBuild(r,'k',s,q,elFm(c),w.map(elFm),y);
 const HB_MATH={
@@ -4548,27 +4548,29 @@ function hbGens0(S){
   if(k==='stc')return hbPick(HB_GRP.dyn).concat(HB_X.stc.map(f=>({w:2,f})));
   const fg=ftGens(k,S);return fg.length?fg:hbPick(HB_GRP.alg);
 }
-const HB_CACHE={};
+const HB_CACHE={},HB_PER=100;
 function hbStream(S){
   const key=hbKey(S);if(HB_CACHE[key])return HB_CACHE[key];
-  const gens=hbGens(S);
-  let salt=0;for(let i=0;i<key.length;i++)salt=(salt*131+key.charCodeAt(i))>>>0;
-  const tot=gens.reduce((s,g)=>s+(g.w||1),0),seen=new Set(),L=[],need=HB_N*11;
-  for(let n=1;L.length<need&&n<120000;n++){
-    const r0=elRng((salt+n*2654435761)>>>0);let x=r0()*tot,gi=0;for(;gi<gens.length;gi++){x-=(gens[gi].w||1);if(x<0)break}
-    if(gi>=gens.length)gi=gens.length-1;
-    const sd=((salt^(n*40503))+gi)>>>0;let q;try{q=gens[gi].f(elRng(sd))}catch(e){continue}
-    const ks=q.q+'|'+q.o.slice().sort().join('~');if(seen.has(ks))continue;seen.add(ks);L.push([gi,sd]);
-  }
-  return HB_CACHE[key]={gens:gens,L:L};
+  const gens=hbGens(S);let salt=0;for(let i=0;i<key.length;i++)salt=(salt*131+key.charCodeAt(i))>>>0;
+  return HB_CACHE[key]={gens:gens,salt:salt,tot:gens.reduce((s,g)=>s+(g.w||1),0)};
 }
-const hbQ=(sm,i)=>{const it=sm.L[i%sm.L.length];return sm.gens[it[0]].f(elRng(it[1]))};
+function hbAt(sm,idx){
+  const r0=elRng((sm.salt+idx*2654435761)>>>0);let x=r0()*sm.tot,gi=0;
+  for(;gi<sm.gens.length;gi++){x-=(sm.gens[gi].w||1);if(x<0)break}
+  if(gi>=sm.gens.length)gi=sm.gens.length-1;
+  return sm.gens[gi].f(elRng(((sm.salt^(idx*40503))+gi)>>>0));
+}
 function hbToQ(q,sn,id){return {id:id,s:q.s,sn:sn+' · '+q.s,q:q.q.replace(/[⟦⟧]/g,''),o:q.o,a:q.a,e:q.y.replace(/[⟦⟧]/g,'')}}
 function hbBuild(S,kind,n){
-  const sm=hbStream(S),sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n;
-  const base=kind==='t'?(n-1)*10:HB_N*10+(n-1),cnt=kind==='t'?10:1,out=[];
-  for(let i=0;i<cnt;i++)out.push(hbToQ(hbQ(sm,base+i),sn,'h'+hbKey(S)+kind+(base+i)));
-  return out;
+  const sm=hbStream(S),sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n,K=hbKey(S);
+  const cnt=kind==='t'?HB_PER:1,base=(kind==='t'?0:1e8)+n*2000,seen=new Set(),L=[];
+  for(let a=0;L.length<cnt&&a<(kind==='t'?900:50);a++){
+    let q;try{q=hbAt(sm,base+a)}catch(e){continue}
+    const ks=q.q+'|'+q.o.slice().sort().join('~');if(seen.has(ks))continue;seen.add(ks);L.push(q);
+  }
+  if(!L.length)return[];
+  for(let i=0;L.length<cnt;i++)L.push(L[i%L.length]);
+  return L.map((q,i)=>hbToQ(q,sn,'h'+K+kind+n+'_'+i));
 }
 /* ---- الواجهة ---- */
 const hbDone=()=>st.get('hbdone',{});
@@ -4584,11 +4586,11 @@ function hbCard(){
   const tr=eduNeedsTrack(S.stage,S.grade)?'<div class="chips hbr">'+Object.keys(TRACKS[S.stage]).map(k=>chip('hbtrack','',k,TRACKS[S.stage][k],S.track===k)).join('')+'</div>':'';
   const LV=[['b','مبتدئ'],['m','متوسط'],['h','متفوق']],lvs='<div class="chips hbr hblv">'+LV.map(x=>chip('hblv','',x[0],x[1],(S.lv||'m')===x[0])).join('')+'</div>';
   const sj='<div class="chips hbr">'+subs.map(s=>chip('hbsubj','',s.k,s.n,S.subj===s.k)).join('')+'</div>';
-  const info=gens?('<p class="mut sm">'+(HB_QUANT(S)?'مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. ':'أسئلة هذه المادة مبنية من جداول حقائق مراجَعة، والمشتتات من نفس الجدول. ')+(sm&&sm.L.length<HB_N*11?'عدد الأسئلة الفريدة المتاحة '+sm.L.length.toLocaleString('ar-EG')+' وتتكرر بعد ذلك.':'كل اختبار فريد.')+'</p>'):'';
+  const pool=gens?gens.reduce((a,g)=>a+(g.w||1),0):0,info=gens?('<p class="mut sm">'+(HB_QUANT(S)?'مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. ':'أسئلة هذه المادة مبنية من جداول حقائق مراجَعة، والمشتتات من نفس الجدول. ')+(HB_QUANT(S)?'كل اختبار 100 سؤال.':(pool<400?'عدد حقائق هذه المادة محدود (نحو '+pool.toLocaleString('ar-EG')+' سؤال فريد) فتتكرر الأسئلة بين الاختبارات. ':'')+'كل اختبار 100 سؤال.')+'</p>'):'';
   const row=(kind,title)=>'<div class="hbrow"><b>'+title+'</b><div class="row"><input type="number" min="1" max="'+HB_N+'" value="'+(S.n||1)+'" class="hbn" id="hbn-'+kind+'" inputmode="numeric"><button class="btn" data-a="hbgo" data-k="'+kind+'">ابدأ</button><button class="btn g" data-a="hbgo" data-k="'+kind+'" data-r="1">عشوائي</button></div><small class="mut">أنجزت '+(kind==='t'?nt:np)+' من '+HB_N+'</small></div>';
   return '<div class="card full hbcard"><h3><span>الاختبارات</span><small>لكل مادة '+HB_N+' اختبار و'+HB_N+' مسألة</small></h3>'+
     '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+lvs+info+
-    (S.subj?row('t','اختبارات (10 أسئلة)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
+    (S.subj?row('t','اختبارات (100 سؤال)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
 RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+exWeekCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
 const _rdExam=()=>RD.exam();
