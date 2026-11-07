@@ -3138,12 +3138,12 @@ function aiBubble(m){return '<div class="aib '+(m.r==='u'?'me':'bot')+'">'+esc(m
 RD.ai=()=>{
   const ch=aiChat(),left=Math.max(0,AI_LIMIT-aiUsed());
   const subj=(typeof subs==='function'?subs():[]).slice(0,4).map(x=>x.n);
-  const sugg=['اشرح لي درسًا بسهولة','اختبرني بـ 5 أسئلة','لخّص لي هذه الفقرة','ضع لي خطة مذاكرة لأسبوع'];
+  const sugg=['اشرح لي درسًا بسهولة','اختبرني بـ 5 أسئلة','ضع لي خطة مذاكرة لأسبوع','اقترح لي نظامًا غذائيًا صحيًا','أشعر بالتوتر قبل الامتحان','ما أفضل تمرين يومي مناسب لي؟'];
   const demo=!AI_ON();
   return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'متبقّي اليوم: '+left+' رسالة')+'</span></div>'+
-    '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس أو اطلب تدريبًا.</span></div>')+'</div>'+
+    '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس من الابتدائي للثانوي، أو عن نظامك الغذائي والرياضي، أو مزاجك وتوترك.</span></div>')+'</div>'+
     (ch.length?'':'<div class="chips aisug">'+sugg.map(x=>'<button class="chip" data-a="aiask" data-q="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>')+
-    '<div class="row aiin"><input id="ai-in" type="text" maxlength="600" placeholder="اكتب سؤالك" class="grow" autocomplete="off"><button class="btn" data-a="aisend" id="ai-go">إرسال</button></div>'+
+    '<div class="row aiin"><input id="ai-in" type="text" maxlength="1400" placeholder="اكتب سؤالك" class="grow" autocomplete="off"><button class="btn" data-a="aisend" id="ai-go">إرسال</button></div>'+
     '<p class="mut sm aiwarn">قد يخطئ ذكي. راجع الإجابة مع كتابك.'+(ch.length?' <button class="lnk" data-a="aiclear" style="background:none;border:0;color:var(--acc);cursor:pointer;padding:0">محادثة جديدة</button>':'')+'</p></div></div>';
 };
 PO.ai=()=>{const l=$('#ailog');if(l)l.scrollTop=l.scrollHeight};
@@ -3151,7 +3151,7 @@ async function aiReply(text){
   const e=eduOf()||{};
   const demo=!(AI_ON()&&CLOUD&&CLOUD.client&&CLOUD.user);
   if(demo){await new Promise(r=>setTimeout(r,900));return 'هذا رد تجريبي. عند تفعيل ذكي سيجيبك هنا بشرح مبسّط ومثال وسؤال تدريبي عن: «'+text.slice(0,60)+'».'}
-  const hist=aiChat().slice(-8).map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}));
+  const hist=aiChat().slice(-10).map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}));
   const r=await CLOUD.client.functions.invoke('tutor',{body:{messages:hist,stage:e.stage||'',grade:e.grade||'',track:e.track||''}});
   if(r.error)throw r.error;if(r.data&&r.data.error==='limit')throw new Error('limit');
   return (r.data&&r.data.reply)||'لم أستطع الإجابة الآن.';
