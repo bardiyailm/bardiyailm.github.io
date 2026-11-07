@@ -658,6 +658,7 @@ body.onai #aifab,body.mo #aifab,body.lock #aifab{opacity:0;pointer-events:none}
 .aihl li{display:flex;gap:.5rem;align-items:center}
 .aihl li button.lnk{display:flex;flex-direction:column}
 .zlogo{width:min(220px,60%);border-radius:18px;display:block;margin:0 auto .6rem}
+.eico.zk{padding:0;overflow:hidden;background:#F8F3E7}.eico.zk img{width:100%;height:100%;object-fit:cover;object-position:50% 36%;transform:scale(1.9);transform-origin:50% 38%}
 </style>
 </head>
 <body>
@@ -2075,6 +2076,7 @@ function applySkin(sec){
 /* ========== أيقونة القسم: شكل مسطح بدل المجسمات ========== */
 function embShow(k,el){
   if(!el)return;const id=curSec,p=(typeof ICO!=='undefined'&&ICO[id])||'';
+  if(id==='ai'&&typeof ZAKI_LOGO!=='undefined'){el.innerHTML='<div class="eico zk"><img src="'+ZAKI_LOGO+'" alt="ذكي"></div>';return}
   el.innerHTML='<div class="eico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+p+'"/></svg></div>';
 }
 
