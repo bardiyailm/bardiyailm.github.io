@@ -3162,7 +3162,7 @@ async function aiSend(q){
   aiBusy=true;const ch=aiChat();ch.push({r:'u',t:q});st.set('aichat',ch.slice(-40));renderSec('ai');
   const l=$('#ailog');if(l){l.insertAdjacentHTML('beforeend','<div class="aib bot aityp"><i></i><i></i><i></i></div>');l.scrollTop=l.scrollHeight}
   try{const rep=await aiReply(q);const c2=aiChat();c2.push({r:'b',t:rep});st.set('aichat',c2.slice(-40));const u=st.get('aiuse',{});st.set('aiuse',{d:td(),n:(u.d===td()?u.n:0)+1})}
-  catch(e){const c2=aiChat();c2.push({r:'b',t:(e&&e.message==='limit')?'انتهت رسائل اليوم، عد غدًا.':'تعذّر الاتصال بالمساعد الآن. جرّب بعد قليل.'});st.set('aichat',c2.slice(-40))}
+  catch(e){const c2=aiChat();c2.push({r:'b',t:(e&&e.message==='limit')?'انتهت رسائل اليوم، عد غدًا.':'تعذّر الاتصال بذكي الآن. جرّب بعد قليل.'+(e&&e.context&&e.context.status?' (رمز '+e.context.status+')':'')});st.set('aichat',c2.slice(-40))}
   aiBusy=false;renderSec('ai');
 }
 ACT.aisend=()=>{const i=$('#ai-in');if(i){const v=i.value;i.value='';aiSend(v)}};
