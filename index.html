@@ -1973,9 +1973,8 @@ const TAGN={study:'مذاكرة',pray:'عبادة',lesson:'درس',gym:'تمري
 const SEC=[
   {id:'home',n:'الرئيسية',sub:'نظرة واحدة على يومك كله',skin:'nile',em:'armillary',c:'#e2bf76'},
   {id:'study',n:'المذاكرة',sub:'جلسات مركّزة بلا تشتت',skin:'lapis',em:'crystal',c:'#6cd9d8'},
-  {id:'exam',n:'الامتحانات',sub:'تقييم أسبوعي وتدريب بالحلول',skin:'lapis',em:'star',c:'#6cd9d8'},
   {id:'elite',n:'المتفوقون',sub:'10,000 سؤال لمتفوقي الثانوية العامة',skin:'lapis',em:'star',c:'#e2b866'},
-  {id:'tests',n:'الاختبارات',sub:'1000 اختبار لكل مادة في كل صف',skin:'sandstone',em:'star',c:'#e2b866'},
+  {id:'tests',n:'الاختبارات',sub:'مبتدئ · متوسط · متفوق لكل مادة',skin:'sandstone',em:'star',c:'#e2b866'},
   {id:'ai',n:'ذكي',sub:'فاهمك: اسأل واشرح وتدرّب',skin:'lapis',em:'star',c:'#6cd9d8'},
   {id:'tasks',n:'المهام',sub:'اكتب، رتّب، أنجز',skin:'lapis',em:'cubes',c:'#6cd9d8'},
   {id:'log',n:'السجل اليومي',sub:'ماذا فعلت اليوم وكيف كان شعورك',skin:'sandstone',em:'book',c:'#e7cf94'},
@@ -1991,7 +1990,7 @@ const SEC=[
   {id:'insp',n:'إلهام',sub:'آيات وأحاديث وحِكَم',skin:'sandstone',em:'star',c:'#e7cf94'},
   {id:'set',n:'الإعدادات',sub:'الخلفية والألوان والنسخ الاحتياطي',skin:'nile',em:'gear',c:'#e2bf76'}
 ];
-const WMK={home:'m3',routine:'m3',alarm:'m3',set:'m3',study:'m4',exam:'m4',ai:'m4',elite:'m4',tests:'m4',tasks:'m4',lib:'m2',read:'m2',notes:'m2',log:'m2',insp:'m2',gym:'m1',fit:'m1',food:'m1',water:'m1'};
+const WMK={home:'m3',routine:'m3',alarm:'m3',set:'m3',study:'m4',ai:'m4',elite:'m4',tests:'m4',tasks:'m4',lib:'m2',read:'m2',notes:'m2',log:'m2',insp:'m2',gym:'m1',fit:'m1',food:'m1',water:'m1'};
 const secOf=id=>SEC.find(s=>s.id===id)||SEC[0];
 
 /* ========== الخلفيات: هادئة وحديثة وبلا حركة ========== */
@@ -2473,7 +2472,7 @@ RD.home=()=>{
     card('منبه الصباح','<div class="b" style="font-size:1.15rem">'+al.text+'</div><div class="mut sm">'+al.sub+'</div><div class="row" style="margin-top:10px"><button class="btn s" data-a="go" data-g="alarm">إعداد المنبه</button>'+(al.canCancel?'<button class="btn d s" data-a="almSkip">'+(al.skipped?'إعادة تفعيل منبه الغد':'إلغاء منبه الغد')+'</button>':'')+'</div>')+
     card('تقدّم اليوم',rings,{cls:'full'})+
     card('الدرس القادم',nl?'<div class="b" style="font-size:1.15rem">'+esc(nl.x.label)+'</div><div class="mut">'+(nl.k===k?'اليوم':DN[wdOf(nl.k)])+' · '+t12(nl.x.t0)+'</div><div class="ac b" style="margin-top:4px">بعد '+dur(nl.mins)+'</div>':'<div class="mut">لا دروس قادمة هذا الأسبوع</div>')+
-    card('امتحان الأسبوع',(()=>{const wr=weekResult();return wr?'<div class="b" style="font-size:1.25rem">'+wr.score+' من '+wr.total+'</div><div class="mut sm">'+grade(pctOf(wr))+' · نتيجة هذا الأسبوع</div>':'<div class="mut sm">عشرة أسئلة من موادك بحلولها، متاح الآن.</div>'})()+'<div class="row" style="margin-top:10px"><button class="btn s" data-a="go" data-g="exam">'+(weekResult()?'الامتحانات':'ابدأ الآن')+'</button></div>')+
+    card('امتحان الأسبوع',(()=>{const wr=weekResult();return wr?'<div class="b" style="font-size:1.25rem">'+wr.score+' من '+wr.total+'</div><div class="mut sm">'+grade(pctOf(wr))+' · نتيجة هذا الأسبوع</div>':'<div class="mut sm">عشرة أسئلة من موادك بحلولها، متاح الآن.</div>'})()+'<div class="row" style="margin-top:10px"><button class="btn s" data-a="go" data-g="tests">'+(weekResult()?'الاختبارات':'ابدأ الآن')+'</button></div>')+
     card('اختصارات','<div class="row"><button class="btn" data-a="homeFocus">ابدأ تركيز</button><button class="btn g" data-a="homeWater">+ كوب ماء</button><button class="btn g" data-a="go" data-g="tasks">مهمة جديدة</button><button class="btn g" data-a="go" data-g="notes">ملاحظة سريعة</button></div>')+
     card('مهام اليوم',tl.length?'<ul class="list">'+tl.map(t=>'<li><input type="checkbox" data-c="tchk" data-id="'+t.id+'" aria-label="تم"><span class="t">'+esc(t.t)+'</span>'+taskBadge(t)+'</li>').join('')+'</ul>':'<div class="empty">لا مهام لليوم. استمتع أو أضف مهمة.</div>',{r:T0.done+'/'+(T0.done+T0.open)})+
     '</div>';
@@ -4155,18 +4154,18 @@ function buildQs(subjs,n,seed){
 const XH=()=>st.get('xhist',[]);
 const saveXH=a=>st.set('xhist',a.slice(-120));
 const EX={on:false,qs:[],i:0,ans:[],done:false,meta:null};
-function exStart(qs,meta){if(!qs.length){toast('لا توجد أسئلة متاحة لهذه المادة بعد');return}EX.on=true;EX.qs=qs;EX.i=0;EX.ans=new Array(qs.length).fill(-1);EX.done=false;EX.meta=meta;EX.t0=Date.now();renderSec('exam')}
+function exStart(qs,meta){if(!qs.length){toast('لا توجد أسئلة متاحة لهذه المادة بعد');return}EX.on=true;EX.qs=qs;EX.i=0;EX.ans=new Array(qs.length).fill(-1);EX.done=false;EX.meta=meta;EX.t0=Date.now();renderSec('tests')}
 ACT.exweek=()=>{
   const subs=examSubjects();if(!subs.length){toast('اختر مرحلتك أولاً من الإعدادات');return}
   exStart(buildQs(subs,10,weekId()+'|'+(userName()||me())),{type:'week',wk:weekId(),title:'امتحان الأسبوع'});
 };
 ACT.exprac=t=>{const s=mySubs().find(x=>x.k===t.dataset.k);if(!s)return;exStart(buildQs([s],10,'p'+Date.now()),{type:'prac',subj:s.k,title:'تدريب: '+s.n})};
 ACT.exmix=()=>{const subs=examSubjects();if(!subs.length){toast('اختر مرحلتك أولاً');return}exStart(buildQs(subs,10,'m'+Date.now()),{type:'mix',title:'تدريب متنوع'})};
-ACT.exans=t=>{if(EX.done)return;EX.ans[EX.i]=+t.dataset.i;renderSec('exam')};
-ACT.exnext=()=>{if(EX.i<EX.qs.length-1){EX.i++;renderSec('exam')}};
-ACT.exprev=()=>{if(EX.i>0){EX.i--;renderSec('exam')}};
-ACT.exgo=t=>{EX.i=+t.dataset.i;renderSec('exam')};
-ACT.exquit=()=>ask('إنهاء الامتحان بلا حفظ النتيجة؟','إنهاء',()=>{EX.on=false;renderSec('exam')},true);
+ACT.exans=t=>{if(EX.done)return;EX.ans[EX.i]=+t.dataset.i;renderSec('tests')};
+ACT.exnext=()=>{if(EX.i<EX.qs.length-1){EX.i++;renderSec('tests')}};
+ACT.exprev=()=>{if(EX.i>0){EX.i--;renderSec('tests')}};
+ACT.exgo=t=>{EX.i=+t.dataset.i;renderSec('tests')};
+ACT.exquit=()=>ask('إنهاء الامتحان بلا حفظ النتيجة؟','إنهاء',()=>{EX.on=false;renderSec('tests')},true);
 ACT.exfinish=()=>{
   const un=EX.ans.filter(x=>x<0).length;
   const fin=()=>{
@@ -4174,12 +4173,12 @@ ACT.exfinish=()=>{
     const score=items.filter(x=>x.ok).length,h=XH();
     const first=EX.meta.type==='week'&&!h.some(x=>x.type==='week'&&x.wk===EX.meta.wk);
     h.push({at:Date.now(),type:EX.meta.type,wk:EX.meta.wk||'',subj:EX.meta.subj||'',score:score,total:EX.qs.length,off:first||EX.meta.type!=='week',items:items,mins:Math.round((Date.now()-EX.t0)/60000)});
-    saveXH(h);if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);EX.done=true;EX.i=0;renderSec('exam');
+    saveXH(h);if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);EX.done=true;EX.i=0;renderSec('tests');
   };
   if(un)ask('بقيت '+un+' أسئلة بلا إجابة. إنهاء الامتحان؟','إنهاء',fin);else fin();
 };
-ACT.exclose=()=>{EX.on=false;renderSec('exam')};
-ACT.exnew=()=>{EX.on=false;renderSec('exam')};
+ACT.exclose=()=>{EX.on=false;renderSec('tests')};
+ACT.exnew=()=>{EX.on=false;renderSec('tests')};
 function weekResult(){return XH().filter(x=>x.type==='week'&&x.wk===weekId()).sort((a,b)=>a.at-b.at)[0]||null}
 function pctOf(h){return h.total?Math.round(h.score/h.total*100):0}
 function grade(p){return p>=90?'ممتاز':p>=75?'جيد جداً':p>=60?'جيد':p>=50?'مقبول':'يحتاج مراجعة'}
@@ -4212,12 +4211,16 @@ function exHistory(){
     (w.length?'<div class="mut sm" style="margin-top:8px">نقاط تحتاج مراجعة:</div><div class="chips" style="flex-wrap:wrap">'+w.slice(0,4).map(x=>'<span class="chip">'+esc(sub(x.k).n)+' · '+x.p+'%</span>').join('')+'</div>':'')+
     (h.length?'<ul class="list" style="margin-top:8px">'+h.map(x=>'<li><span class="t">'+esc(x.type==='week'?'امتحان الأسبوع':x.type==='prac'?'تدريب: '+sub(x.subj).n:'تدريب متنوع')+'</span><small class="mut">'+new Date(x.at).toLocaleDateString('ar-EG',{day:'numeric',month:'short'})+' · '+x.score+' من '+x.total+'</small></li>').join('')+'</ul>':''));
 }
+function exWeekCard(){
+  const wr=weekResult();
+  return card('امتحان الأسبوع','<p class="mut sm">أسبوع '+weekLabel()+' · '+esc(eduLabel())+'. عشرة أسئلة من موادك، ويتجدد كل سبت.</p>'+
+    (wr?'<div class="exscore" style="font-size:1.6rem">'+wr.score+' من '+wr.total+'</div><div class="mut sm" style="text-align:center">'+grade(pctOf(wr))+' · نتيجتك الرسمية لهذا الأسبوع</div><div class="row" style="margin-top:10px"><button class="btn g" data-a="exweek">إعادة للتدريب</button></div>':'<div class="row"><button class="btn" data-a="exweek">ابدأ امتحان الأسبوع</button></div>'),{cls:'glow'});
+}
 RD.exam=()=>{
   if(EX.on)return EX.done?exResult():exQuestion();
   const e=eduOf();if(!e)return card('اختر مرحلتك','<p class="mut">حتى نجهّز لك امتحانات مواد مرحلتك.</p><button class="btn" data-a="edusheet">اختيار المرحلة</button>');
   const subs=examSubjects(),wr=weekResult();
-  const wk=card('امتحان الأسبوع','<p class="mut sm">أسبوع '+weekLabel()+' · '+esc(eduLabel())+'. عشرة أسئلة من موادك، ويتجدد كل سبت.</p>'+
-    (wr?'<div class="exscore" style="font-size:1.6rem">'+wr.score+' من '+wr.total+'</div><div class="mut sm" style="text-align:center">'+grade(pctOf(wr))+' · نتيجتك الرسمية لهذا الأسبوع</div><div class="row" style="margin-top:10px"><button class="btn g" data-a="exweek">إعادة للتدريب</button></div>':'<div class="row"><button class="btn" data-a="exweek">ابدأ امتحان الأسبوع</button></div>'),{cls:'glow'});
+  const wk=exWeekCard();
   const pr=card('تدريب حسب المادة',subs.length?'<div class="chips" style="flex-wrap:wrap">'+subs.map(s=>'<button class="chip" data-a="exprac" data-k="'+s.k+'" style="--c:'+s.c+'">'+esc(s.n)+'</button>').join('')+'</div><div class="row" style="margin-top:10px"><button class="btn g" data-a="exmix">تدريب متنوع</button></div>':'<div class="empty">لا أسئلة لمواد مرحلتك بعد. تُضاف باستمرار.</div>');
   const miss=mySubs().filter(s=>!subs.find(x=>x.k===s.k));
   const note='<p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخاً منها. '+(miss.length?'مواد لم تُضف أسئلتها بعد: '+miss.map(s=>esc(s.n)).join('، ')+'.':'')+'</p>';
@@ -4403,10 +4406,14 @@ const HB_N=1000, HB_NAMES=['أحمد','منى','يوسف','سلمى','عمر','�
 const HB_THINGS=['تفاحة','برتقالة','قلمًا','كتابًا','بالونة','كرة','وردة','قطعة حلوى','دفترًا','لعبة'];
 const hbSub=(r,a)=>elPick(r,a);
 const hbSt=()=>{const e=(typeof eduOf==='function'&&eduOf())||{stage:'sec',grade:3,track:'sci'};
-  return Object.assign({stage:e.stage,grade:+e.grade||1,track:e.track||'',subj:'',n:1},st.get('hub')||{})};
+  return Object.assign({stage:e.stage,grade:+e.grade||1,track:e.track||'',subj:'',n:1,lv:'m'},st.get('hub')||{})};
 const hbSave=o=>st.set('hub',o);
-const hbKey=S=>[S.stage,S.grade,S.track,S.subj].join('-');
-function hbLevel(S){return S.stage==='prim'?'P'+S.grade:S.stage==='prep'?'E'+S.grade:(S.stage==='sec'&&S.grade===1)?'S1':'H'}
+const hbKey=S=>[S.stage,S.grade,S.track,S.subj].concat(S.lv&&S.lv!=='m'?[S.lv]:[]).join('-');
+const HB_CH=['P1','P2','P3','P4','P5','P6','E1','E2','E3','S1','H'];
+function hbBase(S){return S.stage==='prim'?'P'+S.grade:S.stage==='prep'?'E'+S.grade:(S.stage==='sec'&&S.grade===1)?'S1':'H'}
+const hbD=S=>({b:-1,m:0,h:1})[S.lv||'m'];
+function hbLevel(S){const i=HB_CH.indexOf(hbBase(S));return HB_CH[Math.max(0,Math.min(HB_CH.length-1,i+hbD(S)))]}
+const hbSlice=(S,a)=>{const n=a.length,f=S.lv==='b'?1/3:S.lv==='h'?1:2/3;return a.slice(0,Math.max(1,Math.ceil(n*f)))};
 /* ---- مولّدات الرياضيات حسب الصف (كلها بإجابات محسوبة) ---- */
 const HQ=(r,s,q,c,w,y)=>elBuild(r,'k',s,q,elFm(c),w.map(elFm),y);
 const HB_MATH={
@@ -4524,17 +4531,18 @@ const HB_GRP={
 let HB_TOP=null;
 function hbTop(){if(HB_TOP)return HB_TOP;HB_TOP=EL_GEN.map(g=>g.f(elRng(7)).s);return HB_TOP}
 const hbPick=names=>EL_GEN.filter((g,i)=>names.includes(hbTop()[i]));
-function hbGens(S){
-  const k=S.subj,L=hbLevel(S);
+function hbGens(S){const g=hbGens0(S);const M=['math','alg','mathA','calc'].includes(S.subj);return(hbBase(S)==='H'&&!FQ_MAP[S.subj]&&!(M&&S.lv==='b'))?hbSlice(S,g):g}
+function hbGens0(S){
+  const k=S.subj,L=hbLevel(S),H0=hbBase(S)==='H';
   const M=['math','alg','mathA','calc'];
   if(M.includes(k)){
     if(L!=='H')return HB_MATH[L].map(f=>({w:1,f}));
     return hbPick(HB_GRP.calc.concat(HB_GRP.alg));
   }
-  if(k==='stat'&&L==='H')return hbPick(['الاحتمال','التوافيق']).concat(HB_X.stat.map(f=>({w:3,f})));
-  if(['phys','physA'].includes(k)&&L==='H')return hbPick(HB_GRP.phys);
-  if(['chem','chemA'].includes(k)&&L==='H')return hbPick(HB_GRP.chem).concat(HB_X.chem.map(f=>({w:3,f})));
-  if(['bio','bioA'].includes(k)&&L==='H')return hbPick(HB_GRP.bio).concat(HB_X.bio.map(f=>({w:3,f})));
+  if(k==='stat'&&H0)return hbPick(['الاحتمال','التوافيق']).concat(HB_X.stat.map(f=>({w:3,f})));
+  if(['phys','physA'].includes(k)&&H0)return hbPick(HB_GRP.phys);
+  if(['chem','chemA'].includes(k)&&H0)return hbPick(HB_GRP.chem).concat(HB_X.chem.map(f=>({w:3,f})));
+  if(['bio','bioA'].includes(k)&&H0)return hbPick(HB_GRP.bio).concat(HB_X.bio.map(f=>({w:3,f})));
   if(k==='dyn')return hbPick(HB_GRP.dyn);
   if(k==='isci'||(k==='sci'&&S.stage==='prep'&&S.grade===3))return hbPick(HB_GRP.phys.slice(0,2).concat(HB_GRP.chem.slice(0,3),HB_GRP.bio.slice(1,3)));
   if(k==='stc')return hbPick(HB_GRP.dyn).concat(HB_X.stc.map(f=>({w:2,f})));
@@ -4567,33 +4575,35 @@ const hbDone=()=>st.get('hbdone',{});
 function hbMark(h,rec){const d=hbDone();d[h.key]=d[h.key]||{};d[h.key][h.k+h.n]=Math.round(rec.score/rec.total*100);st.set('hbdone',d)}
 function hbCard(){
   const S=hbSt(),subs=eduSubjects({stage:S.stage,grade:S.grade,track:S.track});
-  if(!subs.find(x=>x.k===S.subj))S.subj=subs.length?subs[0].k:'';
+  if(!subs.find(x=>x.k===S.subj)){S.subj=subs.length?subs[0].k:'';hbSave(S)}
   const gens=S.subj?hbGens(S):null,sm=gens?hbStream(S):null,key=hbKey(S),dn=hbDone()[key]||{};
   const nt=Object.keys(dn).filter(x=>x[0]==='t').length,np=Object.keys(dn).filter(x=>x[0]==='p').length;
   const chip=(a,k,v,n,on)=>'<button class="chip'+(on?' on':'')+'" data-a="'+a+'" data-k="'+v+'">'+esc(n)+'</button>';
   const stages=Object.keys(EDU).map(k=>chip('hbstage','',k,EDU[k].n,S.stage===k)).join('');
   const grades=EDU[S.stage].g.map(g=>chip('hbgrade','',g,EDU[S.stage].gn(g).replace(/ (الابتدائي|الإعدادي|الثانوي)$/,'').replace('الصف ','')+'',S.grade===g)).join('');
   const tr=eduNeedsTrack(S.stage,S.grade)?'<div class="chips hbr">'+Object.keys(TRACKS[S.stage]).map(k=>chip('hbtrack','',k,TRACKS[S.stage][k],S.track===k)).join('')+'</div>':'';
+  const LV=[['b','مبتدئ'],['m','متوسط'],['h','متفوق']],lvs='<div class="chips hbr hblv">'+LV.map(x=>chip('hblv','',x[0],x[1],(S.lv||'m')===x[0])).join('')+'</div>';
   const sj='<div class="chips hbr">'+subs.map(s=>chip('hbsubj','',s.k,s.n,S.subj===s.k)).join('')+'</div>';
   const info=gens?('<p class="mut sm">'+(HB_QUANT(S)?'مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. ':'أسئلة هذه المادة مبنية من جداول حقائق مراجَعة، والمشتتات من نفس الجدول. ')+(sm&&sm.L.length<HB_N*11?'عدد الأسئلة الفريدة المتاحة '+sm.L.length.toLocaleString('ar-EG')+' وتتكرر بعد ذلك.':'كل اختبار فريد.')+'</p>'):'';
   const row=(kind,title)=>'<div class="hbrow"><b>'+title+'</b><div class="row"><input type="number" min="1" max="'+HB_N+'" value="'+(S.n||1)+'" class="hbn" id="hbn-'+kind+'" inputmode="numeric"><button class="btn" data-a="hbgo" data-k="'+kind+'">ابدأ</button><button class="btn g" data-a="hbgo" data-k="'+kind+'" data-r="1">عشوائي</button></div><small class="mut">أنجزت '+(kind==='t'?nt:np)+' من '+HB_N+'</small></div>';
-  return '<div class="card full hbcard"><h3><span>مكتبة المتفوقين</span><small>لكل مادة '+HB_N+' اختبار و'+HB_N+' مسألة</small></h3>'+
-    '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+info+
+  return '<div class="card full hbcard"><h3><span>الاختبارات</span><small>لكل مادة '+HB_N+' اختبار و'+HB_N+' مسألة</small></h3>'+
+    '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+lvs+info+
     (S.subj?row('t','اختبارات (10 أسئلة)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
-RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
+RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+exWeekCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
 const _rdExam=()=>RD.exam();
 const hbUp=f=>{const S=hbSt();f(S);hbSave(S);renderSec('tests')};
 ACT.hbstage=t=>hbUp(S=>{S.stage=t.dataset.k;S.grade=EDU[S.stage].g[0];S.track=eduNeedsTrack(S.stage,S.grade)?Object.keys(TRACKS[S.stage])[0]:'';S.subj=''});
 ACT.hbgrade=t=>hbUp(S=>{S.grade=+t.dataset.k;S.track=eduNeedsTrack(S.stage,S.grade)?(S.track&&TRACKS[S.stage]&&TRACKS[S.stage][S.track]?S.track:Object.keys(TRACKS[S.stage])[0]):'';S.subj=''});
 ACT.hbtrack=t=>hbUp(S=>{S.track=t.dataset.k;S.subj=''});
+ACT.hblv=t=>hbUp(S=>{S.lv=t.dataset.k});
 ACT.hbsubj=t=>hbUp(S=>{S.subj=t.dataset.k});
 ACT.hbgo=t=>{
 const S=hbSt(),kind=t.dataset.k;
   let n=t.dataset.r?1+Math.floor(Math.random()*HB_N):Math.max(1,Math.min(HB_N,+(($('#hbn-'+kind)||{}).value)||1));
   S.n=n;hbSave(S);const hb={key:hbKey(S),k:kind,n:n};
   const sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n;
-  const meta={type:'prac',subj:S.subj,title:(kind==='t'?'اختبار ':'مسألة ')+n+' · '+sn,hb:hb};
+  const meta={type:'prac',subj:S.subj,title:(kind==='t'?'اختبار ':'مسألة ')+n+' · '+sn+' · '+({b:'مبتدئ',m:'متوسط',h:'متفوق'}[S.lv||'m']),hb:hb};
   exStart(hbBuild(S,kind,n),meta);
 };
 
@@ -4637,7 +4647,7 @@ const FQ_MAP={
 };
 const _ftC={};
 function ftPairs(id){if(_ftC[id])return _ftC[id];const t=FQ[id];return _ftC[id]=t.p.split(',').map(x=>{const i=x.lastIndexOf('|');return [x.slice(0,i),x.slice(i+1)]})}
-function hbLv(S){return S.stage==='prim'?(S.grade<=3?1:2):S.stage==='prep'?3:S.stage==='sec'?4:5}
+function hbLv(S){const b=S.stage==='prim'?(S.grade<=3?1:2):S.stage==='prep'?3:S.stage==='sec'?4:5;return Math.max(1,Math.min(5,b+(typeof hbD==='function'?hbD(S):0)))}
 function ftGens(subj,S){
   const L=hbLv(S),ids=(FQ_MAP[subj]||[]).filter(id=>FQ[id].lv[0]<=L&&L<=FQ[id].lv[1]+1);
   const use=ids.length?ids:(FQ_MAP[subj]||[]).slice(0,1);
