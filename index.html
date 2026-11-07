@@ -634,6 +634,21 @@ body.lt .herocard .mut,body.lt .herocard small{color:rgba(255,255,255,.68)}
 @media(prefers-reduced-motion:reduce){#aifab::after{animation:none}}
 @media(min-width:900px){#aifab{right:calc(96px + 20px);bottom:28px}}
 body.onai #aifab,body.mo #aifab,body.lock #aifab{opacity:0;pointer-events:none}
+.elq{font-size:1.15rem;line-height:1.9;margin:.6rem 0 1rem;font-weight:600}
+.elm{unicode-bidi:isolate;font-family:ui-monospace,Menlo,monospace;white-space:nowrap;display:inline-block}
+.elo{display:grid;gap:.6rem}
+.elopt{display:flex;gap:.8rem;align-items:center;justify-content:flex-start;text-align:start;width:100%}
+.elopt b{min-width:1.8rem}
+.elopt.good{background:#1f7a4d!important;color:#fff!important}
+.elopt.bad{background:#a93a3a!important;color:#fff!important}
+.elwhy{margin:1rem 0;padding:.8rem;border-radius:12px;background:rgba(226,184,102,.14);line-height:1.8}
+.elnav{gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.elf{margin:.6rem 0}
+.elopt:disabled{opacity:1;cursor:default}
+.elopt.good{background:#1f7a4d!important;color:#fff!important;border-color:#37b577!important}
+.elopt.bad{background:#a93a3a!important;color:#fff!important;border-color:#e07070!important}
+.elcard{padding-bottom:5.5rem}
+.elopt:disabled:not(.good):not(.bad){background:rgba(255,255,255,.07)!important;color:inherit!important;box-shadow:none}
 </style>
 </head>
 <body>
@@ -1897,6 +1912,7 @@ const SEC=[
   {id:'home',n:'الرئيسية',sub:'نظرة واحدة على يومك كله',skin:'nile',em:'armillary',c:'#e2bf76'},
   {id:'study',n:'المذاكرة',sub:'جلسات مركّزة بلا تشتت',skin:'lapis',em:'crystal',c:'#6cd9d8'},
   {id:'exam',n:'الامتحانات',sub:'تقييم أسبوعي وتدريب بالحلول',skin:'lapis',em:'star',c:'#6cd9d8'},
+  {id:'elite',n:'المتفوقون',sub:'10,000 سؤال لمتفوقي الثانوية العامة',skin:'lapis',em:'star',c:'#e2b866'},
   {id:'ai',n:'ذكي',sub:'فاهمك: اسأل واشرح وتدرّب',skin:'lapis',em:'star',c:'#6cd9d8'},
   {id:'tasks',n:'المهام',sub:'اكتب، رتّب، أنجز',skin:'lapis',em:'cubes',c:'#6cd9d8'},
   {id:'log',n:'السجل اليومي',sub:'ماذا فعلت اليوم وكيف كان شعورك',skin:'sandstone',em:'book',c:'#e7cf94'},
@@ -1912,7 +1928,7 @@ const SEC=[
   {id:'insp',n:'إلهام',sub:'آيات وأحاديث وحِكَم',skin:'sandstone',em:'star',c:'#e7cf94'},
   {id:'set',n:'الإعدادات',sub:'الخلفية والألوان والنسخ الاحتياطي',skin:'nile',em:'gear',c:'#e2bf76'}
 ];
-const WMK={home:'m3',routine:'m3',alarm:'m3',set:'m3',study:'m4',exam:'m4',ai:'m4',tasks:'m4',lib:'m2',read:'m2',notes:'m2',log:'m2',insp:'m2',gym:'m1',fit:'m1',food:'m1',water:'m1'};
+const WMK={home:'m3',routine:'m3',alarm:'m3',set:'m3',study:'m4',exam:'m4',ai:'m4',elite:'m4',tasks:'m4',lib:'m2',read:'m2',notes:'m2',log:'m2',insp:'m2',gym:'m1',fit:'m1',food:'m1',water:'m1'};
 const secOf=id=>SEC.find(s=>s.id===id)||SEC[0];
 
 /* ========== الخلفيات: هادئة وحديثة وبلا حركة ========== */
@@ -2067,7 +2083,7 @@ const libTx=(m,fn)=>DB.tx('ab-lib','f',{keyPath:'id',autoIncrement:true},m,fn);
 const bgTx=(m,fn)=>DB.tx('ab-bg','k',{},m,fn);
 
 /* ========== التنقل ========== */
-const ICO={ai:'M12 1.9C6.8 1.9 4.9 6 4.9 10.5L3.8 18.8 7.5 21.8 8.6 15.4H15.4L16.5 21.8 20.2 18.8 19.1 10.5C19.1 6 17.2 1.9 12 1.9zM8.6 15.4C8.2 12.8 8.2 9 8.6 7.5 9.8 5.6 14.2 5.6 15.4 7.5 15.8 9 15.8 12.8 15.4 15.4M10.1 10.5h1.5M12.8 10.5h1.5M12 10.9v1.9M10.5 14.2q1.5 0.8 3 0M10.9 17.2h2.2l-0.4 3.4h-1.5z',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
+const ICO={elite:'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z',ai:'M12 1.9C6.8 1.9 4.9 6 4.9 10.5L3.8 18.8 7.5 21.8 8.6 15.4H15.4L16.5 21.8 20.2 18.8 19.1 10.5C19.1 6 17.2 1.9 12 1.9zM8.6 15.4C8.2 12.8 8.2 9 8.6 7.5 9.8 5.6 14.2 5.6 15.4 7.5 15.8 9 15.8 12.8 15.4 15.4M10.1 10.5h1.5M12.8 10.5h1.5M12 10.9v1.9M10.5 14.2q1.5 0.8 3 0M10.9 17.2h2.2l-0.4 3.4h-1.5z',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
 const NAVPRI=['home','study','tasks','routine'];
 const tabBtn=(s,cls)=>'<button class="tab'+(cls||'')+'" data-a="go" data-g="'+s.id+'" style="--c:'+s.c+'" aria-label="'+s.n+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO[s.id]+'"/></svg><span>'+s.n+'</span></button>';
 function buildShell(){
@@ -4136,6 +4152,176 @@ RD.exam=()=>{
   return '<div class="grid">'+wk+pr+exHistory()+'</div>'+note;
 };
 PO.exam=()=>{};
+
+/* ========== المتفوقون: 10,000 سؤال للثانوية العامة (علمي علوم / علمي رياضة) ==========
+   كل سؤال يُولَّد برمجيًا من بذرة ثابتة، وإجابته تُحسب بالمعادلة نفسها فهي صحيحة بالبناء.
+   الفحص: tools/test_elite.js يشغّل حلقة 10,000 ويتحقق من تفرّد الأسئلة وصحة الخيارات والمشتقات والتكاملات رقميًا. */
+const EL_SUP=n=>String(n).replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+function elRng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
+const elInt=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+const elPick=(r,arr)=>arr[Math.floor(r()*arr.length)];
+const elGcd=(a,b)=>b?elGcd(b,a%b):Math.abs(a);
+function elFr(n,d){if(d<0){n=-n;d=-d}const g=elGcd(n,d)||1;n/=g;d/=g;return d===1?String(n):n+'/'+d}
+const elFm=x=>Number.isInteger(x)?String(x):String(+x.toFixed(3));
+const elM=s=>'⟦'+s+'⟧';
+function elPoly(list){return list.map(([c,p],i)=>{const a=Math.abs(c),v=p===0?'':(p===1?'س':'س'+EL_SUP(p)),co=(a===1&&p!==0)?'':String(a);return (c<0?(i?' − ':'−'):(i?' + ':''))+co+v}).join('')}
+function elShuffle(r,a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function elNW(c,extra){return (extra||[]).concat([c+1,c-1,c*2,c+2,c-2,-c,c/2,c+10,c*3,c-10]).filter(x=>isFinite(x)).map(elFm)}
+function elBuild(r,t,s,q,correct,wrong,why){
+  const seen=new Set([correct]),w=[];
+  for(const x of wrong){if(x!=null&&!seen.has(x)&&!/NaN|undefined|Infinity/.test(String(x))){seen.add(x);w.push(String(x))}}
+  const fm=/^(-?\d+)\/(\d+)$/.exec(correct);
+  if(fm){const a=+fm[1],b=+fm[2];for(const x of [elFr(a+1,b),elFr(a,b+1),elFr(a-1,b),elFr(a*2,b),elFr(a,b*2),elFr(a+2,b+1)]){if(!seen.has(x)&&w.length<3){seen.add(x);w.push(x)}}}
+  const nc=Number(correct);let k=1;
+  while(w.length<3&&isFinite(nc)){for(const x of [elFm(nc+k),elFm(nc-k)]){if(!seen.has(x)&&w.length<3){seen.add(x);w.push(x)}}k++}
+  const o=elShuffle(r,[correct].concat(w.slice(0,3)));
+  return {t,s,q,o,a:o.indexOf(correct),y:why};
+}
+const EL_TR={sci:'علمي علوم',mth:'علمي رياضة',both:'علمي (علوم ورياضة)'};
+const EL_GEN=[
+ /* ---- رياضيات: تفاضل وتكامل ---- */
+ {w:5,f:r=>{const n=elInt(r,3,6),m=elInt(r,2,n-1),a=elInt(r,1,9),b=elInt(r,-9,9)||2,c=elInt(r,-9,9)||3,k=elInt(r,1,4);
+   const v=a*n*Math.pow(k,n-1)+b*m*Math.pow(k,m-1)+c;
+   return elBuild(r,'mth','التفاضل','إذا كانت د(س) = '+elM(elPoly([[a,n],[b,m],[c,1]]))+' فما قيمة د′('+k+') ؟',elFm(v),elNW(v,[a*n*Math.pow(k,n-1)+b*m*Math.pow(k,m-1),v+c]),'د′(س) = '+elM(elPoly([[a*n,n-1],[b*m,m-1],[c,0]]))+'، وبالتعويض عن س = '+k+' ينتج '+v+'.')}},
+ {w:4,f:r=>{const n=elInt(r,3,5),a=elInt(r,1,4),b=elInt(r,-5,5),k=elInt(r,0,3);
+   const v=n*a*Math.pow(a*k+b,n-1);
+   return elBuild(r,'mth','قاعدة السلسلة','إذا كانت د(س) = '+elM('('+(a===1?'':a)+'س '+(b<0?'− '+(-b):'+ '+b)+')'+EL_SUP(n))+' فاحسب د′('+k+').',elFm(v),elNW(v,[n*Math.pow(a*k+b,n-1),a*Math.pow(a*k+b,n-1)]),'د′(س) = '+n+'×'+a+'×(…)'+EL_SUP(n-1)+' فعند س = '+k+' تساوي '+v+'.')}},
+ {w:4,f:r=>{const a=elInt(r,1,9),b=elInt(r,-6,6)||1,k=elInt(r,0,4);
+   const v=2*k*(k+b)+(k*k+a);
+   return elBuild(r,'mth','قاعدة الضرب','إذا كانت د(س) = '+elM('(س²'+(a<0?' − '+(-a):' + '+a)+')(س '+(b<0?'− '+(-b):'+ '+b)+')')+' فما قيمة د′('+k+') ؟',elFm(v),elNW(v,[2*k+0,(k*k+a)+(k+b),2*k*(k+b)]),'بقاعدة الضرب: د′ = ٢س(س'+(b<0?'−'+(-b):'+'+b)+') + (س²'+(a<0?'−'+(-a):'+'+a)+') = '+v+'.')}},
+ {w:5,f:r=>{const k=elPick(r,[2,3,4,5,6]),a=elInt(r,1,9),b=elInt(r,-8,8)||1,c=elInt(r,-9,9)||2;
+   const n=2*a*k*k*k+3*b*k*k+6*c*k,res=elFr(n,6);
+   return elBuild(r,'mth','التكامل المحدد','احسب ∫ من ٠ إلى '+k+' للدالة '+elM('('+a+'س² '+(b<0?'− '+(-b):'+ '+b)+'س '+(c<0?'− '+(-c):'+ '+c)+') دس'),res,[elFr(n+6,6),elFr(n-3*k*k,6),elFr(2*n,6),elFr(n,3),elFr(2*a*k*k*k+3*b*k*k,6)],'التكامل = [ '+a+'س³/٣ '+(b<0?'−':'+')+' '+Math.abs(b)+'س²/٢ '+(c<0?'−':'+')+' '+Math.abs(c)+'س ] من ٠ إلى '+k+' = '+res+'.')}},
+ {w:3,f:r=>{const a=elInt(r,2,12),p=elPick(r,[2,3]),v=p===2?2*a:3*a*a;
+   const q=p===2?'نهــا (س² − '+a*a+')/(س − '+a+') عندما س → '+a:'نهــا (س³ − '+a*a*a+')/(س − '+a+') عندما س → '+a;
+   return elBuild(r,'mth','النهايات','احسب '+elM(q),elFm(v),elNW(v,[a,a*a,0]),'بالتحليل: '+(p===2?'(س−'+a+')(س+'+a+')':'(س−'+a+')(س²+'+a+'س+'+a*a+')')+' ثم التعويض فتكون النهاية '+v+'.')}},
+ {w:4,f:r=>{const t=elInt(r,1,9),v=-2*t*t*t;
+   return elBuild(r,'mth','القيم العظمى والصغرى','أوجد القيمة الصغرى المحلية للدالة '+elM('د(س) = س³ − '+3*t*t+'س'),elFm(v),elNW(v,[2*t*t*t,-t*t*t,t*t*t-3*t*t*t*0]),'د′(س)=٣س²−'+3*t*t+'=٠ ⇒ س=±'+t+'. عند س='+t+' تكون د″>٠ (صغرى) والقيمة = '+v+'.')}},
+ {w:3,f:r=>{const a=elInt(r,2,9),k=elInt(r,1,3);
+   const v=a*k;
+   return elBuild(r,'mth','تفاضل المثلثات','إذا كانت د(س) = '+elM('جا('+a+'س) + س²')+' فما قيمة د′(٠) ؟ (ثم اضرب الناتج في '+k+')',elFm(v),elNW(v,[a,a+k,k]),'د′(س)='+a+'جتا('+a+'س)+٢س ⇒ د′(٠)='+a+'، ×'+k+' = '+v+'.')}},
+ {w:3,f:r=>{const a=elInt(r,2,12);
+   return elBuild(r,'mth','التكامل المثلثي','احسب '+elM('∫ من ٠ إلى π/(٢×'+a+') للدالة جتا('+a+'س) دس'),elFr(1,a),[elFr(a,1),elFr(1,2*a),elFr(2,a),'٠'],'التكامل = جا('+a+'س)/'+a+' من ٠ إلى π/'+2*a+' = جا(π/٢)/'+a+' = ١/'+a+'.')}},
+ /* ---- أعداد مركبة وجبر ---- */
+ {w:4,f:r=>{const tr=elPick(r,[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[9,40,41]]),k=elInt(r,1,9),A=tr[0]*k,B=tr[1]*k,v=tr[2]*k;
+   return elBuild(r,'both','الأعداد المركبة','ما مقياس العدد المركب '+elM('ع = '+A+' + '+B+'ت')+' ؟',elFm(v),elNW(v,[A+B,Math.abs(B-A),A*B/k]),'|ع| = √('+A+'²+'+B+'²) = √'+(A*A+B*B)+' = '+v+'.')}},
+ {w:3,f:r=>{const n=elInt(r,5,400),rem=n%4,v=['١','ت','−١','−ت'][rem];
+   return elBuild(r,'both','قوى ت','احسب قيمة '+elM('ت^'+n),v,['١','ت','−١','−ت'].filter(x=>x!==v),'ت⁴=١ ولذلك ننظر إلى باقي قسمة '+n+' على ٤ وهو '+rem+'، فالناتج '+v+'.')}},
+ {w:4,f:r=>{const a=elInt(r,1,9),d=elInt(r,2,9),n=elInt(r,8,40),an=a+(n-1)*d,s=n*(2*a+(n-1)*d)/2,which=r()<.5;
+   return elBuild(r,'both','المتتاليات',which?'متتالية حسابية حدّها الأول '+a+' وأساسها '+d+'، فما قيمة الحد '+(n===0?'':'رقم '+n)+' ؟':'متتالية حسابية حدّها الأول '+a+' وأساسها '+d+'، فما مجموع أول '+n+' حدًّا؟',elFm(which?an:s),elNW(which?an:s,which?[an+d,an-d,a+n*d]:[s+an,n*an,an*(n+1)/2]),which?'ح(ن)=أ+(ن−١)د = '+an+'.':'ج(ن)=ن/٢[٢أ+(ن−١)د] = '+s+'.')}},
+ {w:3,f:r=>{const a=elInt(r,2,30),m=elInt(r,2,6);
+   return elBuild(r,'both','المتسلسلة الهندسية','أوجد مجموع المتسلسلة الهندسية اللانهائية التي حدّها الأول '+a+' وأساسها '+elM('١/'+m),elFr(a*m,m-1),[elFr(a,m-1),elFr(a*(m-1),m),elFr(a*m,m+1),String(a*m)],'ج∞ = أ/(١−ر) = '+a+'/(١−١/'+m+') = '+elFr(a*m,m-1)+'.')}},
+ {w:4,f:r=>{const n=elInt(r,6,13),k=elInt(r,2,4),c=(function f(n,k){let x=1;for(let i=1;i<=k;i++)x=x*(n-k+i)/i;return Math.round(x)})(n,k);
+   return elBuild(r,'both','التوافيق','بكم طريقة يمكن اختيار '+k+' طلاب من بين '+n+' طالبًا؟',elFm(c),elNW(c,[c*k,c*2]),'ن! ÷ (ر! × (ن−ر)!) = '+c+'.')}},
+ {w:3,f:r=>{const a=elInt(r,1,9),b=elInt(r,1,9),n=100-0,num=10*a+10*b-a*b,res=elFr(num,100);
+   return elBuild(r,'both','الاحتمال','حدثان مستقلان: ل(أ)='+elM(a+'/١٠')+' و ل(ب)='+elM(b+'/١٠')+'. أوجد ل(أ ∪ ب).',res,[elFr(a+b,10),elFr(a*b,100),elFr(10*a+10*b,100),elFr(num+1,100)],'ل(أ∪ب)=ل(أ)+ل(ب)−ل(أ)ل(ب) = '+res+'.')}},
+ {w:3,f:r=>{const a=elInt(r,2,6),b=elInt(r,1,9),c=elInt(r,1,3),k0=elInt(r,1,9),t=c,
+     u=[a,b*1],vK=-b*t;
+   return elBuild(r,'both','المتجهات','المتجهان '+elM('أ = ('+a+' ، '+b+')')+' و '+elM('ب = (ك ، '+a*t+')')+'. أوجد قيمة ك التي تجعلهما متعامدين.',elFm(vK),elNW(vK,[b*t,a*b,-a*t]),'متعامدان ⇒ أ·ب = '+a+'ك + '+b+'×'+a*t+' = ٠ ⇒ ك = '+vK+'.')}},
+ /* ---- ميكانيكا ---- */
+ {w:3,f:r=>{const u=elInt(r,1,12)*5,h=u*u/20,t=u/10;
+   return elBuild(r,'mth','الحركة الرأسية','قُذف جسم رأسيًّا لأعلى بسرعة '+u+' م/ث (عجلة الجاذبية ١٠ م/ث²). أقصى ارتفاع يصل إليه بالمتر هو:',elFm(h),elNW(h,[u*u/10,u*t,h*2]),'ع²=ع٠²−٢جـ ف ⇒ ف = '+u+'²/٢٠ = '+h+' م.')}},
+ {w:3,f:r=>{const m=elInt(r,2,12),F=elInt(r,30,120),f=elInt(r,5,25),a=(F-f)/m;
+   return elBuild(r,'mth','قوانين نيوتن','جسم كتلته '+m+' كجم يتحرك على سطح أفقي بقوة '+F+' نيوتن ومقاومة '+f+' نيوتن. أوجد عجلته بوحدة م/ث².',elFm(a),elNW(a,[F/m,f/m,(F+f)/m]),'ق−م = ك جـ ⇒ جـ = ('+F+'−'+f+')/'+m+' = '+elFm(a)+'.')}},
+ {w:3,f:r=>{const t=elInt(r,1,4),m2=elInt(r,2,6),m1=m2*t,u=elInt(r,1,9)*(1+t),v=u*t/(1+t);
+   return elBuild(r,'mth','الصدم','جسم كتلته '+m1+' كجم يتحرك بسرعة '+u+' م/ث فيصطدم بجسم ساكن كتلته '+m2+' كجم ويلتصقان معًا. سرعتهما بعد التصادم بوحدة م/ث:',elFm(v),elNW(v,[u*m1/m2,u/(1+t),u/2]),'بقاء كمية الحركة: ك١ع١ = (ك١+ك٢)ع ⇒ ع = '+m1+'×'+u+'/'+(m1+m2)+' = '+elFm(v)+'.')}},
+ /* ---- فيزياء ---- */
+ {w:5,f:r=>{const R1=elInt(r,2,20),R2=elInt(r,1,10)*2,I0=elInt(r,1,6),Req=R1+R2/2,V=Req*I0;
+   return elBuild(r,'both','الدوائر الكهربية','مقاومة '+R1+' Ω متصلة على التوالي مع مقاومتين متساويتين قيمة كل منهما '+R2+' Ω على التوازي، ومصدر جهده '+V+' فولت. شدة التيار الكلي بالأمبير:',elFm(I0),elNW(I0,[V/(R1+R2*2),V/(R1+R2),V/R2]),'Rكلية = '+R1+' + '+R2+'/٢ = '+Req+' Ω ⇒ ت = '+V+'/'+Req+' = '+I0+' أمبير.')}},
+ {w:4,f:r=>{const C=elInt(r,1,40)*2,V=elInt(r,2,30),U=0.5*C*V*V;
+   return elBuild(r,'both','المكثفات','مكثف سعته '+C+' ميكروفاراد مشحون بجهد '+V+' فولت. الطاقة المخزنة بوحدة ميكروجول:',elFm(U),elNW(U,[C*V,C*V*V,U/2]),'ط = ½ س جـ² = ½×'+C+'×'+V+'² = '+elFm(U)+' ميكروجول.')}},
+ {w:4,f:r=>{const B=elInt(r,1,9)/10,I=elInt(r,2,20),L=elInt(r,1,10)/2,th=elPick(r,[30,90]),F=B*I*L*(th===30?0.5:1);
+   return elBuild(r,'both','المجال المغناطيسي','سلك طوله '+elFm(L)+' م يمر به تيار '+I+' A داخل مجال كثافة فيضه '+elFm(B)+' تسلا ويصنع زاوية '+th+'° مع المجال. القوة المؤثرة عليه بالنيوتن:',elFm(+F.toFixed(4)),elNW(F,[B*I*L,B*I*L*(th===30?0.866:0)]),'ق = B I L جا θ = '+elFm(B)+'×'+I+'×'+elFm(L)+'×'+(th===30?'٠٫٥':'١')+' = '+elFm(+F.toFixed(4))+' N.')}},
+ {w:3,f:r=>{const Np=elInt(r,1,20)*10,k=elPick(r,[2,3,4,5,10]),Vp=elInt(r,1,20)*10,Vs=Vp*k;
+   return elBuild(r,'both','المحول الكهربي','محول مثالي عدد لفات ملفه الابتدائي '+Np+' ولفات ثانويه '+Np*k+'، وجهد الابتدائي '+Vp+' فولت. جهد الثانوي بالفولت:',elFm(Vs),elNW(Vs,[Vp/k,Vp+k,Vp*k*k]),'Vs/Vp = Ns/Np ⇒ Vs = '+Vp+'×'+k+' = '+Vs+'.')}},
+ {w:4,f:r=>{const lam=elPick(r,[124,155,248,310,620,413.33].slice(0,5)),E=1240/lam,phi=elPick(r,[1,1.5,2,2.5,3].filter(x=>x<E)),KE=E-phi;
+   return elBuild(r,'both','الفيزياء الحديثة','سقط ضوء طوله الموجي '+lam+' نانومتر على سطح دالة شغله '+phi+' إلكترون فولت. أقصى طاقة حركة للإلكترونات المتحررة بوحدة eV (طاقة الفوتون = ١٢٤٠/λ):',elFm(KE),elNW(KE,[E,E+phi,phi]),'طاقة الفوتون = ١٢٤٠/'+lam+' = '+elFm(E)+' eV، وطاقة الحركة = '+elFm(E)+' − '+phi+' = '+elFm(KE)+' eV.')}},
+ {w:3,f:r=>{const n=elInt(r,2,6),k=elInt(r,1,20),N0=Math.pow(2,n)*k,T=elInt(r,2,30);
+   return elBuild(r,'both','النشاط الإشعاعي','عينة كتلتها '+N0+' جم من نظير عمر النصف له '+T+' يومًا. الكتلة المتبقية بعد '+n*T+' يومًا بالجرام:',elFm(k),elNW(k,[N0/2,N0/n,k*2]),'عدد أعمار النصف = '+n+' ⇒ المتبقي = '+N0+'/٢^'+n+' = '+k+' جم.')}},
+ {w:3,f:r=>{const lam=elPick(r,[400,500,600,700]),D=elInt(r,1,4),d=elPick(r,[0.2,0.4,0.5,1]),dy=lam*D/d/1000;
+   return elBuild(r,'both','التداخل (تجربة يونج)','في تجربة يونج استخدم ضوء طوله الموجي '+lam+' نانومتر، والمسافة بين الشقين '+d+' مم، والشاشة على بعد '+D+' م. عرض الهدب بالمليمتر:',elFm(+dy.toFixed(4)),elNW(dy,[lam*D/d,dy*2,dy/2]),'Δy = λD/d = '+lam+'×١٠⁻⁹×'+D+'/('+d+'×١٠⁻³) = '+elFm(+dy.toFixed(4))+' مم.')}},
+ {w:3,f:r=>{const m=elInt(r,2,4),j=elInt(r,1,6),f=m*j,v=(m+1)*f,u=elFr(f*v,v-f);
+   return elBuild(r,'both','العدسات','عدسة محدبة بعدها البؤري '+f+' سم، وُضع أمامها جسم على بعد '+u+' سم. أين تتكوّن الصورة (بالسم)؟',elFm(v),elNW(v,[f,u*1===u?0:f*2,v/2]),'١/ع + ١/ع′ = ١/ء ⇒ ع′ = ع×ء/(ع−ء) = '+v+' سم.')}},
+ /* ---- كيمياء ---- */
+ {w:4,f:r=>{const M2=elInt(r,1,10)/10,k=elInt(r,2,8),M1=elFm(+(M2*k).toFixed(3)),V1=elInt(r,5,25)*10,V2=V1*k;
+   return elBuild(r,'both','التخفيف والمولارية','يُخفَّف '+V1+' مل من محلول تركيزه '+M1+' مولار حتى يصبح حجمه '+V2+' مل. التركيز الجديد بالمولار:',elFm(+M2.toFixed(3)),elNW(M2,[+(M2*k).toFixed(3),M2/k,M2+0.5]),'م١ح١ = م٢ح٢ ⇒ م٢ = '+M1+'×'+V1+'/'+V2+' = '+elFm(+M2.toFixed(3))+' M.')}},
+ {w:4,f:r=>{const k=elInt(r,1,6),typ=elPick(r,['a','b','c']);
+   const v=typ==='a'?k:14-k;
+   const q=typ==='a'?'الرقم الهيدروجيني لمحلول حمض قوي تركيز أيون الهيدروجين فيه ١٠^−'+k+' مول/لتر':(typ==='b'?'الرقم الهيدروجيني لمحلول هيدروكسيد صوديوم تركيزه ١٠^−'+k+' مولار':'الرقم الهيدروجيني لمحلول هيدروكسيد باريوم Ba(OH)₂ تركيزه ٥×١٠^−'+(k+1)+' مولار');
+   return elBuild(r,'both','الاتزان الأيوني',(typ==='c'?'احسب ':'ما ')+q+' ؟',elFm(v),elNW(v,[14-v,k,14-k]),typ==='a'?'pH = −لو[H⁺] = '+k+'.':(typ==='b'?'pOH='+k+' ⇒ pH=١٤−'+k+' = '+(14-k)+'.':'[OH⁻]=٢×٥×١٠^−'+(k+1)+' = ١٠^−'+k+' ⇒ pOH = '+k+' ⇒ pH = '+(14-k)+'.'))}},
+ {w:4,f:r=>{const sub=elPick(r,[['NaOH',40],['H₂SO₄',98],['CaCO₃',100],['HCl',36.5],['CO₂',44],['KOH',56],['C₆H₁₂O₆',180],['NH₃',17]]),n=elInt(r,1,20)/2,g=n*sub[1];
+   return elBuild(r,'both','المول والكتلة','كتلة '+elFm(g)+' جم من '+sub[0]+' تحتوي على كم مول؟ (الكتلة المولية = '+sub[1]+' جم/مول)',elFm(n),elNW(n,[n*sub[1],n/2,n*2]),'عدد المولات = الكتلة / الكتلة المولية = '+elFm(g)+'/'+sub[1]+' = '+elFm(n)+'.')}},
+ {w:3,f:r=>{const a=elInt(r,1,9),h=elPick(r,[2,3,4,5]),kc=elFr(a*a,8*h*0+h*8),n=a;
+   return elBuild(r,'both','الاتزان الكيميائي','للتفاعل: N₂ + 3H₂ ⇌ 2NH₃ كانت التراكيز عند الاتزان [NH₃] = '+a+' ، [N₂] = '+h+' ، [H₂] = ٢ مول/لتر. ثابت الاتزان Kc =',elFr(a*a,8*h),[elFr(a*a,2*h),elFr(a*a,6*h),elFr(2*a,8*h),elFr(8*h,a*a)],'Kc = [NH₃]²/([N₂][H₂]³) = '+a*a+'/('+h+'×٨) = '+elFr(a*a,8*h)+'.')}},
+ {w:4,f:r=>{const el=elPick(r,[['النحاس Cu',63.5,2],['الفضة Ag',108,1],['الألومنيوم Al',27,3],['الخارصين Zn',65,2]]),kq=elPick(r,[0.5,1,2,3]),I=elPick(r,[5,10,20]),t=96500*kq/I,m=el[1]*kq/el[2];
+   return elBuild(r,'both','التحليل الكهربي','تيار شدته '+I+' أمبير مرّ لمدة '+elFm(t)+' ثانية في محلول أيون '+el[0]+' (التكافؤ '+el[2]+'، الكتلة الذرية '+el[1]+'، الفاراداي = ٩٦٥٠٠ كولوم). كتلة المعدن المترسب بالجرام:',elFm(+m.toFixed(3)),elNW(m,[m*el[2],m/el[2],el[1]*kq]),'كمية الكهرباء = '+I+'×'+elFm(t)+' = '+96500*kq+' كولوم = '+kq+' فاراداي ⇒ الكتلة = '+kq+'×'+el[1]+'/'+el[2]+' = '+elFm(+m.toFixed(3))+' جم.')}},
+ {w:3,f:r=>{const V1=elInt(r,2,20)*10,P1=elInt(r,1,4),k=elInt(r,2,5),V2=V1/k;
+   return elBuild(r,'both','قوانين الغازات','غاز حجمه '+V1+' لتر عند ضغط '+P1+' ض.ج. زاد ضغطه إلى '+P1*k+' ض.ج. عند ثبوت درجة الحرارة. حجمه الجديد باللتر:',elFm(+V2.toFixed(3)),elNW(V2,[V1*k,V1+k,V1-k]),'قانون بويل: ض١ح١ = ض٢ح٢ ⇒ ح٢ = '+V1+'/'+k+' = '+elFm(+V2.toFixed(3))+'.')}},
+ {w:3,f:r=>{const f=elPick(r,[['CH₄',12,16,'C'],['Fe₂O₃',112,160,'Fe'],['NH₄NO₃',28,80,'N'],['CaCO₃',40,100,'Ca'],['MgO',24,40,'Mg'],['Al₂O₃',54,102,'Al']]),p=+(f[1]/f[2]*100).toFixed(2);
+   return elBuild(r,'both','التركيب المئوي','النسبة المئوية لكتلة العنصر '+f[3]+' في المركب '+f[0]+' (كتلة العنصر الكلية في الوحدة = '+f[1]+'، الكتلة المولية = '+f[2]+') هي:',elFm(p),elNW(p,[f[1],100-p,f[2]/f[1]]),'النسبة = '+f[1]+'/'+f[2]+' × ١٠٠ = '+elFm(p)+'٪.')}},
+ /* ---- أحياء ---- */
+ {w:3,f:r=>{const k=elInt(r,2,30),N=16*k,typ=elPick(r,['dd','rr']);
+   const v=typ==='dd'?9*k:k,txt=typ==='dd'?'تحمل الصفتين السائدتين معًا':'تحمل الصفتين المتنحيتين معًا';
+   return elBuild(r,'sci','الوراثة','تزاوج فردان هجينان في صفتين مستقلتين (AaBb × AaBb) وأنتجا '+N+' فردًا. المتوقع عدد الأفراد التي '+txt+':',elFm(v),elNW(v,[3*k,4*k,9*k,k].filter(x=>x!==v)),'النسبة المظهرية ٩:٣:٣:١ من ١٦ ⇒ العدد = '+v+'.')}},
+ {w:3,f:r=>{const q=elPick(r,[0.1,0.2,0.3,0.4]),car=2*q*(1-q),aff=q*q;
+   const ask=elPick(r,['car','aff']);
+   const v=ask==='car'?+(car*100).toFixed(1):+(aff*100).toFixed(1);
+   return elBuild(r,'sci','قانون هاردي واينبرج','في جماعة متزنة وراثيًا تردد الأليل المتنحي q = '+q+'. النسبة المئوية '+(ask==='car'?'للأفراد الحاملين (غير المتماثلين)':'للأفراد المتنحيين (aa)')+' هي:',elFm(v),elNW(v,[+(q*100).toFixed(1),+(2*q*100).toFixed(1),+(car*100).toFixed(1),+(aff*100).toFixed(1)]),ask==='car'?'٢pq = ٢×'+(1-q).toFixed(1)+'×'+q+' = '+v+'٪.':'q² = '+q+'² = '+v+'٪.')}},
+ {w:3,f:r=>{const n=elInt(r,5,60)*100,A=elInt(r,10,40),G=50-A,v=n*2*G/100;
+   return elBuild(r,'sci','DNA','جزيء DNA مزدوج السلسلة به '+n+' زوج قواعد، ونسبة الأدنين فيه '+A+'٪. عدد قواعد الجوانين:',elFm(v),elNW(v,[n*2*A/100,n*G/100,n*A/100]),'A=T='+A+'٪ ⇒ G=C='+G+'٪ من '+2*n+' قاعدة = '+v+'.')}},
+ {w:2,f:r=>{const E=elInt(r,1,50)*10000,lvl=elInt(r,2,4),names=['','','المستهلك الأول','المستهلك الثاني','المستهلك الثالث'],v=E/Math.pow(10,lvl-1);
+   return elBuild(r,'sci','البيئة وانتقال الطاقة','طاقة المنتجين في سلسلة غذائية '+E+' كيلوجول. حسب قاعدة ١٠٪ تكون الطاقة المتاحة عند '+names[lvl]+':',elFm(v),elNW(v,[v*10,v/10,E/lvl]),'تنتقل ١٠٪ فقط بين كل مستوى والتالي ⇒ '+E+'×(١/١٠)^'+(lvl-1)+' = '+elFm(v)+' كيلوجول.')}}
+];
+let EL_LIST=null;
+function elList(){
+  if(EL_LIST)return EL_LIST;
+  const tot=EL_GEN.reduce((s,g)=>s+g.w,0),seen=new Set(),L=[];
+  for(let n=1;L.length<10000&&n<200000;n++){
+    const r0=elRng(n*2654435761);let x=r0()*tot,gi=0;for(;gi<EL_GEN.length;gi++){x-=EL_GEN[gi].w;if(x<0)break}
+    if(gi>=EL_GEN.length)gi=EL_GEN.length-1;
+    const q=EL_GEN[gi].f(elRng(n*40503+gi));const key=q.s+'|'+q.q+'|'+q.o[q.a];
+    if(seen.has(key))continue;seen.add(key);L.push({n,gi,t:q.t});
+  }
+  EL_LIST=L;return L;
+}
+function elQ(item){return EL_GEN[item.gi].f(elRng(item.n*40503+item.gi))}
+if(typeof module!=='undefined')module.exports={EL_GEN,elList,elQ,elRng,EL_TR};
+
+/* ---------- الواجهة ---------- */
+const elSt=()=>Object.assign({pos:0,ok:0,tot:0,streak:0,best:0,topic:'',pick:-1,mode:'seq'},st.get('elite')||{});
+const elSave=o=>st.set('elite',o);
+const elFmt=s=>esc(s).replace(/⟦([^⟧]*)⟧/g,'<span dir="ltr" class="elm">$1</span>');
+function elView(){
+  const S=elSt(),L=elList(),tk=S.topic;
+  const idx=tk?L.map((x,i)=>x.t===tk||(x.t==='both'&&0)?i:-1).filter(i=>i>=0):null;
+  return {S,L,idx};
+}
+RD.elite=()=>{
+  const S=elSt(),L=elList();
+  const sel=S.topic;
+  const pool=sel?L.map((x,i)=>x.t===sel||x.t==='both'?i:-1).filter(i=>i>=0):L.map((x,i)=>i);
+  const p=pool.length?pool[((S.pos%pool.length)+pool.length)%pool.length]:0;
+  const q=elQ(L[p]),done=S.pick>=0;
+  const letters=['أ','ب','ج','د'];
+  const trk=(st.get('profile')||{}).edu||{};
+  return '<div class="grid"><div class="card full elcard">'+
+   '<div class="row sp"><span class="pill">متفوقون · الثانوية العامة</span><span class="mut sm">سؤال '+(p+1).toLocaleString('ar-EG')+' من '+L.length.toLocaleString('ar-EG')+'</span></div>'+
+   '<div class="chips elf">'+[['','الكل'],['mth','علمي رياضة'],['sci','علمي علوم']].map(([k,n])=>'<button class="chip'+(sel===k?' on':'')+'" data-a="elfilter" data-k="'+k+'">'+n+'</button>').join('')+'</div>'+
+   '<div class="elsub mut sm">'+esc(q.s)+' · '+EL_TR[q.t]+'</div>'+
+   '<div class="elq">'+elFmt(q.q)+'</div>'+
+   '<div class="elo">'+q.o.map((o,i)=>'<button class="btn elopt'+(done?(i===q.a?' good':(i===S.pick?' bad':'')):'')+'" data-a="elpick" data-i="'+i+'"'+(done?' disabled':'')+'><b>'+letters[i]+'</b><span dir="ltr">'+esc(o)+'</span></button>').join('')+'</div>'+
+   (done?'<div class="elwhy"><b>'+(S.pick===q.a?'إجابة صحيحة':'الصحيح: '+letters[q.a])+'</b><div>'+elFmt(q.y)+'</div><button class="chip" data-a="elask" data-q="'+esc('اشرح لي بالتفصيل حل هذه المسألة: '+q.q.replace(/[⟦⟧]/g,'')+' (الإجابة: '+q.o[q.a]+')')+'">اشرحها لي بذكي</button></div>':'')+
+   '<div class="row elnav"><button class="btn ghost" data-a="elnext" data-d="-1">السابق</button><button class="btn" data-a="elnext" data-d="1">'+(done?'السؤال التالي':'تخطّي')+'</button><button class="btn ghost" data-a="elrand">عشوائي</button></div>'+
+   '<p class="mut sm elscore">نتيجتك: '+S.ok+' / '+S.tot+' · أفضل تتابع '+S.best+(S.streak>1?' · الآن '+S.streak:'')+'</p></div></div>';
+};
+ACT.elfilter=t=>{const S=elSt();S.topic=t.dataset.k;S.pos=0;S.pick=-1;elSave(S);renderSec('elite')};
+ACT.elpick=t=>{const S=elSt();if(S.pick>=0)return;const L=elList();
+  const sel=S.topic,pool=sel?L.map((x,i)=>x.t===sel||x.t==='both'?i:-1).filter(i=>i>=0):L.map((x,i)=>i);
+  const q=elQ(L[pool[((S.pos%pool.length)+pool.length)%pool.length]]);const i=+t.dataset.i;
+  S.pick=i;S.tot++;if(i===q.a){S.ok++;S.streak++;S.best=Math.max(S.best,S.streak)}else S.streak=0;elSave(S);renderSec('elite')};
+ACT.elnext=t=>{const S=elSt();S.pos+=+t.dataset.d;S.pick=-1;elSave(S);renderSec('elite');window.scrollTo(0,0)};
+ACT.elrand=()=>{const S=elSt();S.pos=Math.floor(Math.random()*10000);S.pick=-1;elSave(S);renderSec('elite')};
+ACT.elask=t=>{go('ai');setTimeout(()=>aiSend(t.dataset.q),200)};
 
 /* ========== الدخول والتشغيل ========== */
 async function unlock(){
