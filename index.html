@@ -1975,6 +1975,7 @@ const SEC=[
   {id:'study',n:'المذاكرة',sub:'جلسات مركّزة بلا تشتت',skin:'lapis',em:'crystal',c:'#6cd9d8'},
   {id:'exam',n:'الامتحانات',sub:'تقييم أسبوعي وتدريب بالحلول',skin:'lapis',em:'star',c:'#6cd9d8'},
   {id:'elite',n:'المتفوقون',sub:'10,000 سؤال لمتفوقي الثانوية العامة',skin:'lapis',em:'star',c:'#e2b866'},
+  {id:'tests',n:'الاختبارات',sub:'1000 اختبار لكل مادة في كل صف',skin:'sandstone',em:'star',c:'#e2b866'},
   {id:'ai',n:'ذكي',sub:'فاهمك: اسأل واشرح وتدرّب',skin:'lapis',em:'star',c:'#6cd9d8'},
   {id:'tasks',n:'المهام',sub:'اكتب، رتّب، أنجز',skin:'lapis',em:'cubes',c:'#6cd9d8'},
   {id:'log',n:'السجل اليومي',sub:'ماذا فعلت اليوم وكيف كان شعورك',skin:'sandstone',em:'book',c:'#e7cf94'},
@@ -1990,7 +1991,7 @@ const SEC=[
   {id:'insp',n:'إلهام',sub:'آيات وأحاديث وحِكَم',skin:'sandstone',em:'star',c:'#e7cf94'},
   {id:'set',n:'الإعدادات',sub:'الخلفية والألوان والنسخ الاحتياطي',skin:'nile',em:'gear',c:'#e2bf76'}
 ];
-const WMK={home:'m3',routine:'m3',alarm:'m3',set:'m3',study:'m4',exam:'m4',ai:'m4',elite:'m4',tasks:'m4',lib:'m2',read:'m2',notes:'m2',log:'m2',insp:'m2',gym:'m1',fit:'m1',food:'m1',water:'m1'};
+const WMK={home:'m3',routine:'m3',alarm:'m3',set:'m3',study:'m4',exam:'m4',ai:'m4',elite:'m4',tests:'m4',tasks:'m4',lib:'m2',read:'m2',notes:'m2',log:'m2',insp:'m2',gym:'m1',fit:'m1',food:'m1',water:'m1'};
 const secOf=id=>SEC.find(s=>s.id===id)||SEC[0];
 
 /* ========== الخلفيات: هادئة وحديثة وبلا حركة ========== */
@@ -2146,7 +2147,7 @@ const libTx=(m,fn)=>DB.tx('ab-lib','f',{keyPath:'id',autoIncrement:true},m,fn);
 const bgTx=(m,fn)=>DB.tx('ab-bg','k',{},m,fn);
 
 /* ========== التنقل ========== */
-const ICO={elite:'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z',ai:'M12 1.9C6.8 1.9 4.9 6 4.9 10.5L3.8 18.8 7.5 21.8 8.6 15.4H15.4L16.5 21.8 20.2 18.8 19.1 10.5C19.1 6 17.2 1.9 12 1.9zM8.6 15.4C8.2 12.8 8.2 9 8.6 7.5 9.8 5.6 14.2 5.6 15.4 7.5 15.8 9 15.8 12.8 15.4 15.4M10.1 10.5h1.5M12.8 10.5h1.5M12 10.9v1.9M10.5 14.2q1.5 0.8 3 0M10.9 17.2h2.2l-0.4 3.4h-1.5z',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
+const ICO={tests:'M6 2h9l5 5v15H6zM14 2v6h6M9 13l2 2 4-4M9 18h6',elite:'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z',ai:'M12 1.9C6.8 1.9 4.9 6 4.9 10.5L3.8 18.8 7.5 21.8 8.6 15.4H15.4L16.5 21.8 20.2 18.8 19.1 10.5C19.1 6 17.2 1.9 12 1.9zM8.6 15.4C8.2 12.8 8.2 9 8.6 7.5 9.8 5.6 14.2 5.6 15.4 7.5 15.8 9 15.8 12.8 15.4 15.4M10.1 10.5h1.5M12.8 10.5h1.5M12 10.9v1.9M10.5 14.2q1.5 0.8 3 0M10.9 17.2h2.2l-0.4 3.4h-1.5z',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
 const NAVPRI=['home','study','tasks','routine'];
 const tabBtn=(s,cls)=>'<button class="tab'+(cls||'')+'" data-a="go" data-g="'+s.id+'" style="--c:'+s.c+'" aria-label="'+s.n+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO[s.id]+'"/></svg><span>'+s.n+'</span></button>';
 function buildShell(){
@@ -3218,7 +3219,7 @@ function aiBubble(m){return '<div class="aib '+(m.r==='u'?'me':'bot')+'">'+(m.r=
 RD.ai=()=>{
   const ch=aiChat(),left=Math.max(0,AI_LIMIT-aiUsed());
   const subj=(typeof subs==='function'?subs():[]).slice(0,4).map(x=>x.n);
-  const sugg=['اشرح لي درسًا بسهولة','اختبرني بـ 5 أسئلة','ضع لي خطة مذاكرة لأسبوع','اقترح لي نظامًا غذائيًا صحيًا','أشعر بالتوتر قبل الامتحان','ما أفضل تمرين يومي مناسب لي؟'];
+  const sugg=['اشرح لي درسًا بسهولة','ضع لي خطة مذاكرة لأسبوع','اقترح لي نظامًا غذائيًا صحيًا','أشعر بالتوتر قبل الامتحان','ما أفضل تمرين يومي مناسب لي؟'];
   const demo=!AI_ON();
   return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'اسأل بلا حدود')+'</span><span class="aitools"><button class="chip" data-a="aihist">سجل الدردشة'+(aiHist().length?' ('+aiHist().length+')':'')+'</button>'+(ch.length?'<button class="chip" data-a="aiclear">مسح المحادثة</button>':'')+'</span></div>'+
     '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><img class="zlogo" src="'+ZAKI_LOGO+'" alt="ذكي"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس من الابتدائي للثانوي، أو عن نظامك الغذائي والرياضي، أو مزاجك وتوترك.</span></div>')+'</div>'+
@@ -4379,7 +4380,7 @@ RD.elite=()=>{
    '<div class="elsub mut sm">'+esc(q.s)+' · '+EL_TR[q.t]+'</div>'+
    '<div class="elq">'+elFmt(q.q)+'</div>'+
    '<div class="elo">'+q.o.map((o,i)=>'<button class="btn elopt'+(done?(i===q.a?' good':(i===S.pick?' bad':'')):'')+'" data-a="elpick" data-i="'+i+'"'+(done?' disabled':'')+'><b>'+letters[i]+'</b><span dir="ltr">'+esc(o)+'</span></button>').join('')+'</div>'+
-   (done?'<div class="elwhy"><b>'+(S.pick===q.a?'إجابة صحيحة':'الصحيح: '+letters[q.a])+'</b><div>'+elFmt(q.y)+'</div><button class="chip" data-a="elask" data-q="'+esc('اشرح لي بالتفصيل حل هذه المسألة: '+q.q.replace(/[⟦⟧]/g,'')+' (الإجابة: '+q.o[q.a]+')')+'">اشرحها لي بذكي</button></div>':'')+
+   (done?'<div class="elwhy"><b>'+(S.pick===q.a?'إجابة صحيحة':'الصحيح: '+letters[q.a])+'</b><div>'+elFmt(q.y)+'</div></div>':'')+
    '<div class="row elnav"><button class="btn ghost" data-a="elnext" data-d="-1">السابق</button><button class="btn" data-a="elnext" data-d="1">'+(done?'السؤال التالي':'تخطّي')+'</button><button class="btn ghost" data-a="elrand">عشوائي</button></div>'+
    '<p class="mut sm elscore">نتيجتك: '+S.ok+' / '+S.tot+' · أفضل تتابع '+S.best+(S.streak>1?' · الآن '+S.streak:'')+'</p></div></div>';
 };
@@ -4395,6 +4396,7 @@ ACT.elask=t=>{go('ai');setTimeout(()=>aiSend(t.dataset.q),200)};
 /* ========== مكتبة الاختبارات: لكل مرحلة وصف ومادة 1000 اختبار و1000 مسألة ==========
    المواد الكمية (رياضيات/فيزياء/كيمياء/أحياء…): أسئلة مولَّدة بإجابات محسوبة بالمعادلة.
    باقي المواد: يولّدها «ذكي» عند الطلب لكل رقم اختبار، وتُحفظ على الجهاز. */
+const HB_QUANT=S=>['math','alg','mathA','calc','stat','phys','physA','chem','chemA','bio','bioA','dyn','stc','isci'].includes(S.subj)||(S.subj==='sci'&&S.stage==='prep'&&S.grade===3);
 const HB_N=1000, HB_NAMES=['أحمد','منى','يوسف','سلمى','عمر','هدى','كريم','نور','مصطفى','ليلى'];
 const HB_THINGS=['تفاحة','برتقالة','قلمًا','كتابًا','بالونة','كرة','وردة','قطعة حلوى','دفترًا','لعبة'];
 const hbSub=(r,a)=>elPick(r,a);
@@ -4487,6 +4489,9 @@ HB_MATH.S1.push(
  r=>{const x=elInt(r,2,30),y=elInt(r,2,30);return HQ(r,'النسب المثلثية','في مثلث قائم الزاويتين طولا ضلعيه القائمين '+x*3+' و '+x*4+'. طول الوتر:',x*5,[x*7,x*3+x,x*5+1],'نظرية فيثاغورس ⇒ '+x*5+'.')}
 );
 const HB_X={
+ stc:[r=>{const F=elInt(r,2,30),d=elInt(r,1,12)/2;return HQ(r,'العزوم','عزم قوة مقدارها '+F+' نيوتن حول نقطة تبعد '+elFm(d)+' م عموديًا عن خط عملها بوحدة نيوتن.متر:',F*d,[F+d,F/d,F*d*2],'العزم = القوة × البعد العمودي = '+elFm(F*d)+'.')},
+  r=>{const t=elPick(r,[[3,4,5],[5,12,13],[8,15,17]]),m=elInt(r,1,8);return HQ(r,'محصلة القوى','قوتان متعامدتان مقدارهما '+t[0]*m+' و'+t[1]*m+' نيوتن. مقدار محصلتهما بالنيوتن:',t[2]*m,[t[0]*m+t[1]*m,Math.abs(t[1]-t[0])*m,t[2]*m+m],'√('+(t[0]*m)+'²+'+(t[1]*m)+'²) = '+t[2]*m+'.')},
+  r=>{const W=elInt(r,2,20)*5,a=elInt(r,1,4),b=elInt(r,1,4);return HQ(r,'الاتزان','قضيب مهمل الوزن طوله '+(a+b)+' م يرتكز عند نقطة تبعد '+a+' م عن أحد طرفيه، ويحمل ثقلًا '+W+' نيوتن عند ذلك الطرف. القوة اللازمة عند الطرف الآخر لحفظ الاتزان بالنيوتن:',W*a/b,[W*b/a,W,W+a],'W×'+a+' = ق×'+b+' ⇒ ق = '+elFm(W*a/b)+'.')}],
  chem:[r=>{const n=elInt(r,1,20)/4,V=elInt(r,1,8)/2;return HQ(r,'المولارية',elFm(n)+' مول من مذاب في '+elFm(V)+' لتر من المحلول. التركيز بالمولار:',+(n/V).toFixed(3),[+(n*V).toFixed(3),+(V/n).toFixed(3),+(n/V+1).toFixed(3)],'م = ن/ح = '+elFm(n)+'/'+elFm(V)+' = '+elFm(+(n/V).toFixed(3))+'.')},
   r=>{const M=elPick(r,[40,58.5,98,36.5,74,56]),m=elInt(r,1,5)/2,V=elInt(r,1,4)/2;const g=M*m*V;return HQ(r,'تحضير المحاليل','كتلة المذاب اللازمة لتحضير '+elFm(V)+' لتر من محلول تركيزه '+elFm(m)+' مولار (الكتلة المولية = '+M+' جم/مول) بالجرام:',+g.toFixed(2),[+(M*m).toFixed(2),+(M*V).toFixed(2),+(g*2).toFixed(2)],'الكتلة = م × ح × الكتلة المولية = '+elFm(+g.toFixed(2))+' جم.')},
   r=>{const n=elInt(r,1,20)/4;return HQ(r,'حجم الغاز','حجم '+elFm(n)+' مول من غاز في الظروف القياسية (STP) باللتر:',+(n*22.4).toFixed(2),[+(n*24).toFixed(2),+(n*22.4*2).toFixed(2),+(n/22.4).toFixed(3)],'الحجم = عدد المولات × ٢٢٫٤ = '+elFm(+(n*22.4).toFixed(2))+' لتر.')},
@@ -4530,19 +4535,20 @@ function hbGens(S){
   if(['bio','bioA'].includes(k)&&L==='H')return hbPick(HB_GRP.bio).concat(HB_X.bio.map(f=>({w:3,f})));
   if(k==='dyn')return hbPick(HB_GRP.dyn);
   if(k==='isci'||(k==='sci'&&S.stage==='prep'&&S.grade===3))return hbPick(HB_GRP.phys.slice(0,2).concat(HB_GRP.chem.slice(0,3),HB_GRP.bio.slice(1,3)));
-  return null;
+  if(k==='stc')return hbPick(HB_GRP.dyn).concat(HB_X.stc.map(f=>({w:2,f})));
+  const fg=ftGens(k,S);return fg.length?fg:hbPick(HB_GRP.alg);
 }
 const HB_CACHE={};
 function hbStream(S){
   const key=hbKey(S);if(HB_CACHE[key])return HB_CACHE[key];
-  const gens=hbGens(S);if(!gens)return null;
+  const gens=hbGens(S);
   let salt=0;for(let i=0;i<key.length;i++)salt=(salt*131+key.charCodeAt(i))>>>0;
   const tot=gens.reduce((s,g)=>s+(g.w||1),0),seen=new Set(),L=[],need=HB_N*11;
   for(let n=1;L.length<need&&n<120000;n++){
     const r0=elRng((salt+n*2654435761)>>>0);let x=r0()*tot,gi=0;for(;gi<gens.length;gi++){x-=(gens[gi].w||1);if(x<0)break}
     if(gi>=gens.length)gi=gens.length-1;
     const sd=((salt^(n*40503))+gi)>>>0;let q;try{q=gens[gi].f(elRng(sd))}catch(e){continue}
-    const ks=q.q+'|'+q.o[q.a];if(seen.has(ks))continue;seen.add(ks);L.push([gi,sd]);
+    const ks=q.q+'|'+q.o.slice().sort().join('~');if(seen.has(ks))continue;seen.add(ks);L.push([gi,sd]);
   }
   return HB_CACHE[key]={gens:gens,L:L};
 }
@@ -4553,40 +4559,6 @@ function hbBuild(S,kind,n){
   const base=kind==='t'?(n-1)*10:HB_N*10+(n-1),cnt=kind==='t'?10:1,out=[];
   for(let i=0;i<cnt;i++)out.push(hbToQ(hbQ(sm,base+i),sn,'h'+hbKey(S)+kind+(base+i)));
   return out;
-}
-/* ---- المواد غير الكمية: يولّدها ذكي ---- */
-let hbBusy=false;
-async function hbAiCall(prompt){
-  const e=eduOf()||{};
-  if(!(AI_ON()&&CLOUD&&CLOUD.client&&CLOUD.user))throw new Error('login');
-  const ss=await CLOUD.client.auth.getSession();const tok=ss&&ss.data&&ss.data.session&&ss.data.session.access_token;
-  const r=await fetch(window.INJAZ.supabaseUrl+'/functions/v1/tutor',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+(tok||window.INJAZ.supabaseAnonKey),'apikey':window.INJAZ.supabaseAnonKey},body:JSON.stringify({messages:[{role:'user',content:prompt}],stage:e.stage||'',grade:e.grade||'',track:e.track||''})});
-  if(!r.ok)throw new Error('http'+r.status);
-  const rd=r.body.getReader(),dc=new TextDecoder();let buf='',full='';
-  for(;;){const {done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});let i;
-    while((i=buf.indexOf('\n'))>=0){const ln=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!ln.startsWith('data:'))continue;const p=ln.slice(5).trim();if(p==='[DONE]')continue;try{const t=JSON.parse(p).t;if(t)full+=t}catch(x){}}}
-  return full;
-}
-function hbParse(txt,sn,idp){
-  const a=txt.indexOf('['),b=txt.lastIndexOf(']');if(a<0||b<a)return [];
-  let j;try{j=JSON.parse(txt.slice(a,b+1))}catch(e){return []}
-  return j.filter(x=>x&&typeof x.q==='string'&&Array.isArray(x.o)&&x.o.length===4&&x.o.every(o=>typeof o==='string')&&Number.isInteger(x.a)&&x.a>=0&&x.a<4).map((x,i)=>({id:idp+i,s:'ai',sn:sn,q:x.q,o:x.o.map(String),a:x.a,e:String(x.e||'')}));
-}
-async function hbAiBuild(S,kind,n){
-  const sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:S.subj}).n,key='hba-'+hbKey(S)+kind+n;
-  const cache=st.get('hbcache',{});if(cache[key])return cache[key];
-  const ctx='مادة «'+sn+'» '+EDU[S.stage].gn(S.grade)+(S.track&&TRACKS[S.stage]?' · '+TRACKS[S.stage][S.track]:'')+' بمنهج وزارة التربية والتعليم المصرية';
-  const fmt='أخرج مصفوفة JSON فقط بلا أي نص قبلها أو بعدها وبلا علامات كود، بهذه الصيغة: [{"q":"نص السؤال","o":["خيار","خيار","خيار","خيار"],"a":رقم الإجابة الصحيحة من 0 إلى 3,"e":"شرح موجز للحل"}]. اكتب بالعربية الفصحى المبسطة، والإجابة الصحيحة مؤكدة 100٪، والخيارات المضللة منطقية.';
-  let qs=[];
-  if(kind==='t'){
-    const parts=await Promise.all([1,2].map(p=>hbAiCall('أنشئ 5 أسئلة اختيار من متعدد بمستوى المتفوقين (تفكير وتطبيق وليس حفظًا فقط) في '+ctx+'. هذا هو الاختبار رقم '+n+' من 1000، الجزء '+p+' من 2، فنوّع الدروس والأفكار عن بقية الأرقام. اجعل الشرح في 12 كلمة أو أقل. '+fmt).then(t=>hbParse(t,sn,key+'p'+p+'_'))));
-    qs=parts[0].concat(parts[1]);
-  }else{
-    qs=hbParse(await hbAiCall('أنشئ مسألة واحدة متدرجة الصعوبة بمستوى المتفوقين في '+ctx+'، رقمها '+n+' من 1000 (نوّعها عن غيرها)، بأربعة خيارات. في الحقل e اكتب الحل خطوة بخطوة في 60 كلمة أو أقل. '+fmt),sn,key+'_');
-  }
-  if(!qs.length)throw new Error('parse');
-  cache[key]=qs;const ks=Object.keys(cache);if(ks.length>40)delete cache[ks[0]];st.set('hbcache',cache);
-  return qs;
 }
 /* ---- الواجهة ---- */
 const hbDone=()=>st.get('hbdone',{});
@@ -4601,33 +4573,81 @@ function hbCard(){
   const grades=EDU[S.stage].g.map(g=>chip('hbgrade','',g,EDU[S.stage].gn(g).replace(/ (الابتدائي|الإعدادي|الثانوي)$/,'').replace('الصف ','')+'',S.grade===g)).join('');
   const tr=eduNeedsTrack(S.stage,S.grade)?'<div class="chips hbr">'+Object.keys(TRACKS[S.stage]).map(k=>chip('hbtrack','',k,TRACKS[S.stage][k],S.track===k)).join('')+'</div>':'';
   const sj='<div class="chips hbr">'+subs.map(s=>chip('hbsubj','',s.k,s.n,S.subj===s.k)).join('')+'</div>';
-  const info=gens?('<p class="mut sm">مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. '+(sm&&sm.L.length<HB_N*11?'عدد الأسئلة الفريدة المتاحة '+sm.L.length.toLocaleString('ar-EG')+' وتتكرر بعد ذلك.':'كل اختبار ومسألة فريدان.')+'</p>'):'<p class="mut sm">هذه المادة يولّد ذكي أسئلتها عند فتح كل رقم، ويحفظها لك. لم تُراجَع يدويًا، فراجع الشرح مع كتابك.</p>';
+  const info=gens?('<p class="mut sm">'+(HB_QUANT(S)?'مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. ':'أسئلة هذه المادة مبنية من جداول حقائق مراجَعة، والمشتتات من نفس الجدول. ')+(sm&&sm.L.length<HB_N*11?'عدد الأسئلة الفريدة المتاحة '+sm.L.length.toLocaleString('ar-EG')+' وتتكرر بعد ذلك.':'كل اختبار فريد.')+'</p>'):'';
   const row=(kind,title)=>'<div class="hbrow"><b>'+title+'</b><div class="row"><input type="number" min="1" max="'+HB_N+'" value="'+(S.n||1)+'" class="hbn" id="hbn-'+kind+'" inputmode="numeric"><button class="btn" data-a="hbgo" data-k="'+kind+'">ابدأ</button><button class="btn g" data-a="hbgo" data-k="'+kind+'" data-r="1">عشوائي</button></div><small class="mut">أنجزت '+(kind==='t'?nt:np)+' من '+HB_N+'</small></div>';
   return '<div class="card full hbcard"><h3><span>مكتبة المتفوقين</span><small>لكل مادة '+HB_N+' اختبار و'+HB_N+' مسألة</small></h3>'+
     '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+info+
-    (S.subj?row('t','اختبارات متفوقين (10 أسئلة)')+row('p','مسائل متفوقين (مسألة بحلها)'):'')+
-    '<div class="row" style="margin-top:12px"><button class="btn g" data-a="hbask">اسأل ذكي</button></div></div>';
+    (S.subj?row('t','اختبارات (10 أسئلة)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
-const _rdExam=RD.exam;
-RD.exam=()=>EX.on?_rdExam():'<div class="grid">'+hbCard()+'</div>'+_rdExam();
-const hbUp=f=>{const S=hbSt();f(S);hbSave(S);renderSec('exam')};
+RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
+const _rdExam=()=>RD.exam();
+const hbUp=f=>{const S=hbSt();f(S);hbSave(S);renderSec('tests')};
 ACT.hbstage=t=>hbUp(S=>{S.stage=t.dataset.k;S.grade=EDU[S.stage].g[0];S.track=eduNeedsTrack(S.stage,S.grade)?Object.keys(TRACKS[S.stage])[0]:'';S.subj=''});
 ACT.hbgrade=t=>hbUp(S=>{S.grade=+t.dataset.k;S.track=eduNeedsTrack(S.stage,S.grade)?(S.track&&TRACKS[S.stage]&&TRACKS[S.stage][S.track]?S.track:Object.keys(TRACKS[S.stage])[0]):'';S.subj=''});
 ACT.hbtrack=t=>hbUp(S=>{S.track=t.dataset.k;S.subj=''});
 ACT.hbsubj=t=>hbUp(S=>{S.subj=t.dataset.k});
-ACT.hbask=()=>go('ai');
-ACT.hbgo=async t=>{
-  if(hbBusy)return;const S=hbSt(),kind=t.dataset.k;
+ACT.hbgo=t=>{
+const S=hbSt(),kind=t.dataset.k;
   let n=t.dataset.r?1+Math.floor(Math.random()*HB_N):Math.max(1,Math.min(HB_N,+(($('#hbn-'+kind)||{}).value)||1));
   S.n=n;hbSave(S);const hb={key:hbKey(S),k:kind,n:n};
   const sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n;
   const meta={type:'prac',subj:S.subj,title:(kind==='t'?'اختبار ':'مسألة ')+n+' · '+sn,hb:hb};
-  if(hbGens(S)){exStart(hbBuild(S,kind,n),meta);return}
-  hbBusy=true;toast('ذكي يجهّز '+(kind==='t'?'الاختبار':'المسألة')+'…',9000);
-  try{const qs=await hbAiBuild(S,kind,n);exStart(qs,meta)}
-  catch(e){toast(e.message==='login'?'سجّل الدخول لتستخدم ذكي':'تعذّر تجهيز الاختبار الآن. جرّب بعد قليل.')}
-  hbBusy=false;
+  exStart(hbBuild(S,kind,n),meta);
 };
+
+/* ========== بنوك الحقائق: أسئلة المواد غير الكمية (بلا ذكاء اصطناعي) ==========
+   كل جدول: أزواج «مفتاح|قيمة» مراجَعة، والسؤال يُبنى منها والمشتتات من قيم الجدول نفسه، فالإجابة صحيحة بالبناء. lv=[أدنى مستوى، أعلى مستوى]:
+   1 ابتدائي 1-3، 2 ابتدائي 4-6، 3 إعدادي، 4 ثانوي، 5 بكالوريا. */
+const FQ={
+ ar_ant:{lv:[1,3],q:k=>'ما ضد كلمة «'+k+'»؟',r:v=>'ما ضد كلمة «'+v+'»؟',p:'كبير|صغير,طويل|قصير,سريع|بطيء,نهار|ليل,حار|بارد,قوي|ضعيف,جديد|قديم,سعيد|حزين,قريب|بعيد,ثقيل|خفيف,غني|فقير,ممتلئ|فارغ,شجاع|جبان,صادق|كاذب,نظيف|متسخ,واسع|ضيق,عالٍ|منخفض,أبيض|أسود,فتح|أغلق,صعد|هبط,دخل|خرج,ضحك|بكى,نام|استيقظ,أعطى|أخذ,ارتفع|انخفض,أول|آخر,حلو|مرّ,سهل|صعب,رخيص|غالٍ,حيّ|ميت'},
+ ar_pl:{lv:[1,4],q:k=>'ما جمع كلمة «'+k+'»؟',r:v=>'ما مفرد كلمة «'+v+'»؟',p:'كتاب|كتب,قلم|أقلام,رجل|رجال,باب|أبواب,ولد|أولاد,بيت|بيوت,شجرة|أشجار,طالب|طلاب,مدينة|مدن,نهر|أنهار,جبل|جبال,بحر|بحار,قلب|قلوب,نجم|نجوم,طفل|أطفال,عين|عيون,سيف|سيوف,ملك|ملوك,صديق|أصدقاء,وزير|وزراء,عالم|علماء,شاعر|شعراء,مسجد|مساجد,قصر|قصور,زهرة|أزهار,سفينة|سفن,جزيرة|جزر,صحراء|صحارى'},
+ ar_syn:{lv:[2,4],q:k=>'ما مرادف كلمة «'+k+'»؟',r:null,p:'سعيد|مسرور,عدو|خصم,كبير|ضخم,بيت|منزل,شجاع|باسل,غضب|سخط,طريق|سبيل,أسد|ليث,جبل|طود,ماء|مياه,سريع|عاجل,جميل|حسن,نور|ضياء,ذكي|فطن,صديق|رفيق,خوف|فزع,مهارة|براعة,سيد|مولى,كثير|وفير,قليل|يسير'},
+ ar_nahw:{lv:[3,5],q:k=>'ما علامة '+k+'؟',r:null,p:'رفع الفاعل|الضمة,نصب المفعول به|الفتحة,جر الاسم بحرف الجر|الكسرة,رفع المثنى|الألف,رفع جمع المذكر السالم|الواو,نصب جمع المؤنث السالم|الكسرة,جزم الفعل المضارع الصحيح|السكون,نصب الفعل المضارع|الفتحة,رفع الفعل المضارع|الضمة,نصب المثنى|الياء,جر جمع المذكر السالم|الياء,رفع الأسماء الخمسة|الواو'},
+ en_ant:{lv:[1,4],q:k=>'What is the opposite of “'+k+'”?',r:v=>'What is the opposite of “'+v+'”?',p:'big|small,hot|cold,fast|slow,happy|sad,old|new,tall|short,hard|easy,full|empty,day|night,up|down,open|close,rich|poor,strong|weak,early|late,clean|dirty,wet|dry,heavy|light,near|far,true|false,love|hate,begin|end,buy|sell,win|lose,answer|question,always|never'},
+ en_pl:{lv:[1,4],q:k=>'What is the plural of “'+k+'”?',r:null,p:'child|children,man|men,woman|women,foot|feet,tooth|teeth,mouse|mice,person|people,sheep|sheep,leaf|leaves,knife|knives,city|cities,box|boxes,bus|buses,baby|babies,wolf|wolves,fish|fish,goose|geese,watch|watches,day|days,class|classes,life|lives'},
+ en_past:{lv:[2,5],q:k=>'What is the past tense of “'+k+'”?',r:null,p:'go|went,eat|ate,see|saw,take|took,come|came,buy|bought,write|wrote,run|ran,sit|sat,drink|drank,give|gave,make|made,know|knew,swim|swam,bring|brought,teach|taught,think|thought,begin|began,speak|spoke,break|broke,forget|forgot,sleep|slept,fly|flew,find|found,tell|told,leave|left'},
+ en_pp:{lv:[3,5],q:k=>'What is the past participle of “'+k+'”?',r:null,p:'go|gone,eat|eaten,see|seen,take|taken,write|written,drink|drunk,give|given,know|known,speak|spoken,break|broken,begin|begun,fly|flown,do|done,choose|chosen,drive|driven,swim|swum'},
+ en_ar:{lv:[1,3],q:k=>'ما معنى كلمة “'+k+'” بالعربية؟',r:v=>'ما الكلمة الإنجليزية التي معناها «'+v+'»؟',p:'apple|تفاحة,book|كتاب,water|ماء,house|منزل,school|مدرسة,teacher|معلم,friend|صديق,family|أسرة,mother|أم,father|أب,brother|أخ,sister|أخت,cat|قطة,dog|كلب,bird|طائر,fish|سمكة,red|أحمر,blue|أزرق,green|أخضر,yellow|أصفر,table|طاولة,chair|كرسي,window|نافذة,door|باب,car|سيارة,sun|شمس,moon|قمر,tree|شجرة,flower|زهرة'},
+ en_ar2:{lv:[3,5],q:k=>'ما معنى كلمة “'+k+'” بالعربية؟',r:null,p:'achieve|يحقق,environment|بيئة,government|حكومة,knowledge|معرفة,discover|يكتشف,develop|يطور,society|مجتمع,education|تعليم,improve|يحسّن,decision|قرار,research|بحث,effort|جهد,future|مستقبل,experience|خبرة,important|مهم,difficult|صعب,solution|حل,benefit|فائدة,protect|يحمي,increase|يزيد'},
+ fr:{lv:[2,4],q:k=>'ما معنى الكلمة الفرنسية «'+k+'»؟',r:null,p:'bonjour|صباح الخير,merci|شكرًا,chat|قط,chien|كلب,maison|بيت,livre|كتاب,école|مدرسة,eau|ماء,pain|خبز,rouge|أحمر,bleu|أزرق,vert|أخضر,un|واحد,deux|اثنان,trois|ثلاثة,famille|أسرة,ami|صديق,soleil|شمس,lune|قمر,fleur|زهرة'},
+ de:{lv:[2,4],q:k=>'ما معنى الكلمة الألمانية «'+k+'»؟',r:null,p:'Haus|بيت,Buch|كتاب,Wasser|ماء,Hund|كلب,Katze|قطة,Schule|مدرسة,Brot|خبز,Freund|صديق,Sonne|شمس,Mond|قمر,Blume|زهرة,rot|أحمر,blau|أزرق,grün|أخضر,eins|واحد,zwei|اثنان,drei|ثلاثة,Familie|أسرة'},
+ rel:{lv:[1,5],q:k=>k,r:null,p:'كم عدد أركان الإسلام؟|خمسة,كم عدد أركان الإيمان؟|ستة,كم عدد الصلوات المفروضة في اليوم؟|خمس,أول ما نزل من القرآن الكريم|اقرأ,كم عدد سور القرآن الكريم؟|114,أطول سورة في القرآن|البقرة,في أي شهر ليلة القدر؟|رمضان,الحج يكون في شهر|ذي الحجة,أول الخلفاء الراشدين|أبو بكر الصديق,الكعبة المشرفة في مدينة|مكة المكرمة,أول مؤذن في الإسلام|بلال بن رباح,عدد ركعات صلاة الفجر|ركعتان,عدد ركعات صلاة المغرب|ثلاث,عدد ركعات صلاة الظهر|أربع,قبلة المسلمين|الكعبة المشرفة,صيام شهر رمضان من أركان|الإسلام,عيد الفطر بعد شهر|رمضان,أول من أسلم من الصبيان|علي بن أبي طالب,الخليفة الذي لقب بالفاروق|عمر بن الخطاب,الذي جمع القرآن في مصحف واحد|أبو بكر الصديق,المسجد الذي يقع في المدينة المنورة|المسجد النبوي,مولد النبي محمد صلى الله عليه وسلم في|مكة المكرمة,الهجرة النبوية كانت إلى|المدينة المنورة,غار حراء نزل فيه|الوحي'},
+ geo:{lv:[2,5],q:k=>'ما عاصمة '+k+'؟',r:v=>'أي دولة عاصمتها '+v+'؟',p:'مصر|القاهرة,السعودية|الرياض,الإمارات|أبوظبي,الأردن|عمّان,لبنان|بيروت,سوريا|دمشق,العراق|بغداد,الكويت|مدينة الكويت,قطر|الدوحة,سلطنة عُمان|مسقط,اليمن|صنعاء,ليبيا|طرابلس,تونس|تونس,الجزائر|الجزائر,المغرب|الرباط,السودان|الخرطوم,موريتانيا|نواكشوط,الصومال|مقديشو,فرنسا|باريس,ألمانيا|برلين,إيطاليا|روما,اليابان|طوكيو,الصين|بكين,روسيا|موسكو,تركيا|أنقرة,البرازيل|برازيليا,كندا|أوتاوا'},
+ geo_eg:{lv:[2,5],q:k=>k,r:null,p:'أطول نهر في العالم|نهر النيل,أعلى قمة جبلية في مصر|جبل كاترين,يقع السد العالي في محافظة|أسوان,تربط قناة السويس بين البحر المتوسط و|البحر الأحمر,أكبر محافظات مصر مساحة|الوادي الجديد,تقع مدينة الأقصر في|صعيد مصر,يصب نهر النيل في البحر|المتوسط,أشهر موانئ مصر على البحر المتوسط|الإسكندرية,تقع شبه جزيرة سيناء في|شرق مصر,المحافظة التي تقع عندها مدينة بورسعيد|بورسعيد,بحيرة ناصر خلف|السد العالي,واحة سيوه تقع في|الصحراء الغربية,أكبر قارات العالم|آسيا,أكبر محيطات العالم|المحيط الهادئ,أصغر قارات العالم|أستراليا,تقع مصر في قارة|أفريقيا,يمر خط الاستواء بقارة|أفريقيا,أطول نهر في أوروبا|نهر الفولجا,المحيط الذي يفصل أمريكا عن أوروبا|المحيط الأطلسي'},
+ hist:{lv:[2,5],q:k=>k,r:null,p:'موحّد القطرين في مصر القديمة|الملك مينا,باني الهرم الأكبر|خوفو,ملك معركة قادش|رمسيس الثاني,طارد الهكسوس من مصر|أحمس,الملكة التي بنت معبد الدير البحري|حتشبسوت,مؤسس مصر الحديثة|محمد علي,المنتصر في معركة حطين|صلاح الدين الأيوبي,قائد معركة عين جالوت|سيف الدين قطز,قائد الثورة العرابية|أحمد عرابي,زعيم ثورة 1919|سعد زغلول,قام بتأميم قناة السويس|جمال عبد الناصر,قائد حرب أكتوبر 1973 رئيس مصر|أنور السادات,قامت ثورة 23 يوليو عام|1952,تأميم قناة السويس عام|1956,حرب أكتوبر المجيدة عام|1973,افتُتحت قناة السويس عام|1869,قامت ثورة 1919 عام|1919,إعلان الجمهورية في مصر عام|1953,معركة حطين عام|1187,معركة عين جالوت عام|1260,فاتح مصر في العصر الإسلامي|عمرو بن العاص,مدينة أسسها عمرو بن العاص|الفسطاط,مؤسس مدينة القاهرة|جوهر الصقلي,جامع أنشأه أحمد بن طولون|جامع ابن طولون,الجامع الأزهر أُنشئ في العصر|الفاطمي'},
+ sci1:{lv:[1,3],q:k=>k,r:null,p:'أكبر كواكب المجموعة الشمسية|المشتري,أقرب كوكب إلى الشمس|عطارد,الكوكب الأحمر|المريخ,الكوكب الذي نعيش عليه|الأرض,الغاز الذي نتنفسه|الأكسجين,الغاز الذي تمتصه النباتات|ثاني أكسيد الكربون,النبات يصنع غذاءه بعملية|البناء الضوئي,العضو المسؤول عن ضخ الدم|القلب,العضو المسؤول عن التنفس|الرئتان,العضو المسؤول عن التفكير|المخ,الماء الصلب يسمى|الجليد,حالات المادة الثلاث|صلب وسائل وغاز,مصدر الضوء والحرارة للأرض|الشمس,الحيوان الذي يأكل النبات فقط|العاشب,الحيوان الذي يأكل اللحوم فقط|اللاحم,أكبر حيوانات الأرض|الحوت الأزرق,الحواس الخمس|اللمس والبصر والسمع والشم والتذوق,العضو الذي نشم به|الأنف,الجزء الذي يثبّت النبات في التربة|الجذر,الجزء الذي يصنع الغذاء في النبات|الورقة'},
+ sci2:{lv:[3,5],q:k=>k,r:null,p:'الرمز الكيميائي للماء|H₂O,الرمز الكيميائي لملح الطعام|NaCl,الرمز الكيميائي للأكسجين|O,الرمز الكيميائي للذهب|Au,الرمز الكيميائي للحديد|Fe,الرمز الكيميائي للصوديوم|Na,الرمز الكيميائي للبوتاسيوم|K,الرمز الكيميائي للكالسيوم|Ca,الرمز الكيميائي للنحاس|Cu,الرمز الكيميائي للفضة|Ag,مصنع الطاقة في الخلية|الميتوكوندريا,المسؤول عن التحكم في الخلية|النواة,مكان البناء الضوئي في الخلية|البلاستيدات الخضراء,مكان تصنيع البروتين في الخلية|الريبوسومات,الوحدة الأساسية في بناء الكائنات الحية|الخلية,الغاز الذي يشكل معظم الهواء الجوي|النيتروجين,وحدة قياس القوة|النيوتن,وحدة قياس التيار الكهربي|الأمبير,وحدة قياس المقاومة|الأوم,الجهاز المسؤول عن هضم الطعام|الجهاز الهضمي,الدم الذي يحمل الأكسجين تحمله|كرات الدم الحمراء,أصغر وحدة في العنصر|الذرة,الأس الهيدروجيني للماء النقي|7,سرعة الضوء تقريبًا|300000 كم/ث'},
+ comp:{lv:[2,5],q:k=>'ماذا يعني '+k+'؟',r:null,p:'CPU|وحدة المعالجة المركزية,RAM|ذاكرة الوصول العشوائي,ROM|ذاكرة القراءة فقط,USB|ناقل تسلسلي عام,Wi-Fi|شبكة لاسلكية,OS|نظام التشغيل,URL|عنوان صفحة الويب,HTML|لغة ترميز صفحات الويب,LAN|الشبكة المحلية,GPU|وحدة معالجة الرسومات,الفأرة|جهاز إدخال,لوحة المفاتيح|جهاز إدخال,الشاشة|جهاز إخراج,الطابعة|جهاز إخراج,الماسح الضوئي|جهاز إدخال,السماعة|جهاز إخراج,بت|أصغر وحدة لقياس المعلومات,البايت|ثمانية بت,الكيلوبايت|1024 بايت'},
+ prog:{lv:[3,5],q:k=>k,r:null,p:'الأمر المستخدم للطباعة في بايثون|print,الكلمة المستخدمة للتعريف بدالة في بايثون|def,الحلقة التي تكرر حتى يتحقق شرط|while,الحلقة المناسبة للتكرار على قائمة|for,الأمر الشرطي في بايثون|if,نوع البيانات للنص في بايثون|str,نوع البيانات للأعداد الصحيحة|int,نوع البيانات للأعداد العشرية|float,نوع البيانات للقيم المنطقية|bool,الرمز الذي يبدأ التعليق في بايثون|#,رمز علامة التساوي للإسناد في بايثون|=,رمز المقارنة بالتساوي في بايثون|==,الدالة التي تعطي طول القائمة|len,الدالة التي تقرأ مدخلات المستخدم|input'},
+ econ:{lv:[4,5],q:k=>k,r:null,p:'الارتفاع المستمر في المستوى العام للأسعار|التضخم,عدم توفر عمل لمن يرغب فيه|البطالة,مقياس القيمة الإجمالية لما تنتجه الدولة|الناتج المحلي الإجمالي,سوق يسيطر عليه بائع واحد|الاحتكار,جزء من الدخل لا يُنفق|الادخار,ما تفرضه الدولة على الدخل والأرباح|الضريبة,عندما يزيد السعر يقل الطلب|قانون الطلب,المال المستثمر في مشروع|رأس المال,الفرق بين الإيرادات والتكاليف|الربح,الفرق بين الصادرات والواردات|الميزان التجاري,البنك المسؤول عن السياسة النقدية|البنك المركزي,قائمة المركز المالي تسمى أيضًا|الميزانية العمومية,الجانب الأيمن في القيد المحاسبي|المدين,الجانب الأيسر في القيد المحاسبي|الدائن,الأصول تساوي الخصوم +|حقوق الملكية,نشاط يهدف لتحقيق الربح|المشروع التجاري,مبيعات - تكلفة البضاعة المباعة|مجمل الربح'},
+ phil:{lv:[4,5],q:k=>k,r:null,p:'مؤسس المنطق الصوري|أرسطو,الفيلسوف القائل اعرف نفسك|سقراط,تلميذ سقراط ومؤلف الجمهورية|أفلاطون,علم قوانين الفكر الصحيح|المنطق,مؤسس علم الاجتماع عند العرب|ابن خلدون,صاحب مقدمة ابن خلدون|ابن خلدون,مؤسس التحليل النفسي|سيجموند فرويد,صاحب الاشتراط الكلاسيكي|إيفان بافلوف,علم دراسة السلوك والعمليات العقلية|علم النفس,الفيلسوف القائل أنا أفكر إذن أنا موجود|ديكارت,الفيلسوف المسلم الملقب بالمعلم الثاني|الفارابي,صاحب كتاب الشفاء|ابن سينا,صاحب كتاب تهافت التهافت|ابن رشد'},
+ geol:{lv:[4,5],q:k=>k,r:null,p:'صلادة التلك في مقياس موهس|1,صلادة الجبس في مقياس موهس|2,صلادة الكالسيت في مقياس موهس|3,صلادة الفلورايت في مقياس موهس|4,صلادة الكوارتز في مقياس موهس|7,صلادة الكورندم في مقياس موهس|9,صلادة الألماس في مقياس موهس|10,الجرانيت صخر|ناري,البازلت صخر|ناري,الحجر الجيري صخر|رسوبي,الحجر الرملي صخر|رسوبي,الرخام صخر|متحول,الأردواز صخر|متحول,الصخور التي تتكون من تبريد الصهير|النارية,الصخور التي تتكون بتراكم الرواسب|الرسوبية,الصخور التي تتكون بتأثير الضغط والحرارة|المتحولة,الطبقة الخارجية للأرض|القشرة,الطبقة التي تلي القشرة|الوشاح'},
+ art:{lv:[1,3],q:k=>k,r:null,p:'الألوان الأساسية|الأحمر والأصفر والأزرق,الأحمر + الأصفر|البرتقالي,الأزرق + الأصفر|الأخضر,الأحمر + الأزرق|البنفسجي,الأبيض + الأسود|الرمادي,اللون الدافئ|الأحمر,اللون البارد|الأزرق,أداة الرسم بالألوان المائية|الفرشاة,أداة الرسم بالرصاص|القلم الرصاص,فن النحت يكون على|المجسمات,الخط الأفقي يعطي إحساسًا بـ|الهدوء'},
+ mus:{lv:[1,3],q:k=>k,r:null,p:'عدد النغمات الأساسية|سبع,أول نغمة في السلم الموسيقي|دو,آلة العود من الآلات|الوترية,آلة الطبلة من الآلات|الإيقاعية,آلة الناي من الآلات|النفخية,آلة القانون من الآلات|الوترية,آلة الكمان من الآلات|الوترية,آلة المزمار من الآلات|النفخية,نشيد مصر الوطني|بلادي بلادي,قائد الفرقة الموسيقية|المايسترو'},
+ pe:{lv:[1,3],q:k=>k,r:null,p:'عدد لاعبي فريق كرة القدم داخل الملعب|11,عدد لاعبي فريق كرة السلة داخل الملعب|5,عدد لاعبي فريق الكرة الطائرة داخل الملعب|6,عدد لاعبي فريق كرة اليد داخل الملعب|7,تقام الألعاب الأولمبية كل|4 سنوات,مدة شوط كرة القدم|45 دقيقة,الرياضة التي تستخدم المضرب والشبكة|التنس,الرياضة التي يُسجَّل فيها هدف بالقدم|كرة القدم,الإحماء قبل التمرين يقي من|الإصابات,شرب الماء أثناء الرياضة يمنع|الجفاف'},
+ val:{lv:[1,3],q:k=>k,r:null,p:'وجدت محفظة نقود في الطريق، فماذا تفعل؟|أسلمها لصاحبها أو للشرطة,زميلك يحتاج المساعدة في الدرس، فماذا تفعل؟|أساعده,رأيت طفلًا صغيرًا ضائعًا، فماذا تفعل؟|أساعده في الوصول لأهله,اختلفت مع صديقك، فماذا تفعل؟|أتحاور معه بهدوء,أخطأت في حق زميلك، فماذا تفعل؟|أعتذر له,رأيت قمامة في الشارع، فماذا تفعل؟|أضعها في سلة المهملات,جارك كبير في السن، فماذا تفعل؟|أحترمه وأساعده,من قيم الإسلام العظيمة|الصدق,عند الامتحان نلتزم بـ|الأمانة,نتعامل مع الآخرين بـ|الاحترام'}
+};
+const FQ_MAP={
+ ar:['ar_ant','ar_pl','ar_syn','ar_nahw'],en:['en_ant','en_pl','en_past','en_pp','en_ar','en_ar2'],l2:['fr','de'],rel:['rel'],
+ sci:['sci1','sci2'],isci:['sci1','sci2'],soc:['geo','geo_eg','hist'],hist:['hist'],ehist:['hist'],geo:['geo','geo_eg'],geoA:['geo','geo_eg'],
+ comp:['comp'],prog:['prog','comp'],eco:['econ'],ecoA:['econ'],biz:['econ'],acc:['econ'],fin:['econ'],phil:['phil'],psy:['phil'],geol:['geol','sci2'],
+ art:['art'],mus:['mus'],pe:['pe'],val:['val']
+};
+const _ftC={};
+function ftPairs(id){if(_ftC[id])return _ftC[id];const t=FQ[id];return _ftC[id]=t.p.split(',').map(x=>{const i=x.lastIndexOf('|');return [x.slice(0,i),x.slice(i+1)]})}
+function hbLv(S){return S.stage==='prim'?(S.grade<=3?1:2):S.stage==='prep'?3:S.stage==='sec'?4:5}
+function ftGens(subj,S){
+  const L=hbLv(S),ids=(FQ_MAP[subj]||[]).filter(id=>FQ[id].lv[0]<=L&&L<=FQ[id].lv[1]+1);
+  const use=ids.length?ids:(FQ_MAP[subj]||[]).slice(0,1);
+  return use.map(id=>({w:ftPairs(id).length,f:r=>{
+    const t=FQ[id],P=ftPairs(id),i=Math.floor(r()*P.length),rev=t.r&&r()<.4;
+    const [k,v]=P[i],ans=rev?k:v,q=rev?t.r(v):t.q(k);
+    const pool=[...new Set(P.map(x=>rev?x[0]:x[1]).filter(x=>x!==ans))];
+    const w=[];while(w.length<3&&pool.length){w.push(pool.splice(Math.floor(r()*pool.length),1)[0])}
+    const o=elShuffle(r,[ans].concat(w));
+    return {t:'k',s:({ar_ant:'الأضداد',ar_pl:'الجمع والمفرد',ar_syn:'المرادفات',ar_nahw:'النحو',en_ant:'Opposites',en_pl:'Plurals',en_past:'Past tense',en_pp:'Past participle',en_ar:'Vocabulary',en_ar2:'Vocabulary',fr:'مفردات فرنسية',de:'مفردات ألمانية',rel:'التربية الدينية',geo:'العواصم',geo_eg:'الجغرافيا',hist:'التاريخ',sci1:'العلوم',sci2:'العلوم',comp:'الحاسب',prog:'البرمجة',econ:'المفاهيم',phil:'الفكر والفلسفة',geol:'الجيولوجيا',art:'الفنون',mus:'الموسيقى',pe:'الرياضة',val:'القيم'})[id],q:q,o:o,a:o.indexOf(ans),y:'الإجابة الصحيحة: '+ans+'.'};
+  }}));
+}
 
 /* شعار ذكي */
 const ZAKI_LOGO='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDc2MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj7YqNix2K/ZitipINi52ZDZhNmFIOKAlCDZgtmG2KfYuSDYqtmI2Kog2LnZhtiuINii2YXZiNmGPC90aXRsZT48ZGVzYyBpZD0iZGVzYyI+2LTYudin2LEg2KrYudmE2YrZhdmKINmF2LXYsdmKINmK2LbZhSDZgtmG2KfYuSDYqtmI2Kog2LnZhtiuINii2YXZiNmGINin2YTYsNmH2KjZiiDYqNij2LPZhNmI2Kgg2YXYrNiz2YXYjCDZiNin2YTZhtmK2YQg2YjYp9mE2KjYsdiv2YrYqSDZiNix2YrYtNipINin2YTZg9iq2KfYqNipLjwvZGVzYz4KPGRlZnM+CiA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjRkZGMUE3Ii8+PHN0b3Agb2Zmc2V0PSIuMjIiIHN0b3AtY29sb3I9IiNEOTlBMjQiLz48c3RvcCBvZmZzZXQ9Ii40OCIgc3RvcC1jb2xvcj0iI0ZGRTY4QSIvPjxzdG9wIG9mZnNldD0iLjcyIiBzdG9wLWNvbG9yPSIjQTk2NTEyIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRjRDOTU2Ii8+PC9saW5lYXJHcmFkaWVudD4KIDxsaW5lYXJHcmFkaWVudCBpZD0iYmx1ZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM1M0QxQzgiLz48c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzE3NkU3MyIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzEyM0Q0QiIvPjwvbGluZWFyR3JhZGllbnQ+CiA8bGluZWFyR3JhZGllbnQgaWQ9ImxhcGlzIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iIzUwQTdCOSIvPjxzdG9wIG9mZnNldD0iLjQ1IiBzdG9wLWNvbG9yPSIjMTQ2MTdDIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTAyRjU4Ii8+PC9saW5lYXJHcmFkaWVudD4KIDxsaW5lYXJHcmFkaWVudCBpZD0ic2tpbiIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkYwQjAiLz48c3RvcCBvZmZzZXQ9Ii4zNCIgc3RvcC1jb2xvcj0iI0RDQTMzNyIvPjxzdG9wIG9mZnNldD0iLjciIHN0b3AtY29sb3I9IiNGN0Q2NkUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM5RDVEMTkiLz48L2xpbmVhckdyYWRpZW50PgogPGxpbmVhckdyYWRpZW50IGlkPSJwYXAiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjRkZGNkQ5Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjREZDMTdEIi8+PC9saW5lYXJHcmFkaWVudD4KIDxyYWRpYWxHcmFkaWVudCBpZD0iaGFsbyI+PHN0b3Agc3RvcC1jb2xvcj0iI0Y5RDM2QSIgc3RvcC1vcGFjaXR5PSIuNDgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNGOUQzNkEiIHN0b3Atb3BhY2l0eT0iMCIvPjwvcmFkaWFsR3JhZGllbnQ+CiA8ZmlsdGVyIGlkPSJzaGFkb3ciIHg9Ii0zMCUiIHk9Ii0zMCUiIHdpZHRoPSIxNjAlIiBoZWlnaHQ9IjE3MCUiPjxmZURyb3BTaGFkb3cgZHg9IjAiIGR5PSIxNiIgc3RkRGV2aWF0aW9uPSIxNiIgZmxvb2QtY29sb3I9IiMxNTJEMkQiIGZsb29kLW9wYWNpdHk9Ii4yOCIvPjwvZmlsdGVyPgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIxMDAwIiBoZWlnaHQ9Ijc2MCIgcng9IjQ0IiBmaWxsPSIjRjhGM0U3Ii8+CjwhLS0gTmlsZSBtZWRhbGxpb24gYW5kIGxhbmRzY2FwZSAtLT4KPGcgZmlsdGVyPSJ1cmwoI3NoYWRvdykiPjxjaXJjbGUgY3g9IjUwMCIgY3k9IjMwNSIgcj0iMjIyIiBmaWxsPSIjQjk4NzMwIi8+PGNpcmNsZSBjeD0iNTAwIiBjeT0iMzA1IiByPSIyMDkiIGZpbGw9IiMxMDNFM0UiLz48Y2lyY2xlIGN4PSI1MDAiIGN5PSIzMDUiIHI9IjE5NiIgZmlsbD0iIzE1NUE1NyIvPjwvZz4KPGNpcmNsZSBjeD0iNTAwIiBjeT0iMjg3IiByPSIxNzUiIGZpbGw9InVybCgjaGFsbykiLz4KPGcgb3BhY2l0eT0iLjg1Ij4KIDxjaXJjbGUgY3g9IjUwMCIgY3k9IjE5MSIgcj0iNDIiIGZpbGw9IiNGNEM3NUMiLz4KIDxwYXRoIGQ9Ik0zMTAgMzI0IDM4MCAyNDRsNzAgODBabTE3NSAwIDY1LTY2IDY2IDY2WiIgZmlsbD0iI0Q2QUE1OSIvPgogPHBhdGggZD0ibTM4MCAyNDQgNzAgODBoLTcwWm0xNzAgMTQgNjYgNjZoLTY2WiIgZmlsbD0iI0I4ODczOSIvPgogPHBhdGggZD0iTTI4NCAzNDRxOTAtMjQgMTc0IDB0MTc2IDBxNTctMTYgOTQtNHY4MUgyODRaIiBmaWxsPSIjQkQ4QjNCIi8+CiA8cGF0aCBkPSJNMjY1IDM2N3ExMDUtMzEgMTk2IDN0MTk0LTNxNTMtMTcgMTAyLTN2MTA0cS02Ni05LTExOCA5LTEwNCAzNy0yMDEtNHQtMTczIDNaIiBmaWxsPSJ1cmwoI2JsdWUpIi8+CiA8cGF0aCBkPSJNMjkwIDM4NnE0Ni0xNyA5MS0xbTEwNSAyM3E0OSAxNyA5OS0xbTU1LTI3cTM1LTExIDc0IDBNMzI5IDQ0OXE1MC0xNiA4OSAxbTEzMiA1cTQ2LTE4IDkxLTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0I1RjNERiIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9nPgo8IS0tIFR1dGFua2hhbXVuIGluc3BpcmVkIDNEIGZ1bmVyYXJ5IG1hc2sgLS0+CjxnIGZpbHRlcj0idXJsKCNzaGFkb3cpIj4KIDwhLS0gc3RyaXBlZCBuZW1lcyBoZWFkZHJlc3MgLS0+CiA8cGF0aCBkPSJNMzkzIDIwNCBRMzg1IDE0NiA0MTQgMTE5IFE0NTIgOTEgNTAwIDkxIFE1NDggOTEgNTg2IDExOSBRNjE1IDE0NiA2MDcgMjA0IEw2MzIgMzQ5IFE2MjAgMzkwIDU4NCA0MTQgTDU0OCAzNzggTDQ1MiAzNzggTDQxNiA0MTQgUTM4MCAzOTAgMzY4IDM0OVoiIGZpbGw9InVybCgjbGFwaXMpIiBzdHJva2U9IiNEN0E2M0UiIHN0cm9rZS13aWR0aD0iOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogPCEtLSBnb2xkIGJhbmRzIC0tPgogPHBhdGggZD0iTTM5OCAxNjhRNTAwIDIwMyA2MDIgMTY4IE0zODggMjA0UTUwMCAyNDAgNjEyIDIwNCBNMzgwIDI0MVE1MDAgMjc3IDYyMCAyNDEgTTM3NSAyODBRNTAwIDMxNSA2MjUgMjgwIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ29sZCkiIHN0cm9rZS13aWR0aD0iMTUiLz4KIDxwYXRoIGQ9Ik00MDEgMTQyUTQzMyAxMjMgNDYyIDEyMCBNNTk5IDE0MlE1NjcgMTIzIDUzOCAxMjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1RDM2RCIgc3Ryb2tlLXdpZHRoPSI1IiBvcGFjaXR5PSIuODUiLz4KIDwhLS0gZmFjZSBzaWxob3VldHRlIC0tPgogPHBhdGggZD0iTTQyMyAxNjYgUTUwMCAxMzkgNTc3IDE2NiBMNTY2IDI1NCBRNTU4IDMwMSA1MzUgMzMzIEw1MDAgMzU3IEw0NjUgMzMzIFE0NDIgMzAxIDQzNCAyNTRaIiBmaWxsPSJ1cmwoI3NraW4pIiBzdHJva2U9IiM4RjU4MUIiIHN0cm9rZS13aWR0aD0iNSIvPgogPCEtLSBmb3JlaGVhZCBjb2JyYSBhbmQgc3VuIGRpc2sgLS0+CiA8cGF0aCBkPSJNNTAwIDE2MCBDNDc3IDE0NyA0ODAgMTI2IDQ5NyAxMTkgQzUxMCAxMjYgNTE0IDE0MSA1MDMgMTUwIEM1MTggMTM5IDUzMCAxNDggNTIzIDE2MyBMNTEwIDE3N1oiIGZpbGw9InVybCgjZ29sZCkiIHN0cm9rZT0iIzhENTcxQiIgc3Ryb2tlLXdpZHRoPSIzIi8+CiA8Y2lyY2xlIGN4PSI0OTkiIGN5PSIxMjciIHI9IjgiIGZpbGw9IiNFODREMzAiLz4KIDwhLS0gYnJvd3MgLyBleWVzIC0tPgogPHBhdGggZD0iTTQzNiAyMTEgUTQ2NCAxOTAgNDg2IDIxMCBRNDYzIDIyOSA0NDAgMjI0WiBNNTY0IDIxMSBRNTM2IDE5MCA1MTQgMjEwIFE1MzcgMjI5IDU2MCAyMjRaIiBmaWxsPSIjRjdFOEI0IiBzdHJva2U9IiMxNzNENTQiIHN0cm9rZS13aWR0aD0iNiIvPgogPHBhdGggZD0iTTQ0MyAyMTFRNDY0IDIwMCA0ODEgMjExIE01NTcgMjExUTUzNiAyMDAgNTE5IDIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTMyRjQzIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogPGVsbGlwc2UgY3g9IjQ2MyIgY3k9IjIxMyIgcng9IjYiIHJ5PSI4IiBmaWxsPSIjMTAyQTQwIi8+PGVsbGlwc2UgY3g9IjUzNyIgY3k9IjIxMyIgcng9IjYiIHJ5PSI4IiBmaWxsPSIjMTAyQTQwIi8+CiA8cGF0aCBkPSJNNTAwIDIxMSBMNDg3IDI2MyBRNTAwIDI3MiA1MTMgMjYzWiIgZmlsbD0iI0M1OEEyRCIgc3Ryb2tlPSIjOTg2MDFEIiBzdHJva2Utd2lkdGg9IjMiLz4KIDwhLS0gY2hlZWtzLCBtb3V0aCwgY2VyZW1vbmlhbCBiZWFyZCAtLT4KIDxwYXRoIGQ9Ik00NTUgMjc4IFE0NzggMjkwIDQ5MyAyODMgTTU0NSAyNzggUTUyMiAyOTAgNTA3IDI4MyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQzY4QTMwIiBzdHJva2Utd2lkdGg9IjQiIG9wYWNpdHk9Ii44Ii8+CiA8cGF0aCBkPSJNNDc3IDMwMCBRNTAwIDMwNyA1MjMgMzAwIFE1MDEgMzE5IDQ3NyAzMDBaIiBmaWxsPSIjODQzRTJBIiBzdHJva2U9IiM4QzU5MUMiIHN0cm9rZS13aWR0aD0iMyIvPgogPHBhdGggZD0iTTQ4MiAzMjEgUTUwMCAzMjkgNTE4IDMyMSBMNTI1IDM1NyBMNTAwIDM3OCBMNDc1IDM1N1oiIGZpbGw9InVybCgjZ29sZCkiIHN0cm9rZT0iIzg3NTQxQiIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiA8cGF0aCBkPSJNNDgyIDMzNWgzNm0tMzQgMTBoMzJtLTI3IDEwaDIyIiBzdHJva2U9IiM5RTY3MUQiIHN0cm9rZS13aWR0aD0iMyIvPgogPCEtLSB1cmFldXMgc2lkZSBvcm5hbWVudHMgLS0+CiA8cGF0aCBkPSJNNDEwIDI0NiBRMzkwIDI2NSAzOTQgMzAxIFE0MTAgMjg5IDQxNyAyNzUgTTU5MCAyNDZRNjEwIDI2NSA2MDYgMzAxUTU5MCAyODkgNTgzIDI3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogPCEtLSBoaWdobGlnaHRzIGZvciBzY3VscHRlZCBkZXB0aCAtLT4KIDxwYXRoIGQ9Ik00NDMgMTc3UTQ2MiAxNjQgNDgxIDE2NSBNNTE5IDE2NVE1MzggMTY0IDU1NyAxNzcgTTQ0NyAyNDRRNDUzIDI2MyA0NjMgMjcyIiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkYwQTAiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNjUiLz4KPC9nPgo8IS0tIG9wZW4gcGFweXJ1cyBhbmQgcXVpbGwgYXQgZm9vdCBvZiBlbWJsZW0gLS0+CjxwYXRoIGQ9Ik01MDAgNDAwUTQ1NSAzNzggNDA4IDM5M0w0MDggNDUxUTQ1OCA0MzUgNTAwIDQ2MlE1NDIgNDM1IDU5MiA0NTFMNTkyIDM5M1E1NDUgMzc4IDUwMCA0MDBaIiBmaWxsPSJ1cmwoI3BhcCkiIHN0cm9rZT0iI0E2NkQyOCIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik01MDAgNDAxdjYwbS03Ny00MnEzNS0xMCA2MyA0bS02MyA4cTM1LTEwIDYzIDRtOTEtMTZxLTM1LTEwLTYzIDRtNjMgOHEtMzUtMTAtNjMgNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQzZBMzVDIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNNTE5IDM5NFE1MzkgMzcxIDU2NCAzNzVRNTUwIDM5OCA1MTkgNDA0TDUwNSA0MTdaIiBmaWxsPSIjRjFEMjc2IiBzdHJva2U9IiM4MDU3MkYiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Im01MTEgNDEyIDQzLTM0IiBzdHJva2U9IiM4MDU3MkYiIHN0cm9rZS13aWR0aD0iMi41Ii8+CjxjaXJjbGUgY3g9IjUwMCIgY3k9IjMwNSIgcj0iMjA4IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREM2NjUiIHN0cm9rZS13aWR0aD0iNSIvPgo8dGV4dCB4PSI1MDAiIHk9IjYwMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZGlyZWN0aW9uPSJydGwiIHVuaWNvZGUtYmlkaT0icGxhaW50ZXh0IiBmb250LWZhbWlseT0iJ05vdG8gTmFza2ggQXJhYmljJywnQW1pcmknLCdTZWdvZSBVSScsc2VyaWYiIGZvbnQtc2l6ZT0iODUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMjNGM0QiPtiw2YPZijwvdGV4dD4KPHBhdGggZD0iTTMyMiA2NDBINDIwIE01ODAgNjQwSDY3OCIgc3Ryb2tlPSIjQzk5NzM5IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Im00OTIgNjM0IDggNi04IDYtOC02WiBNNTA4IDYzNGw4IDYtOCA2LTgtNloiIGZpbGw9IiNDOTk3MzkiLz4KPHRleHQgeD0iNTAwIiB5PSI2OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRpcmVjdGlvbj0icnRsIiB1bmljb2RlLWJpZGk9InBsYWludGV4dCIgZm9udC1mYW1pbHk9IidTZWdvZSBVSScsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZmlsbD0iIzUyNzM2QyI+2YXZhiDYttmB2KfZgSDYp9mE2YbZitmE4oCmINiq2KjYr9ijINix2K3ZhNipINin2YTZhdi52LHZgdipPC90ZXh0Pgo8L3N2Zz4=';
