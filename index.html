@@ -623,6 +623,17 @@ body.mo #wmk,body.lock #wmk{opacity:calc(var(--wmo,.12)*.5)}
 @media(min-width:701px){#wmk{-webkit-mask-position:calc(50% - 48px) 46%;mask-position:calc(50% - 48px) 46%}}
 body.lt .herocard>h3{color:rgba(255,255,255,.78)}
 body.lt .herocard .mut,body.lt .herocard small{color:rgba(255,255,255,.68)}
+
+/* ===== زر ذكي العائم: ذهب النيل إلى فيروز مصري، أيقونة بلون الحبر الليلي ===== */
+#aifab{position:fixed;z-index:41;right:14px;bottom:calc(64px + var(--sab,0px) + 14px);width:58px;height:58px;border-radius:50%;border:2px solid rgba(255,255,255,.55);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;color:#0F2E3F;background:linear-gradient(145deg,#F2D28A 0%,#DDAE55 48%,#38B2AA 120%);box-shadow:0 8px 22px rgba(0,0,0,.35),0 0 0 4px color-mix(in srgb,#38B2AA 28%,transparent);transition:transform .2s ease,opacity .25s ease}
+#aifab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#aifab span{font:700 .62rem/1 'IBM Plex Sans Arabic',system-ui,sans-serif;margin-top:1px}
+#aifab:active{transform:scale(.92)}
+#aifab::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #38B2AA;opacity:0;animation:aifp 3.2s ease-out infinite}
+@keyframes aifp{0%{transform:scale(.85);opacity:.7}70%,100%{transform:scale(1.25);opacity:0}}
+@media(prefers-reduced-motion:reduce){#aifab::after{animation:none}}
+@media(min-width:900px){#aifab{right:calc(96px + 20px);bottom:24px}}
+body.onai #aifab,body.mo #aifab,body.lock #aifab{opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -653,6 +664,7 @@ body.lt .herocard .mut,body.lt .herocard small{color:rgba(255,255,255,.68)}
     <div class="ctl"><button class="btn g" id="fp" data-a="fp">إيقاف مؤقت</button><button class="btn g" id="fm" data-a="fm">الصوت: يعمل</button><button class="btn g" id="fx" data-a="fx">إغلاق</button></div>
   </div>
 </div>
+<button id="aifab" data-a="go" data-g="ai" aria-label="ذكي: مساعدك في المذاكرة" title="ذكي"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.2A3 3 0 0 0 6.6 6.6 3.2 3.2 0 0 0 5 12a3.3 3.3 0 0 0 2 5.3A3 3 0 0 0 12 18.8V5.2zM12 5.2a3 3 0 0 1 5.4 1.4A3.2 3.2 0 0 1 19 12a3.3 3.3 0 0 1-2 5.3 3 3 0 0 1-5 1.5M8.5 10.5c1 0 2-.6 2.2-1.7M15.5 10.5c-1 0-2-.6-2.2-1.7M8.5 14.5c1 0 2 .6 2.2 1.7M15.5 14.5c-1 0-2 .6-2.2 1.7"/></svg><span>ذكي</span></button>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="modal" hidden></div>
 
@@ -1885,7 +1897,7 @@ const SEC=[
   {id:'home',n:'الرئيسية',sub:'نظرة واحدة على يومك كله',skin:'nile',em:'armillary',c:'#e2bf76'},
   {id:'study',n:'المذاكرة',sub:'جلسات مركّزة بلا تشتت',skin:'lapis',em:'crystal',c:'#6cd9d8'},
   {id:'exam',n:'الامتحانات',sub:'تقييم أسبوعي وتدريب بالحلول',skin:'lapis',em:'star',c:'#6cd9d8'},
-  {id:'ai',n:'المساعد',sub:'اسأل واشرح وتدرّب',skin:'lapis',em:'star',c:'#6cd9d8'},
+  {id:'ai',n:'ذكي',sub:'فاهمك: اسأل واشرح وتدرّب',skin:'lapis',em:'star',c:'#6cd9d8'},
   {id:'tasks',n:'المهام',sub:'اكتب، رتّب، أنجز',skin:'lapis',em:'cubes',c:'#6cd9d8'},
   {id:'log',n:'السجل اليومي',sub:'ماذا فعلت اليوم وكيف كان شعورك',skin:'sandstone',em:'book',c:'#e7cf94'},
   {id:'gym',n:'التمارين',sub:'الجيم، الأوزان، والتقدّم',skin:'faience',em:'dumbbell',c:'#f39e8f'},
@@ -2055,11 +2067,11 @@ const libTx=(m,fn)=>DB.tx('ab-lib','f',{keyPath:'id',autoIncrement:true},m,fn);
 const bgTx=(m,fn)=>DB.tx('ab-bg','k',{},m,fn);
 
 /* ========== التنقل ========== */
-const ICO={ai:'M4 5h16v11H10l-6 4zM8 9h8M8 12h5',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
+const ICO={ai:'M12 5.2A3 3 0 0 0 6.6 6.6 3.2 3.2 0 0 0 5 12a3.3 3.3 0 0 0 2 5.3A3 3 0 0 0 12 18.8V5.2zM12 5.2a3 3 0 0 1 5.4 1.4A3.2 3.2 0 0 1 19 12a3.3 3.3 0 0 1-2 5.3 3 3 0 0 1-5 1.5M8.5 10.5c1 0 2-.6 2.2-1.7M15.5 10.5c-1 0-2-.6-2.2-1.7M8.5 14.5c1 0 2 .6 2.2 1.7M15.5 14.5c-1 0-2 .6-2.2 1.7',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
 const NAVPRI=['home','study','tasks','routine'];
 const tabBtn=(s,cls)=>'<button class="tab'+(cls||'')+'" data-a="go" data-g="'+s.id+'" style="--c:'+s.c+'" aria-label="'+s.n+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO[s.id]+'"/></svg><span>'+s.n+'</span></button>';
 function buildShell(){
-  $('#tabs').innerHTML=SEC.map(s=>tabBtn(s,NAVPRI.includes(s.id)?' pri':'')).join('')+'<button class="tab moreb" data-a="more" style="--c:var(--acc)" aria-label="المزيد"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO.more+'"/></svg><span>المزيد</span></button>';
+  $('#tabs').innerHTML=SEC.filter(s=>s.id!=='ai').map(s=>tabBtn(s,NAVPRI.includes(s.id)?' pri':'')).join('')+'<button class="tab moreb" data-a="more" style="--c:var(--acc)" aria-label="المزيد"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO.more+'"/></svg><span>المزيد</span></button>';
   const dg=n=>String(n).padStart(2,'0').replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
   $('#main').innerHTML=SEC.map((s,i)=>'<section class="sec" id="s-'+s.id+'" data-sec="'+s.id+'" aria-label="'+s.n+'" style="--sc:'+s.c+'"><div class="sh"><div class="emb"></div><div><div class="eyb"><b>'+dg(i+1)+'</b><span>'+dg(SEC.length)+'</span></div><h2>'+s.n+'</h2><p class="mut">'+s.sub+'</p></div></div><div id="b-'+s.id+'"></div></section>').join('');
 }
@@ -2076,7 +2088,7 @@ function go(id){
   if(!SEC.find(s=>s.id===id))id='home';
   $$('.sec').forEach(s=>s.classList.toggle('on',s.dataset.sec===id));
   $$('#tabs .tab').forEach(t=>{const on=t.dataset.g===id;t.classList.toggle('on',on);if(on)try{t.scrollIntoView({inline:'center',block:'nearest',behavior:RM?'auto':'smooth'})}catch(e){}});
-  curSec=id;roughUL();applySkin(id);embShow(secOf(id).em,$('#s-'+id+' .emb'));renderSec(id);st.set('tab',id);
+  curSec=id;document.body.classList.toggle('onai',id==='ai');roughUL();applySkin(id);embShow(secOf(id).em,$('#s-'+id+' .emb'));renderSec(id);st.set('tab',id);
   try{history.replaceState(null,'','#'+id)}catch(e){}
   window.scrollTo(0,0);if(A)G.fromTo('#s-'+id,{opacity:0,y:14},{opacity:1,y:0,duration:.5});
 }
@@ -3129,16 +3141,16 @@ RD.ai=()=>{
   const sugg=['اشرح لي درسًا بسهولة','اختبرني بـ 5 أسئلة','لخّص لي هذه الفقرة','ضع لي خطة مذاكرة لأسبوع'];
   const demo=!AI_ON();
   return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'متبقّي اليوم: '+left+' رسالة')+'</span></div>'+
-    '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><b>مرحبًا، أنا مساعدك في المذاكرة</b><span>اسألني عن أي درس أو اطلب تدريبًا.</span></div>')+'</div>'+
+    '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس أو اطلب تدريبًا.</span></div>')+'</div>'+
     (ch.length?'':'<div class="chips aisug">'+sugg.map(x=>'<button class="chip" data-a="aiask" data-q="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>')+
     '<div class="row aiin"><input id="ai-in" type="text" maxlength="600" placeholder="اكتب سؤالك" class="grow" autocomplete="off"><button class="btn" data-a="aisend" id="ai-go">إرسال</button></div>'+
-    '<p class="mut sm aiwarn">قد يخطئ المساعد. راجع الإجابة مع كتابك.'+(ch.length?' <button class="lnk" data-a="aiclear" style="background:none;border:0;color:var(--acc);cursor:pointer;padding:0">محادثة جديدة</button>':'')+'</p></div></div>';
+    '<p class="mut sm aiwarn">قد يخطئ ذكي. راجع الإجابة مع كتابك.'+(ch.length?' <button class="lnk" data-a="aiclear" style="background:none;border:0;color:var(--acc);cursor:pointer;padding:0">محادثة جديدة</button>':'')+'</p></div></div>';
 };
 PO.ai=()=>{const l=$('#ailog');if(l)l.scrollTop=l.scrollHeight};
 async function aiReply(text){
   const e=eduOf()||{};
   const demo=!(AI_ON()&&CLOUD&&CLOUD.client&&CLOUD.user);
-  if(demo){await new Promise(r=>setTimeout(r,900));return 'هذا رد تجريبي. عند ربط المساعد بالنموذج سيجيبك هنا بشرح مبسّط ومثال وسؤال تدريبي عن: «'+text.slice(0,60)+'».'}
+  if(demo){await new Promise(r=>setTimeout(r,900));return 'هذا رد تجريبي. عند تفعيل ذكي سيجيبك هنا بشرح مبسّط ومثال وسؤال تدريبي عن: «'+text.slice(0,60)+'».'}
   const hist=aiChat().slice(-8).map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}));
   const r=await CLOUD.client.functions.invoke('tutor',{body:{messages:hist,stage:e.stage||'',grade:e.grade||'',track:e.track||''}});
   if(r.error)throw r.error;if(r.data&&r.data.error==='limit')throw new Error('limit');
