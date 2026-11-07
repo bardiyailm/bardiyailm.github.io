@@ -626,7 +626,8 @@ body.lt .herocard .mut,body.lt .herocard small{color:rgba(255,255,255,.68)}
 
 /* ===== زر ذكي العائم: قناع توت عنخ آمون (ذهب ولازورد وفيروز) على ليل النيل ===== */
 #aifab{position:fixed;z-index:41;right:14px;bottom:calc(64px + var(--sab,0px) + 16px);width:64px;height:64px;border-radius:50%;border:2px solid #E2B866;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#0F2E3F;background:radial-gradient(circle at 50% 35%,#1C4A63 0%,#0F2E3F 72%);box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 4px color-mix(in srgb,#38B2AA 30%,transparent);transition:transform .2s ease,opacity .25s ease}
-#aifab svg{width:46px;height:46px;margin-top:-2px}
+#aifab svg{width:100%;height:100%;margin:0;border-radius:50%;overflow:hidden}
+#aifab{background:#F8F3E7!important}
 #aifab span{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(145deg,#F2D28A,#DDAE55);color:#0F2E3F;border-radius:9px;padding:2px 9px;font:700 .68rem/1.2 'IBM Plex Sans Arabic',system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 #aifab:active{transform:scale(.92)}
 #aifab::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #38B2AA;opacity:0;animation:aifp 3.2s ease-out infinite}
@@ -656,6 +657,7 @@ body.onai #aifab,body.mo #aifab,body.lock #aifab{opacity:0;pointer-events:none}
 .aitools{display:flex;gap:.4rem}
 .aihl li{display:flex;gap:.5rem;align-items:center}
 .aihl li button.lnk{display:flex;flex-direction:column}
+.zlogo{width:min(220px,60%);border-radius:18px;display:block;margin:0 auto .6rem}
 </style>
 </head>
 <body>
@@ -686,7 +688,59 @@ body.onai #aifab,body.mo #aifab,body.lock #aifab{opacity:0;pointer-events:none}
     <div class="ctl"><button class="btn g" id="fp" data-a="fp">إيقاف مؤقت</button><button class="btn g" id="fm" data-a="fm">الصوت: يعمل</button><button class="btn g" id="fx" data-a="fx">إغلاق</button></div>
   </div>
 </div>
-<button id="aifab" data-a="go" data-g="ai" aria-label="ذكي: مساعدك في المذاكرة" title="ذكي"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3C17 3 12 15 12 28L8 51l11 9 3-20h20l3 20 11-9-4-23C52 15 47 3 32 3z" fill="#E6B84F" stroke="#7a5a14" stroke-width="1.2"/><g fill="none" stroke="#1F4E9E" stroke-width="2.2" stroke-linecap="round"><path d="M18 14c2-4 5-7 8-8M46 14c-2-4-5-7-8-8M14 26c1-3 2-6 4-8M50 26c-1-3-2-6-4-8"/><path d="M13 36l-2 10M17 38l-2 11M51 36l2 10M47 38l2 11M24 44l-1 11M40 44l1 11"/></g><path d="M22 22c0-8 20-8 20 0l-1 17c-1 7-17 7-18 0z" fill="#F6DD99" stroke="#7a5a14" stroke-width="1"/><g fill="none" stroke="#0F2E3F" stroke-width="1.8" stroke-linecap="round"><path d="M24.5 26.5c2-1.6 5-1.6 6.5 0M33 26.5c1.5-1.6 4.5-1.6 6.5 0M23 25l-2 1.2M41 25l2 1.2M32 28v6M29.5 35.5h5M28 39.5q4 2 8 0"/></g><path d="M29 46h6l-1.2 11h-3.6z" fill="#1F4E9E" stroke="#0F2E3F" stroke-width="1"/><path d="M32 5.5c-2 0-3 1.6-3 3.4 0 1.6 1.2 2.6 3 2.6s3-1 3-2.6c0-1.8-1-3.4-3-3.4z" fill="#38B2AA" stroke="#0F2E3F" stroke-width=".8"/></svg><span>ذكي</span></button>
+<button id="aifab" data-a="go" data-g="ai" aria-label="ذكي: مساعدك في المذاكرة" title="ذكي"><svg viewBox="268 73 464 484" aria-hidden="true"><defs>
+ <linearGradient id="zk-gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF1A7"/><stop offset=".22" stop-color="#D99A24"/><stop offset=".48" stop-color="#FFE68A"/><stop offset=".72" stop-color="#A96512"/><stop offset="1" stop-color="#F4C956"/></linearGradient>
+ <linearGradient id="zk-blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#53D1C8"/><stop offset=".55" stop-color="#176E73"/><stop offset="1" stop-color="#123D4B"/></linearGradient>
+ <linearGradient id="zk-lapis" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#50A7B9"/><stop offset=".45" stop-color="#14617C"/><stop offset="1" stop-color="#102F58"/></linearGradient>
+ <linearGradient id="zk-skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF0B0"/><stop offset=".34" stop-color="#DCA337"/><stop offset=".7" stop-color="#F7D66E"/><stop offset="1" stop-color="#9D5D19"/></linearGradient>
+ <linearGradient id="zk-pap" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFF6D9"/><stop offset="1" stop-color="#DFC17D"/></linearGradient>
+ <radialGradient id="zk-halo"><stop stop-color="#F9D36A" stop-opacity=".48"/><stop offset="1" stop-color="#F9D36A" stop-opacity="0"/></radialGradient>
+ 
+</defs>
+
+<!-- Nile medallion and landscape -->
+<g><circle cx="500" cy="305" r="222" fill="#B98730"/><circle cx="500" cy="305" r="209" fill="#103E3E"/><circle cx="500" cy="305" r="196" fill="#155A57"/></g>
+<circle cx="500" cy="287" r="175" fill="url(#zk-halo)"/>
+<g opacity=".85">
+ <circle cx="500" cy="191" r="42" fill="#F4C75C"/>
+ <path d="M310 324 380 244l70 80Zm175 0 65-66 66 66Z" fill="#D6AA59"/>
+ <path d="m380 244 70 80h-70Zm170 14 66 66h-66Z" fill="#B88739"/>
+ <path d="M284 344q90-24 174 0t176 0q57-16 94-4v81H284Z" fill="#BD8B3B"/>
+ <path d="M265 367q105-31 196 3t194-3q53-17 102-3v104q-66-9-118 9-104 37-201-4t-173 3Z" fill="url(#zk-blue)"/>
+ <path d="M290 386q46-17 91-1m105 23q49 17 99-1m55-27q35-11 74 0M329 449q50-16 89 1m132 5q46-18 91-2" fill="none" stroke="#B5F3DF" stroke-width="6" stroke-linecap="round"/>
+</g>
+<!-- Tutankhamun inspired 3D funerary mask -->
+<g>
+ <!-- striped nemes headdress -->
+ <path d="M393 204 Q385 146 414 119 Q452 91 500 91 Q548 91 586 119 Q615 146 607 204 L632 349 Q620 390 584 414 L548 378 L452 378 L416 414 Q380 390 368 349Z" fill="url(#zk-lapis)" stroke="#D7A63E" stroke-width="8" stroke-linejoin="round"/>
+ <!-- gold bands -->
+ <path d="M398 168Q500 203 602 168 M388 204Q500 240 612 204 M380 241Q500 277 620 241 M375 280Q500 315 625 280" fill="none" stroke="url(#zk-gold)" stroke-width="15"/>
+ <path d="M401 142Q433 123 462 120 M599 142Q567 123 538 120" fill="none" stroke="#F5D36D" stroke-width="5" opacity=".85"/>
+ <!-- face silhouette -->
+ <path d="M423 166 Q500 139 577 166 L566 254 Q558 301 535 333 L500 357 L465 333 Q442 301 434 254Z" fill="url(#zk-skin)" stroke="#8F581B" stroke-width="5"/>
+ <!-- forehead cobra and sun disk -->
+ <path d="M500 160 C477 147 480 126 497 119 C510 126 514 141 503 150 C518 139 530 148 523 163 L510 177Z" fill="url(#zk-gold)" stroke="#8D571B" stroke-width="3"/>
+ <circle cx="499" cy="127" r="8" fill="#E84D30"/>
+ <!-- brows / eyes -->
+ <path d="M436 211 Q464 190 486 210 Q463 229 440 224Z M564 211 Q536 190 514 210 Q537 229 560 224Z" fill="#F7E8B4" stroke="#173D54" stroke-width="6"/>
+ <path d="M443 211Q464 200 481 211 M557 211Q536 200 519 211" fill="none" stroke="#132F43" stroke-width="8" stroke-linecap="round"/>
+ <ellipse cx="463" cy="213" rx="6" ry="8" fill="#102A40"/><ellipse cx="537" cy="213" rx="6" ry="8" fill="#102A40"/>
+ <path d="M500 211 L487 263 Q500 272 513 263Z" fill="#C58A2D" stroke="#98601D" stroke-width="3"/>
+ <!-- cheeks, mouth, ceremonial beard -->
+ <path d="M455 278 Q478 290 493 283 M545 278 Q522 290 507 283" fill="none" stroke="#C68A30" stroke-width="4" opacity=".8"/>
+ <path d="M477 300 Q500 307 523 300 Q501 319 477 300Z" fill="#843E2A" stroke="#8C591C" stroke-width="3"/>
+ <path d="M482 321 Q500 329 518 321 L525 357 L500 378 L475 357Z" fill="url(#zk-gold)" stroke="#87541B" stroke-width="4"/>
+ <path d="M482 335h36m-34 10h32m-27 10h22" stroke="#9E671D" stroke-width="3"/>
+ <!-- uraeus side ornaments -->
+ <path d="M410 246 Q390 265 394 301 Q410 289 417 275 M590 246Q610 265 606 301Q590 289 583 275" fill="none" stroke="url(#zk-gold)" stroke-width="8" stroke-linecap="round"/>
+ <!-- highlights for sculpted depth -->
+ <path d="M443 177Q462 164 481 165 M519 165Q538 164 557 177 M447 244Q453 263 463 272" fill="none" stroke="#FFF0A0" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+</g>
+<!-- open papyrus and quill at foot of emblem -->
+<path d="M500 400Q455 378 408 393L408 451Q458 435 500 462Q542 435 592 451L592 393Q545 378 500 400Z" fill="url(#zk-pap)" stroke="#A66D28" stroke-width="5" stroke-linejoin="round"/>
+<path d="M500 401v60m-77-42q35-10 63 4m-63 8q35-10 63 4m91-16q-35-10-63 4m63 8q-35-10-63 4" fill="none" stroke="#C6A35C" stroke-width="4" stroke-linecap="round"/>
+<path d="M519 394Q539 371 564 375Q550 398 519 404L505 417Z" fill="#F1D276" stroke="#80572F" stroke-width="3"/><path d="m511 412 43-34" stroke="#80572F" stroke-width="2.5"/>
+<circle cx="500" cy="305" r="208" fill="none" stroke="#EDC665" stroke-width="5"/></svg><span>ذكي</span></button>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="modal" hidden></div>
 
@@ -3165,7 +3219,7 @@ RD.ai=()=>{
   const sugg=['اشرح لي درسًا بسهولة','اختبرني بـ 5 أسئلة','ضع لي خطة مذاكرة لأسبوع','اقترح لي نظامًا غذائيًا صحيًا','أشعر بالتوتر قبل الامتحان','ما أفضل تمرين يومي مناسب لي؟'];
   const demo=!AI_ON();
   return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'اسأل بلا حدود')+'</span><span class="aitools"><button class="chip" data-a="aihist">سجل الدردشة'+(aiHist().length?' ('+aiHist().length+')':'')+'</button>'+(ch.length?'<button class="chip" data-a="aiclear">مسح المحادثة</button>':'')+'</span></div>'+
-    '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس من الابتدائي للثانوي، أو عن نظامك الغذائي والرياضي، أو مزاجك وتوترك.</span></div>')+'</div>'+
+    '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><img class="zlogo" src="'+ZAKI_LOGO+'" alt="ذكي"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس من الابتدائي للثانوي، أو عن نظامك الغذائي والرياضي، أو مزاجك وتوترك.</span></div>')+'</div>'+
     (ch.length?'':'<div class="chips aisug">'+sugg.map(x=>'<button class="chip" data-a="aiask" data-q="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>')+
     '<div class="row aiin"><input id="ai-in" type="text" maxlength="1400" placeholder="اكتب سؤالك" class="grow" autocomplete="off"><button class="btn" data-a="aisend" id="ai-go">إرسال</button></div>'+
     '<p class="mut sm aiwarn">قد يخطئ ذكي. راجع الإجابة مع كتابك.'+''+'</p></div></div>';
@@ -4572,6 +4626,9 @@ ACT.hbgo=async t=>{
   catch(e){toast(e.message==='login'?'سجّل الدخول لتستخدم ذكي':'تعذّر تجهيز الاختبار الآن. جرّب بعد قليل.')}
   hbBusy=false;
 };
+
+/* شعار ذكي */
+const ZAKI_LOGO='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDc2MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj7YqNix2K/ZitipINi52ZDZhNmFIOKAlCDZgtmG2KfYuSDYqtmI2Kog2LnZhtiuINii2YXZiNmGPC90aXRsZT48ZGVzYyBpZD0iZGVzYyI+2LTYudin2LEg2KrYudmE2YrZhdmKINmF2LXYsdmKINmK2LbZhSDZgtmG2KfYuSDYqtmI2Kog2LnZhtiuINii2YXZiNmGINin2YTYsNmH2KjZiiDYqNij2LPZhNmI2Kgg2YXYrNiz2YXYjCDZiNin2YTZhtmK2YQg2YjYp9mE2KjYsdiv2YrYqSDZiNix2YrYtNipINin2YTZg9iq2KfYqNipLjwvZGVzYz4KPGRlZnM+CiA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjRkZGMUE3Ii8+PHN0b3Agb2Zmc2V0PSIuMjIiIHN0b3AtY29sb3I9IiNEOTlBMjQiLz48c3RvcCBvZmZzZXQ9Ii40OCIgc3RvcC1jb2xvcj0iI0ZGRTY4QSIvPjxzdG9wIG9mZnNldD0iLjcyIiBzdG9wLWNvbG9yPSIjQTk2NTEyIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRjRDOTU2Ii8+PC9saW5lYXJHcmFkaWVudD4KIDxsaW5lYXJHcmFkaWVudCBpZD0iYmx1ZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM1M0QxQzgiLz48c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzE3NkU3MyIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzEyM0Q0QiIvPjwvbGluZWFyR3JhZGllbnQ+CiA8bGluZWFyR3JhZGllbnQgaWQ9ImxhcGlzIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iIzUwQTdCOSIvPjxzdG9wIG9mZnNldD0iLjQ1IiBzdG9wLWNvbG9yPSIjMTQ2MTdDIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTAyRjU4Ii8+PC9saW5lYXJHcmFkaWVudD4KIDxsaW5lYXJHcmFkaWVudCBpZD0ic2tpbiIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkYwQjAiLz48c3RvcCBvZmZzZXQ9Ii4zNCIgc3RvcC1jb2xvcj0iI0RDQTMzNyIvPjxzdG9wIG9mZnNldD0iLjciIHN0b3AtY29sb3I9IiNGN0Q2NkUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM5RDVEMTkiLz48L2xpbmVhckdyYWRpZW50PgogPGxpbmVhckdyYWRpZW50IGlkPSJwYXAiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjRkZGNkQ5Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjREZDMTdEIi8+PC9saW5lYXJHcmFkaWVudD4KIDxyYWRpYWxHcmFkaWVudCBpZD0iaGFsbyI+PHN0b3Agc3RvcC1jb2xvcj0iI0Y5RDM2QSIgc3RvcC1vcGFjaXR5PSIuNDgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNGOUQzNkEiIHN0b3Atb3BhY2l0eT0iMCIvPjwvcmFkaWFsR3JhZGllbnQ+CiA8ZmlsdGVyIGlkPSJzaGFkb3ciIHg9Ii0zMCUiIHk9Ii0zMCUiIHdpZHRoPSIxNjAlIiBoZWlnaHQ9IjE3MCUiPjxmZURyb3BTaGFkb3cgZHg9IjAiIGR5PSIxNiIgc3RkRGV2aWF0aW9uPSIxNiIgZmxvb2QtY29sb3I9IiMxNTJEMkQiIGZsb29kLW9wYWNpdHk9Ii4yOCIvPjwvZmlsdGVyPgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIxMDAwIiBoZWlnaHQ9Ijc2MCIgcng9IjQ0IiBmaWxsPSIjRjhGM0U3Ii8+CjwhLS0gTmlsZSBtZWRhbGxpb24gYW5kIGxhbmRzY2FwZSAtLT4KPGcgZmlsdGVyPSJ1cmwoI3NoYWRvdykiPjxjaXJjbGUgY3g9IjUwMCIgY3k9IjMwNSIgcj0iMjIyIiBmaWxsPSIjQjk4NzMwIi8+PGNpcmNsZSBjeD0iNTAwIiBjeT0iMzA1IiByPSIyMDkiIGZpbGw9IiMxMDNFM0UiLz48Y2lyY2xlIGN4PSI1MDAiIGN5PSIzMDUiIHI9IjE5NiIgZmlsbD0iIzE1NUE1NyIvPjwvZz4KPGNpcmNsZSBjeD0iNTAwIiBjeT0iMjg3IiByPSIxNzUiIGZpbGw9InVybCgjaGFsbykiLz4KPGcgb3BhY2l0eT0iLjg1Ij4KIDxjaXJjbGUgY3g9IjUwMCIgY3k9IjE5MSIgcj0iNDIiIGZpbGw9IiNGNEM3NUMiLz4KIDxwYXRoIGQ9Ik0zMTAgMzI0IDM4MCAyNDRsNzAgODBabTE3NSAwIDY1LTY2IDY2IDY2WiIgZmlsbD0iI0Q2QUE1OSIvPgogPHBhdGggZD0ibTM4MCAyNDQgNzAgODBoLTcwWm0xNzAgMTQgNjYgNjZoLTY2WiIgZmlsbD0iI0I4ODczOSIvPgogPHBhdGggZD0iTTI4NCAzNDRxOTAtMjQgMTc0IDB0MTc2IDBxNTctMTYgOTQtNHY4MUgyODRaIiBmaWxsPSIjQkQ4QjNCIi8+CiA8cGF0aCBkPSJNMjY1IDM2N3ExMDUtMzEgMTk2IDN0MTk0LTNxNTMtMTcgMTAyLTN2MTA0cS02Ni05LTExOCA5LTEwNCAzNy0yMDEtNHQtMTczIDNaIiBmaWxsPSJ1cmwoI2JsdWUpIi8+CiA8cGF0aCBkPSJNMjkwIDM4NnE0Ni0xNyA5MS0xbTEwNSAyM3E0OSAxNyA5OS0xbTU1LTI3cTM1LTExIDc0IDBNMzI5IDQ0OXE1MC0xNiA4OSAxbTEzMiA1cTQ2LTE4IDkxLTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0I1RjNERiIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9nPgo8IS0tIFR1dGFua2hhbXVuIGluc3BpcmVkIDNEIGZ1bmVyYXJ5IG1hc2sgLS0+CjxnIGZpbHRlcj0idXJsKCNzaGFkb3cpIj4KIDwhLS0gc3RyaXBlZCBuZW1lcyBoZWFkZHJlc3MgLS0+CiA8cGF0aCBkPSJNMzkzIDIwNCBRMzg1IDE0NiA0MTQgMTE5IFE0NTIgOTEgNTAwIDkxIFE1NDggOTEgNTg2IDExOSBRNjE1IDE0NiA2MDcgMjA0IEw2MzIgMzQ5IFE2MjAgMzkwIDU4NCA0MTQgTDU0OCAzNzggTDQ1MiAzNzggTDQxNiA0MTQgUTM4MCAzOTAgMzY4IDM0OVoiIGZpbGw9InVybCgjbGFwaXMpIiBzdHJva2U9IiNEN0E2M0UiIHN0cm9rZS13aWR0aD0iOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogPCEtLSBnb2xkIGJhbmRzIC0tPgogPHBhdGggZD0iTTM5OCAxNjhRNTAwIDIwMyA2MDIgMTY4IE0zODggMjA0UTUwMCAyNDAgNjEyIDIwNCBNMzgwIDI0MVE1MDAgMjc3IDYyMCAyNDEgTTM3NSAyODBRNTAwIDMxNSA2MjUgMjgwIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ29sZCkiIHN0cm9rZS13aWR0aD0iMTUiLz4KIDxwYXRoIGQ9Ik00MDEgMTQyUTQzMyAxMjMgNDYyIDEyMCBNNTk5IDE0MlE1NjcgMTIzIDUzOCAxMjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Y1RDM2RCIgc3Ryb2tlLXdpZHRoPSI1IiBvcGFjaXR5PSIuODUiLz4KIDwhLS0gZmFjZSBzaWxob3VldHRlIC0tPgogPHBhdGggZD0iTTQyMyAxNjYgUTUwMCAxMzkgNTc3IDE2NiBMNTY2IDI1NCBRNTU4IDMwMSA1MzUgMzMzIEw1MDAgMzU3IEw0NjUgMzMzIFE0NDIgMzAxIDQzNCAyNTRaIiBmaWxsPSJ1cmwoI3NraW4pIiBzdHJva2U9IiM4RjU4MUIiIHN0cm9rZS13aWR0aD0iNSIvPgogPCEtLSBmb3JlaGVhZCBjb2JyYSBhbmQgc3VuIGRpc2sgLS0+CiA8cGF0aCBkPSJNNTAwIDE2MCBDNDc3IDE0NyA0ODAgMTI2IDQ5NyAxMTkgQzUxMCAxMjYgNTE0IDE0MSA1MDMgMTUwIEM1MTggMTM5IDUzMCAxNDggNTIzIDE2MyBMNTEwIDE3N1oiIGZpbGw9InVybCgjZ29sZCkiIHN0cm9rZT0iIzhENTcxQiIgc3Ryb2tlLXdpZHRoPSIzIi8+CiA8Y2lyY2xlIGN4PSI0OTkiIGN5PSIxMjciIHI9IjgiIGZpbGw9IiNFODREMzAiLz4KIDwhLS0gYnJvd3MgLyBleWVzIC0tPgogPHBhdGggZD0iTTQzNiAyMTEgUTQ2NCAxOTAgNDg2IDIxMCBRNDYzIDIyOSA0NDAgMjI0WiBNNTY0IDIxMSBRNTM2IDE5MCA1MTQgMjEwIFE1MzcgMjI5IDU2MCAyMjRaIiBmaWxsPSIjRjdFOEI0IiBzdHJva2U9IiMxNzNENTQiIHN0cm9rZS13aWR0aD0iNiIvPgogPHBhdGggZD0iTTQ0MyAyMTFRNDY0IDIwMCA0ODEgMjExIE01NTcgMjExUTUzNiAyMDAgNTE5IDIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTMyRjQzIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogPGVsbGlwc2UgY3g9IjQ2MyIgY3k9IjIxMyIgcng9IjYiIHJ5PSI4IiBmaWxsPSIjMTAyQTQwIi8+PGVsbGlwc2UgY3g9IjUzNyIgY3k9IjIxMyIgcng9IjYiIHJ5PSI4IiBmaWxsPSIjMTAyQTQwIi8+CiA8cGF0aCBkPSJNNTAwIDIxMSBMNDg3IDI2MyBRNTAwIDI3MiA1MTMgMjYzWiIgZmlsbD0iI0M1OEEyRCIgc3Ryb2tlPSIjOTg2MDFEIiBzdHJva2Utd2lkdGg9IjMiLz4KIDwhLS0gY2hlZWtzLCBtb3V0aCwgY2VyZW1vbmlhbCBiZWFyZCAtLT4KIDxwYXRoIGQ9Ik00NTUgMjc4IFE0NzggMjkwIDQ5MyAyODMgTTU0NSAyNzggUTUyMiAyOTAgNTA3IDI4MyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQzY4QTMwIiBzdHJva2Utd2lkdGg9IjQiIG9wYWNpdHk9Ii44Ii8+CiA8cGF0aCBkPSJNNDc3IDMwMCBRNTAwIDMwNyA1MjMgMzAwIFE1MDEgMzE5IDQ3NyAzMDBaIiBmaWxsPSIjODQzRTJBIiBzdHJva2U9IiM4QzU5MUMiIHN0cm9rZS13aWR0aD0iMyIvPgogPHBhdGggZD0iTTQ4MiAzMjEgUTUwMCAzMjkgNTE4IDMyMSBMNTI1IDM1NyBMNTAwIDM3OCBMNDc1IDM1N1oiIGZpbGw9InVybCgjZ29sZCkiIHN0cm9rZT0iIzg3NTQxQiIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiA8cGF0aCBkPSJNNDgyIDMzNWgzNm0tMzQgMTBoMzJtLTI3IDEwaDIyIiBzdHJva2U9IiM5RTY3MUQiIHN0cm9rZS13aWR0aD0iMyIvPgogPCEtLSB1cmFldXMgc2lkZSBvcm5hbWVudHMgLS0+CiA8cGF0aCBkPSJNNDEwIDI0NiBRMzkwIDI2NSAzOTQgMzAxIFE0MTAgMjg5IDQxNyAyNzUgTTU5MCAyNDZRNjEwIDI2NSA2MDYgMzAxUTU5MCAyODkgNTgzIDI3NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogPCEtLSBoaWdobGlnaHRzIGZvciBzY3VscHRlZCBkZXB0aCAtLT4KIDxwYXRoIGQ9Ik00NDMgMTc3UTQ2MiAxNjQgNDgxIDE2NSBNNTE5IDE2NVE1MzggMTY0IDU1NyAxNzcgTTQ0NyAyNDRRNDUzIDI2MyA0NjMgMjcyIiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkYwQTAiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNjUiLz4KPC9nPgo8IS0tIG9wZW4gcGFweXJ1cyBhbmQgcXVpbGwgYXQgZm9vdCBvZiBlbWJsZW0gLS0+CjxwYXRoIGQ9Ik01MDAgNDAwUTQ1NSAzNzggNDA4IDM5M0w0MDggNDUxUTQ1OCA0MzUgNTAwIDQ2MlE1NDIgNDM1IDU5MiA0NTFMNTkyIDM5M1E1NDUgMzc4IDUwMCA0MDBaIiBmaWxsPSJ1cmwoI3BhcCkiIHN0cm9rZT0iI0E2NkQyOCIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik01MDAgNDAxdjYwbS03Ny00MnEzNS0xMCA2MyA0bS02MyA4cTM1LTEwIDYzIDRtOTEtMTZxLTM1LTEwLTYzIDRtNjMgOHEtMzUtMTAtNjMgNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQzZBMzVDIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNNTE5IDM5NFE1MzkgMzcxIDU2NCAzNzVRNTUwIDM5OCA1MTkgNDA0TDUwNSA0MTdaIiBmaWxsPSIjRjFEMjc2IiBzdHJva2U9IiM4MDU3MkYiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Im01MTEgNDEyIDQzLTM0IiBzdHJva2U9IiM4MDU3MkYiIHN0cm9rZS13aWR0aD0iMi41Ii8+CjxjaXJjbGUgY3g9IjUwMCIgY3k9IjMwNSIgcj0iMjA4IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREM2NjUiIHN0cm9rZS13aWR0aD0iNSIvPgo8dGV4dCB4PSI1MDAiIHk9IjYwMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZGlyZWN0aW9uPSJydGwiIHVuaWNvZGUtYmlkaT0icGxhaW50ZXh0IiBmb250LWZhbWlseT0iJ05vdG8gTmFza2ggQXJhYmljJywnQW1pcmknLCdTZWdvZSBVSScsc2VyaWYiIGZvbnQtc2l6ZT0iODUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMjNGM0QiPtiw2YPZijwvdGV4dD4KPHBhdGggZD0iTTMyMiA2NDBINDIwIE01ODAgNjQwSDY3OCIgc3Ryb2tlPSIjQzk5NzM5IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Im00OTIgNjM0IDggNi04IDYtOC02WiBNNTA4IDYzNGw4IDYtOCA2LTgtNloiIGZpbGw9IiNDOTk3MzkiLz4KPHRleHQgeD0iNTAwIiB5PSI2OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRpcmVjdGlvbj0icnRsIiB1bmljb2RlLWJpZGk9InBsYWludGV4dCIgZm9udC1mYW1pbHk9IidTZWdvZSBVSScsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZmlsbD0iIzUyNzM2QyI+2YXZhiDYttmB2KfZgSDYp9mE2YbZitmE4oCmINiq2KjYr9ijINix2K3ZhNipINin2YTZhdi52LHZgdipPC90ZXh0Pgo8L3N2Zz4=';
 
 /* ========== الدخول والتشغيل ========== */
 async function unlock(){
