@@ -1579,6 +1579,7 @@ var e,t;e=this,t=function(){"use strict";function e(e,t){var n=Object.keys(e);if
 <script>/* إعدادات الخادم. المفتاح العام (anon) آمن للنشر لأن الحماية في قاعدة البيانات (RLS).
    اتركهما فارغين لتشغيل التطبيق محلياً بلا حسابات. */
 window.INJAZ={
+  aiEnabled:false, /* يُفعَّل بعد نشر دالة tutor وإضافة GEMINI_API_KEY */
   supabaseUrl:'https://qrmysfoogtutcnklhvgv.supabase.co',
   supabaseAnonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybXlzZm9vZ3R1dGNua2xodmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2ODc3OTksImV4cCI6MjEwODI2Mzc5OX0.wdyjQyUWkydTrJG1jLzCTY-ZEyUufv3EBWd0iW4eqgg',
   emailDomain:'injaz.app',
@@ -3116,6 +3117,7 @@ CHG.bkimp=t=>{
 ACT.wipe=()=>ask('سيُمسح كل شيء: المهام والسجلات والإعدادات. لا رجوع بعد ذلك.','مسح كل شيء',async()=>{const prof=lsGet('ab:profile'),uid=lsGet('ab:__uid');if(CLOUD.on&&CLOUD.user){try{const r=await CLOUD.client.from('user_kv').delete().eq('user_id',CLOUD.user.id);if(r.error)throw r.error}catch(e){toast(CLOUD.msg(e));return}}clearLocal();if(CLOUD.on&&CLOUD.user){if(uid)lsSet('ab:__uid',uid);if(prof){lsSet('ab:profile',prof);CLOUD.q={profile:1};lsSet('ab:__q',JSON.stringify(CLOUD.q))}}location.reload()},true);
 
 /* ========== المساعد الذكي ========== */
+const AI_ON=()=>!!(window.INJAZ&&window.INJAZ.supabaseUrl&&window.INJAZ.aiEnabled);
 const AI_LIMIT=20;
 let aiBusy=false;
 const aiChat=()=>st.get('aichat',[]);
@@ -3125,8 +3127,8 @@ RD.ai=()=>{
   const ch=aiChat(),left=Math.max(0,AI_LIMIT-aiUsed());
   const subj=(typeof subs==='function'?subs():[]).slice(0,4).map(x=>x.n);
   const sugg=['اشرح لي درسًا بسهولة','اختبرني بـ 5 أسئلة','لخّص لي هذه الفقرة','ضع لي خطة مذاكرة لأسبوع'];
-  const demo=!(window.INJAZ&&window.INJAZ.supabaseUrl);
-  return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'وضع تجريبي':'متبقّي اليوم: '+left+' رسالة')+'</span></div>'+
+  const demo=!AI_ON();
+  return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'متبقّي اليوم: '+left+' رسالة')+'</span></div>'+
     '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><b>مرحبًا، أنا مساعدك في المذاكرة</b><span>اسألني عن أي درس أو اطلب تدريبًا.</span></div>')+'</div>'+
     (ch.length?'':'<div class="chips aisug">'+sugg.map(x=>'<button class="chip" data-a="aiask" data-q="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>')+
     '<div class="row aiin"><input id="ai-in" type="text" maxlength="600" placeholder="اكتب سؤالك" class="grow" autocomplete="off"><button class="btn" data-a="aisend" id="ai-go">إرسال</button></div>'+
@@ -3135,7 +3137,7 @@ RD.ai=()=>{
 PO.ai=()=>{const l=$('#ailog');if(l)l.scrollTop=l.scrollHeight};
 async function aiReply(text){
   const e=eduOf()||{};
-  const demo=!(window.INJAZ&&window.INJAZ.supabaseUrl&&CLOUD&&CLOUD.client&&CLOUD.user);
+  const demo=!(AI_ON()&&CLOUD&&CLOUD.client&&CLOUD.user);
   if(demo){await new Promise(r=>setTimeout(r,900));return 'هذا رد تجريبي. عند ربط المساعد بالنموذج سيجيبك هنا بشرح مبسّط ومثال وسؤال تدريبي عن: «'+text.slice(0,60)+'».'}
   const hist=aiChat().slice(-8).map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}));
   const r=await CLOUD.client.functions.invoke('tutor',{body:{messages:hist,stage:e.stage||'',grade:e.grade||'',track:e.track||''}});
@@ -3144,7 +3146,7 @@ async function aiReply(text){
 }
 async function aiSend(q){
   q=(q||'').trim();if(!q||aiBusy)return;
-  if(aiUsed()>=AI_LIMIT&&window.INJAZ&&window.INJAZ.supabaseUrl){toast('انتهت رسائل اليوم، عد غدًا');return}
+  if(aiUsed()>=AI_LIMIT&&AI_ON()){toast('انتهت رسائل اليوم، عد غدًا');return}
   aiBusy=true;const ch=aiChat();ch.push({r:'u',t:q});st.set('aichat',ch.slice(-40));renderSec('ai');
   const l=$('#ailog');if(l){l.insertAdjacentHTML('beforeend','<div class="aib bot aityp"><i></i><i></i><i></i></div>');l.scrollTop=l.scrollHeight}
   try{const rep=await aiReply(q);const c2=aiChat();c2.push({r:'b',t:rep});st.set('aichat',c2.slice(-40));const u=st.get('aiuse',{});st.set('aiuse',{d:td(),n:(u.d===td()?u.n:0)+1})}
