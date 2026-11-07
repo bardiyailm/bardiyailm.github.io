@@ -659,6 +659,8 @@ body.onai #aifab,body.mo #aifab,body.lock #aifab{opacity:0;pointer-events:none}
 .aihl li button.lnk{display:flex;flex-direction:column}
 .zlogo{width:min(220px,60%);border-radius:18px;display:block;margin:0 auto .6rem}
 .eico.zk{padding:0;overflow:hidden;background:#F8F3E7}.eico.zk img{width:100%;height:100%;object-fit:cover;object-position:50% 36%;transform:scale(1.9);transform-origin:50% 38%}
+
+.exmap{margin-top:14px}.exmap summary{cursor:pointer;color:var(--mut,#b9a982);font-size:.85rem}.exmap .exdots{margin-top:8px}
 </style>
 </head>
 <body>
@@ -4162,9 +4164,11 @@ ACT.exweek=()=>{
 ACT.exprac=t=>{const s=mySubs().find(x=>x.k===t.dataset.k);if(!s)return;exStart(buildQs([s],10,'p'+Date.now()),{type:'prac',subj:s.k,title:'تدريب: '+s.n})};
 ACT.exmix=()=>{const subs=examSubjects();if(!subs.length){toast('اختر مرحلتك أولاً');return}exStart(buildQs(subs,10,'m'+Date.now()),{type:'mix',title:'تدريب متنوع'})};
 ACT.exans=t=>{if(EX.done)return;EX.ans[EX.i]=+t.dataset.i;renderSec('tests')};
-ACT.exnext=()=>{if(EX.i<EX.qs.length-1){EX.i++;renderSec('tests')}};
-ACT.exprev=()=>{if(EX.i>0){EX.i--;renderSec('tests')}};
-ACT.exgo=t=>{EX.i=+t.dataset.i;renderSec('tests')};
+const exTop=()=>{renderSec('tests');try{window.scrollTo(0,0)}catch(e){}};
+ACT.exnext=()=>{if(EX.i<EX.qs.length-1){EX.i++;exTop()}};
+ACT.exprev=()=>{if(EX.i>0){EX.i--;exTop()}};
+ACT.exgo=t=>{EX.i=+t.dataset.i;exTop()};
+ACT.exrf=t=>{EX.rf=t.dataset.k;renderSec('tests')};
 ACT.exquit=()=>ask('إنهاء الامتحان بلا حفظ النتيجة؟','إنهاء',()=>{EX.on=false;renderSec('tests')},true);
 ACT.exfinish=()=>{
   const un=EX.ans.filter(x=>x<0).length;
@@ -4173,7 +4177,7 @@ ACT.exfinish=()=>{
     const score=items.filter(x=>x.ok).length,h=XH();
     const first=EX.meta.type==='week'&&!h.some(x=>x.type==='week'&&x.wk===EX.meta.wk);
     h.push({at:Date.now(),type:EX.meta.type,wk:EX.meta.wk||'',subj:EX.meta.subj||'',score:score,total:EX.qs.length,off:first||EX.meta.type!=='week',items:items,mins:Math.round((Date.now()-EX.t0)/60000)});
-    saveXH(h);if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);EX.done=true;EX.i=0;renderSec('tests');
+    saveXH(h);if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);EX.done=true;EX.i=0;EX.rf='all';exTop();
   };
   if(un)ask('بقيت '+un+' أسئلة بلا إجابة. إنهاء الامتحان؟','إنهاء',fin);else fin();
 };
@@ -4188,19 +4192,19 @@ function weakSubjects(){
 }
 function exQuestion(){
   const q=EX.qs[EX.i],ans=EX.ans[EX.i],n=EX.qs.length;
-  const nav='<div class="exdots">'+EX.qs.map((_,i)=>'<button class="exd'+(i===EX.i?' cur':'')+(EX.ans[i]>=0?' ans':'')+'" data-a="exgo" data-i="'+i+'" aria-label="سؤال '+(i+1)+'">'+(i+1)+'</button>').join('')+'</div>';
-  return '<div class="card"><h3><span>'+esc(EX.meta.title)+'</span><small>'+(EX.i+1)+' من '+n+'</small></h3>'+bar((EX.i+1)/n)+nav+
+  const nav='<details class="exmap"><summary>خريطة الأسئلة · أجبت '+EX.ans.filter(x=>x>=0).length+' من '+n+'</summary><div class="exdots">'+EX.qs.map((_,i)=>'<button class="exd'+(i===EX.i?' cur':'')+(EX.ans[i]>=0?' ans':'')+'" data-a="exgo" data-i="'+i+'" aria-label="سؤال '+(i+1)+'">'+(i+1)+'</button>').join('')+'</div></details>';
+  return '<div class="card"><h3><span>'+esc(EX.meta.title)+'</span><small>'+(EX.i+1)+' من '+n+'</small></h3>'+bar((EX.i+1)/n)+
     '<div class="mut sm" style="margin-top:10px">'+esc(q.sn)+'</div><div class="exq">'+esc(q.q)+'</div><div class="exopts">'+
     q.o.map((o,i)=>'<button class="opt'+(ans===i?' sel':'')+'" data-a="exans" data-i="'+i+'">'+esc(o)+'</button>').join('')+'</div>'+
     '<div class="row" style="margin-top:12px"><button class="btn g" data-a="exprev"'+(EX.i?'':' disabled')+'>السابق</button>'+
     (EX.i<n-1?'<button class="btn" data-a="exnext">التالي</button>':'<button class="btn" data-a="exfinish">إنهاء وتصحيح</button>')+
-    '<button class="btn d s" data-a="exquit">خروج</button></div></div>';
+    '<button class="btn d s" data-a="exquit">خروج</button></div>'+nav+'</div>';
 }
 function exResult(){
   const items=EX.qs.map((q,i)=>({q:q,a:EX.ans[i]})),score=items.filter(x=>x.a===x.q.a).length,p=Math.round(score/EX.qs.length*100);
   return '<div class="card glow"><h3><span>النتيجة</span><small>'+esc(EX.meta.title)+'</small></h3><div class="exscore">'+score+' من '+EX.qs.length+'</div><div class="b" style="text-align:center">'+p+'% · '+grade(p)+'</div>'+
-    '<div class="row" style="justify-content:center;margin-top:10px"><button class="btn" data-a="exnew">رجوع للامتحانات</button></div></div>'+
-    '<div class="card" style="margin-top:12px"><h3>الحلول والشرح</h3>'+items.map((x,i)=>{const ok=x.a===x.q.a;
+    '<div class="mut sm" style="text-align:center">صحيحة: '+score+' · خاطئة: '+items.filter(x=>x.a>=0&&x.a!==x.q.a).length+' · بلا إجابة: '+items.filter(x=>x.a<0).length+'</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn" data-a="exnew">رجوع للاختبارات</button></div></div>'+
+    '<div class="card" style="margin-top:12px"><h3>الحلول والشرح</h3><div class="chips" style="margin-bottom:8px"><button class="chip'+(EX.rf!=='bad'?' on':'')+'" data-a="exrf" data-k="all">كل الأسئلة</button><button class="chip'+(EX.rf==='bad'?' on':'')+'" data-a="exrf" data-k="bad">الأخطاء فقط</button></div>'+items.map((x,i)=>{const ok=x.a===x.q.a;if(EX.rf==='bad'&&ok)return '';
       return '<div class="exrev '+(ok?'ok':'no')+'"><div class="mut sm">'+(i+1)+'. '+esc(x.q.sn)+' · '+(ok?'إجابة صحيحة':x.a<0?'بلا إجابة':'إجابة خاطئة')+'</div><div class="b">'+esc(x.q.q)+'</div>'+
       (ok?'':'<div class="sm">إجابتك: '+(x.a<0?'—':esc(x.q.o[x.a]))+'</div>')+'<div class="sm">الصحيح: <b>'+esc(x.q.o[x.q.a])+'</b></div><div class="mut sm">'+esc(x.q.e)+'</div></div>'}).join('')+'</div>';
 }
