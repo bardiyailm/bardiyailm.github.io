@@ -4404,6 +4404,51 @@ const HB_MATH={
   r=>{const p=elPick(r,[[30,'جا',1,2],[60,'جتا',1,2],[45,'جا',1,1.414]]);return elBuild(r,'k','النسب المثلثية','قيمة '+p[1]+' '+p[0]+'° =',p[0]===45?'1/√2':'1/2',p[0]===45?['1/2','√3/2','1']:['√3/2','1','1/√2'],'قيمة معروفة للزوايا الخاصة.')},
   r=>{const a=elInt(r,2,9),d=elInt(r,2,6),n=elInt(r,4,20),s=n*(2*a+(n-1)*d)/2;return HQ(r,'المتتابعات','مجموع أول '+n+' حدًا من متتابعة حسابية أولها '+a+' وأساسها '+d+':',s,[s+n,s-a,n*(a+(n-1)*d)],'ج = ن/٢[٢أ+(ن−١)د] = '+s+'.')}]
 };
+
+/* ---- مولّدات إضافية لرفع التنوع ---- */
+HB_MATH.P6.push(
+ r=>{const o=elInt(r,2,40)*20,d=elPick(r,[10,20,25,30,40]);return HQ(r,'الخصم','سلعة ثمنها '+o+' جنيهًا خُصم منها '+d+'٪. ثمنها بعد الخصم:',o-o*d/100,[o*d/100,o+o*d/100,o-d],o+' − '+d+'٪ × '+o+' = '+(o-o*d/100)+'.')},
+ r=>{const a=elInt(r,1,5),b=elInt(r,2,6),c=elInt(r,1,5),d=elInt(r,2,6);return elBuild(r,'k','ضرب الكسور',a+'/'+b+' × '+c+'/'+d+' = ؟',elFr(a*c,b*d),[elFr(a+c,b+d),elFr(a*d,b*c),elFr(a*c,b+d),elFr(a*c+1,b*d)],'نضرب البسطين والمقامين: '+elFr(a*c,b*d)+'.')},
+ r=>{const b=elInt(r,4,30),h=elInt(r,2,20)*2;return HQ(r,'المساحة','مساحة مثلث قاعدته '+b+' سم وارتفاعه '+h+' سم:',b*h/2,[b*h,b+h,b*h/2+b],'½ × '+b+' × '+h+' = '+b*h/2+'.')},
+ r=>{const a=elInt(r,11,99)/10,k=elInt(r,2,9);return HQ(r,'الكسور العشرية',a+' × '+k+' = ؟',+(a*k).toFixed(1),[+(a*k+1).toFixed(1),+(a*k/10).toFixed(2),+(a+k).toFixed(1)],a+' × '+k+' = '+(+(a*k).toFixed(1))+'.')},
+ r=>{const d1=elInt(r,2,9)*20,d2=elInt(r,2,9)*30,t1=d1/20*1,t2=d2/30;return HQ(r,'السرعة المتوسطة','قطع قطار '+d1+' كم بسرعة 20 كم/س ثم '+d2+' كم بسرعة 30 كم/س. السرعة المتوسطة بالكم/س (قرّب لأقرب عدد صحيح):',Math.round((d1+d2)/(t1+t2)),[25,Math.round((d1+d2)/(t1+t2))+2,Math.round((d1+d2)/(t1+t2))-2],'المسافة الكلية '+(d1+d2)+' ÷ الزمن الكلي '+(t1+t2)+'.')},
+ r=>{const a=elInt(r,2,9),b=elInt(r,-9,9)||2,x=elInt(r,2,12);return HQ(r,'المعادلات','حل: '+a+'(س + '+b+') = '+a*(x+b)+' فتكون س =',x,[x+b,x-b,a*x],'نقسم على '+a+' ثم نطرح '+b+'.')}
+);
+HB_MATH.E3.push(
+ r=>{const a=elInt(r,2,9),b=elInt(r,2,9);return HQ(r,'التحليل','قيمة (س+'+a+')(س−'+a+') عند س = '+(a+b),(a+b)*(a+b)-a*a,[(a+b)*(a+b)+a*a,(a+b)*2,b*b],'س² − '+a*a+' = '+((a+b)*(a+b)-a*a)+'.')},
+ r=>{const n=elInt(r,3,12);return HQ(r,'الهندسة','مجموع قياسات الزوايا الداخلية لمضلع عدد أضلاعه '+n+' بالدرجات:',(n-2)*180,[n*180,(n-1)*180,(n-2)*90],'(ن−٢) × ١٨٠ = '+(n-2)*180+'.')},
+ r=>{const r2=elInt(r,2,15);return HQ(r,'الدائرة','مساحة دائرة نصف قطرها '+r2+' سم بدلالة π (المعامل فقط):',r2*r2,[2*r2,r2,r2*r2*2],'π ر² = π × '+r2*r2+'.')},
+ r=>{const a=elInt(r,2,9),n=elInt(r,2,6),m=elInt(r,2,6);return HQ(r,'قوانين الأسس',a+'^'+n+' × '+a+'^'+m+' = '+a+'^؟',n+m,[n*m,n-m>0?n-m:n+m+1,n+m+1],'عند ضرب أسس متساوية الأساس نجمع الأس: '+(n+m)+'.')},
+ r=>{const a=elInt(r,2,9),b=elInt(r,2,9),c=elInt(r,2,9);return HQ(r,'الاحتمال','صندوق به '+a+' كرة حمراء و'+b+' زرقاء و'+c+' خضراء. احتمال سحب كرة زرقاء بالنسبة المئوية (لأقرب عدد صحيح):',Math.round(100*b/(a+b+c)),[Math.round(100*a/(a+b+c)),Math.round(100*c/(a+b+c)),Math.round(100*b/(a+c))],b+'/'+(a+b+c)+' ≈ '+Math.round(100*b/(a+b+c))+'٪.')},
+ r=>{const m=elInt(r,1,9),c=elInt(r,-9,9),x=elInt(r,-5,9);return HQ(r,'الدوال الخطية','إذا كانت د(س) = '+m+'س + '+(c<0?'('+c+')':c)+' فإن د('+x+') =',m*x+c,[m*x-c,m+x+c,m*(x+c)],'نعوض: '+m+'×'+x+' + '+c+'.')}
+);
+HB_MATH.S1.push(
+ r=>{const a=elInt(r,2,9),b=elInt(r,1,9),x=elInt(r,1,6);return HQ(r,'الدوال الأسية',a+'^س × '+b+' عند س = '+x,Math.pow(a,x)*b,[Math.pow(a,x)+b,Math.pow(a*b,x),a*x*b],a+'^'+x+' × '+b+' = '+Math.pow(a,x)*b+'.')},
+ r=>{const a=elInt(r,2,6),b=elInt(r,2,6),c=elInt(r,-9,9);const s=-c/a;return HQ(r,'المتباينات','عدد القيم الصحيحة الموجبة س التي تحقق '+a+'س ≤ '+a*b,b,[b-1,b+1,a*b],'س ≤ '+b+' فتكون القيم من ١ إلى '+b+'.')},
+ r=>{const a=elInt(r,2,12),b=elInt(r,2,12);return HQ(r,'التحليل','(س+'+a+')² − (س−'+a+')² = '+'ك س، فإن ك =',4*a,[2*a,a*a,4*a*a],'الفرق = ٤أس = '+4*a+'س.')},
+ r=>{const n=elInt(r,3,12);return HQ(r,'الهندسة التحليلية','المسافة بين النقطتين (٠،٠) و('+n*3+'، '+n*4+'):',n*5,[n*7,n*3+n*4-n,n*5+1],'√('+(n*3)+'² + '+(n*4)+'²) = '+n*5+'.')},
+ r=>{const a=elInt(r,2,9),n=elInt(r,3,8),m=elInt(r,2,5);return HQ(r,'المتتابعات الهندسية','الحد الأول '+a+' والأساس '+m+'. الحد رقم '+n+' في المتتابعة الهندسية:',a*Math.pow(m,n-1),[a*Math.pow(m,n),a*m*n,a+(n-1)*m],'ح = أ ر^(ن−١) = '+a*Math.pow(m,n-1)+'.')},
+ r=>{const x=elInt(r,2,30),y=elInt(r,2,30);return HQ(r,'النسب المثلثية','في مثلث قائم الزاويتين طولا ضلعيه القائمين '+x*3+' و '+x*4+'. طول الوتر:',x*5,[x*7,x*3+x,x*5+1],'نظرية فيثاغورس ⇒ '+x*5+'.')}
+);
+const HB_X={
+ chem:[r=>{const n=elInt(r,1,20)/4,V=elInt(r,1,8)/2;return HQ(r,'المولارية',elFm(n)+' مول من مذاب في '+elFm(V)+' لتر من المحلول. التركيز بالمولار:',+(n/V).toFixed(3),[+(n*V).toFixed(3),+(V/n).toFixed(3),+(n/V+1).toFixed(3)],'م = ن/ح = '+elFm(n)+'/'+elFm(V)+' = '+elFm(+(n/V).toFixed(3))+'.')},
+  r=>{const M=elPick(r,[40,58.5,98,36.5,74,56]),m=elInt(r,1,5)/2,V=elInt(r,1,4)/2;const g=M*m*V;return HQ(r,'تحضير المحاليل','كتلة المذاب اللازمة لتحضير '+elFm(V)+' لتر من محلول تركيزه '+elFm(m)+' مولار (الكتلة المولية = '+M+' جم/مول) بالجرام:',+g.toFixed(2),[+(M*m).toFixed(2),+(M*V).toFixed(2),+(g*2).toFixed(2)],'الكتلة = م × ح × الكتلة المولية = '+elFm(+g.toFixed(2))+' جم.')},
+  r=>{const n=elInt(r,1,20)/4;return HQ(r,'حجم الغاز','حجم '+elFm(n)+' مول من غاز في الظروف القياسية (STP) باللتر:',+(n*22.4).toFixed(2),[+(n*24).toFixed(2),+(n*22.4*2).toFixed(2),+(n/22.4).toFixed(3)],'الحجم = عدد المولات × ٢٢٫٤ = '+elFm(+(n*22.4).toFixed(2))+' لتر.')},
+  r=>{const a=elInt(r,1,10);return HQ(r,'الحسابات الكيميائية','في التفاعل N₂ + 3H₂ → 2NH₃ كم مولًا من H₂ يلزم للتفاعل الكامل مع '+a+' مول من N₂؟',3*a,[a,2*a,3*a+1],'النسبة ١:٣ فيلزم '+3*a+' مول.')},
+  r=>{const th=elInt(r,5,60),ac=elInt(r,1,th-1);return HQ(r,'نسبة المردود','الناتج النظري '+th*2+' جم والناتج الفعلي '+ac*2+' جم. المردود المئوي (لأقرب عدد صحيح):',Math.round(ac/th*100),[Math.round(th/ac*100),Math.round(100-ac/th*100),Math.round(ac/th*100)+5],'الفعلي ÷ النظري × ١٠٠ ≈ '+Math.round(ac/th*100)+'٪.')},
+  r=>{const e=elInt(r,1,10),pH=elInt(r,1,6),c=elInt(r,2,9);return HQ(r,'الأس الهيدروجيني','تركيز أيون الهيدروجين '+c+'×١٠^−'+pH+' مولار. pH ≈ (لأقرب جزء من عشرة، لو'+c+' = '+Math.log10(c).toFixed(2)+'):',+(pH-Math.log10(c)).toFixed(1),[pH,+(pH+Math.log10(c)).toFixed(1),14-pH],'pH = '+pH+' − لو'+c+' ≈ '+(+(pH-Math.log10(c)).toFixed(1))+'.')}],
+ bio:[r=>{const n=elInt(r,2,12);return HQ(r,'انقسام الخلايا','خلية بكتيرية تنقسم كل 20 دقيقة. عدد الخلايا بعد '+n+' انقسامات:',Math.pow(2,n),[2*n,n*n,Math.pow(2,n)-1],'٢^'+n+' = '+Math.pow(2,n)+'.')},
+  r=>{const n=elInt(r,2,18)*2;return HQ(r,'الانقسام الميوزي','خلية جسمية عدد كروموسوماتها '+n+'. عدد الكروموسومات في الجاميتة:',n/2,[n,n*2,n/4],'الانقسام الاختزالي ينصف العدد ⇒ '+n/2+'.')},
+  r=>{const c=elInt(r,20,200);return HQ(r,'تخليق البروتين','سلسلة mRNA بها '+c*3+' نيوكليوتيدة تشفر لعدد الأحماض الأمينية (بدون كودون التوقف):',c,[c*3,c*2,c+1],'كل ٣ نيوكليوتيدات = حمض أميني واحد ⇒ '+c+'.')},
+  r=>{const n=elInt(r,3,12);return HQ(r,'تفاعل البوليميريز (PCR)','عدد نسخ DNA بعد '+n+' دورات PCR بدءًا من جزيء واحد:',Math.pow(2,n),[n*2,Math.pow(2,n-1),n*n],'يتضاعف العدد كل دورة ⇒ ٢^'+n+'.')},
+  r=>{const t=elInt(r,2,9),T=elInt(r,2,9)*8;return HQ(r,'الوراثة','تزاوج هجينين (Aa × Aa) أنتجا '+T*4+' فردًا. عدد الأفراد المتوقع أن تحمل الصفة المتنحية:',T,[T*3,T*2,T/2],'النسبة ٣:١ ⇒ ١/٤ من '+T*4+' = '+T+'.')},
+  r=>{const p=elInt(r,3,9),q=10-p;return HQ(r,'التوازن الوراثي','تردد الأليل السائد '+(p/10)+'، فتردد الأليل المتنحي = '+'؟',+(q/10).toFixed(1),[+(p/10).toFixed(1),+(q/5).toFixed(1),+(p*q/100).toFixed(2)],'p + q = ١ ⇒ q = '+(q/10)+'.')}],
+ stat:[r=>{const n=elInt(r,5,9),s=Array.from({length:n},()=>elInt(r,2,60));const t=s.reduce((x,y)=>x+y,0);s[0]+=(n-t%n)%n;const m=s.reduce((x,y)=>x+y,0)/n;return HQ(r,'الوسط الحسابي','الوسط الحسابي للقيم: '+s.join('، ')+':',m,[m+1,m-1,Math.max(...s)],'المجموع ÷ '+n+' = '+m+'.')},
+  r=>{const n=elPick(r,[5,7,9]),s=Array.from({length:n},()=>elInt(r,1,99));const m=s.slice().sort((a,b)=>a-b)[(n-1)/2];return HQ(r,'الوسيط','الوسيط للقيم: '+s.join('، ')+':',m,[Math.max(...s),Math.min(...s),Math.round(s.reduce((x,y)=>x+y,0)/n)],'نرتب القيم ونأخذ الوسطى = '+m+'.')},
+  r=>{const n=elInt(r,5,9),s=Array.from({length:n},()=>elInt(r,1,99));return HQ(r,'المدى','المدى للقيم: '+s.join('، ')+':',Math.max(...s)-Math.min(...s),[Math.max(...s),Math.max(...s)+Math.min(...s),Math.min(...s)],'أكبر قيمة − أصغر قيمة = '+(Math.max(...s)-Math.min(...s))+'.')},
+  r=>{const a=elInt(r,1,9)*2,b=elInt(r,1,9)*2,c=2*elInt(r,1,9);const mu=(a+b+c)/3;const v=((a-mu)**2+(b-mu)**2+(c-mu)**2)/3;return HQ(r,'التباين','التباين (عدد صحيح؟ قرّب لرقمين) للقيم '+a+'، '+b+'، '+c+':',+v.toFixed(2),[+(v*3/2).toFixed(2),+Math.sqrt(v).toFixed(2),+(v+1).toFixed(2)],'مجموع مربعات الانحرافات ÷ ٣ = '+(+v.toFixed(2))+'.')},
+  r=>{const a=elInt(r,1,9),b=elInt(r,1,9);const tot=a*b+elInt(r,1,9)+10;return HQ(r,'الاحتمال','إذا كان ل(أ) = '+a+'/'+(a+b+3)+' فإن ل(أ̄) =',(b+3)/(a+b+3),[a/(a+b+3),1+a/(a+b+3),(b+3)/(a+b)],'١ − ل(أ) = '+(b+3)+'/'+(a+b+3)+'.')}]
+};
 /* ---- مجموعات الثانوي والبكالوريا من مولّد المتفوقين ---- */
 const HB_GRP={
  calc:['التفاضل','قاعدة السلسلة','قاعدة الضرب','التكامل المحدد','النهايات','القيم العظمى والصغرى','تفاضل المثلثات','التكامل المثلثي'],
@@ -4423,10 +4468,10 @@ function hbGens(S){
     if(L!=='H')return HB_MATH[L].map(f=>({w:1,f}));
     return hbPick(HB_GRP.calc.concat(HB_GRP.alg));
   }
-  if(k==='stat'&&L==='H')return hbPick(['الاحتمال','التوافيق']);
+  if(k==='stat'&&L==='H')return hbPick(['الاحتمال','التوافيق']).concat(HB_X.stat.map(f=>({w:3,f})));
   if(['phys','physA'].includes(k)&&L==='H')return hbPick(HB_GRP.phys);
-  if(['chem','chemA'].includes(k)&&L==='H')return hbPick(HB_GRP.chem);
-  if(['bio','bioA'].includes(k)&&L==='H')return hbPick(HB_GRP.bio);
+  if(['chem','chemA'].includes(k)&&L==='H')return hbPick(HB_GRP.chem).concat(HB_X.chem.map(f=>({w:3,f})));
+  if(['bio','bioA'].includes(k)&&L==='H')return hbPick(HB_GRP.bio).concat(HB_X.bio.map(f=>({w:3,f})));
   if(k==='dyn')return hbPick(HB_GRP.dyn);
   if(k==='isci'||(k==='sci'&&S.stage==='prep'&&S.grade===3))return hbPick(HB_GRP.phys.slice(0,2).concat(HB_GRP.chem.slice(0,3),HB_GRP.bio.slice(1,3)));
   return null;
