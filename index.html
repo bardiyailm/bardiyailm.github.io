@@ -4982,7 +4982,7 @@ function boot(){
   go(tab);
   clock();setInterval(clock,20000);
   alarmInit();natInit();loadRemoteBank();
-  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){{const had=!!navigator.serviceWorker.controller;let rl=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{})}}
 }
 addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(SEC.find(s=>s.id===h)&&h!==curSec)go(h)});
 unlock();
