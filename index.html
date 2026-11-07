@@ -3210,10 +3210,12 @@ ACT.wipe=()=>ask('سيُمسح كل شيء: المهام والسجلات وال
 
 /* ========== المساعد الذكي ========== */
 const AI_ON=()=>!!(window.INJAZ&&window.INJAZ.supabaseUrl&&window.INJAZ.aiEnabled);
-const AI_LIMIT=6;
+const AI_LIMIT=7,AI_WIN=5*3600e3;
+const aiWin=()=>Math.floor(Date.now()/AI_WIN);
+const aiReset=()=>new Date((aiWin()+1)*AI_WIN).toLocaleTimeString('ar-EG',{hour:'numeric',minute:'2-digit'});
 let aiBusy=false;
 const aiChat=()=>st.get('aichat',[]);
-const aiUsed=()=>{const u=st.get('aiuse',{});return u.d===td()?u.n:0};
+const aiUsed=()=>{const u=st.get('aiuse',{});return u.w===aiWin()?u.n:0};
 const aiFmt=t=>esc(t).replace(/\$([^$\n]+)\$/g,'$1').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
 function aiBubble(m){return '<div class="aib '+(m.r==='u'?'me':'bot')+'">'+(m.r==='u'?esc(m.t).replace(/\n/g,'<br>'):aiFmt(m.t))+'</div>'}
 RD.ai=()=>{
@@ -3221,7 +3223,7 @@ RD.ai=()=>{
   const subj=(typeof subs==='function'?subs():[]).slice(0,4).map(x=>x.n);
   const sugg=['اشرح لي درسًا بسهولة','ضع لي خطة مذاكرة لأسبوع','اقترح لي نظامًا غذائيًا صحيًا','أشعر بالتوتر قبل الامتحان','ما أفضل تمرين يومي مناسب لي؟'];
   const demo=!AI_ON();
-  return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'باقي لك '+left+' رسائل اليوم')+'</span><span class="aitools"><button class="chip" data-a="aihist">سجل الدردشة'+(aiHist().length?' ('+aiHist().length+')':'')+'</button>'+(ch.length?'<button class="chip" data-a="aiclear">مسح المحادثة</button>':'')+'</span></div>'+
+  return '<div class="grid"><div class="card full aicard"><div class="aihead"><span class="pill">'+(demo?'قريبًا: وضع تجريبي':'باقي لك '+left+' رسائل (تتجدد '+aiReset()+')')+'</span><span class="aitools"><button class="chip" data-a="aihist">سجل الدردشة'+(aiHist().length?' ('+aiHist().length+')':'')+'</button>'+(ch.length?'<button class="chip" data-a="aiclear">مسح المحادثة</button>':'')+'</span></div>'+
     '<div class="ailog" id="ailog">'+(ch.length?ch.map(aiBubble).join(''):'<div class="aiempty"><img class="zlogo" src="'+ZAKI_LOGO+'" alt="ذكي"><b>مرحبًا، أنا ذكي. فاهمك</b><span>اسألني عن أي درس من الابتدائي للثانوي، أو عن نظامك الغذائي والرياضي، أو مزاجك وتوترك.</span></div>')+'</div>'+
     (ch.length?'':'<div class="chips aisug">'+sugg.map(x=>'<button class="chip" data-a="aiask" data-q="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>')+
     '<div class="row aiin"><input id="ai-in" type="text" maxlength="1400" placeholder="اكتب سؤالك" class="grow" autocomplete="off"><button class="btn" data-a="aisend" id="ai-go">إرسال</button></div>'+
@@ -3244,11 +3246,11 @@ async function aiReply(text,onTok){
 }
 async function aiSend(q){
   q=(q||'').trim();if(!q||aiBusy)return;
-  if(aiUsed()>=AI_LIMIT&&AI_ON()){toast('انتهت رسائل اليوم، عد غدًا');return}
+  if(aiUsed()>=AI_LIMIT&&AI_ON()){toast('انتهت رسائلك الحالية، تتجدد '+aiReset());return}
   aiBusy=true;const ch=aiChat();ch.push({r:'u',t:q});st.set('aichat',ch.slice(-40));renderSec('ai');
   const l=$('#ailog');if(l){l.insertAdjacentHTML('beforeend','<div class="aib bot aityp"><i></i><i></i><i></i></div>');l.scrollTop=l.scrollHeight}
-  try{const rep=await aiReply(q,t=>{const lg=$('#ailog');if(!lg)return;let lb=lg.querySelector('.aityp');if(lb){lb.classList.remove('aityp');lb.classList.add('live')}lb=lg.querySelector('.live');if(lb){lb.innerHTML=aiFmt(t);lg.scrollTop=lg.scrollHeight}});const c2=aiChat();c2.push({r:'b',t:rep});st.set('aichat',c2.slice(-40));const u=st.get('aiuse',{});st.set('aiuse',{d:td(),n:(u.d===td()?u.n:0)+1})}
-  catch(e){const c2=aiChat();c2.push({r:'b',t:(e&&e.message==='limit')?'انتهت رسائل اليوم، عد غدًا.':'تعذّر الاتصال بذكي الآن. جرّب بعد قليل.'+(e&&e.context&&e.context.status?' (رمز '+e.context.status+')':'')});st.set('aichat',c2.slice(-40))}
+  try{const rep=await aiReply(q,t=>{const lg=$('#ailog');if(!lg)return;let lb=lg.querySelector('.aityp');if(lb){lb.classList.remove('aityp');lb.classList.add('live')}lb=lg.querySelector('.live');if(lb){lb.innerHTML=aiFmt(t);lg.scrollTop=lg.scrollHeight}});const c2=aiChat();c2.push({r:'b',t:rep});st.set('aichat',c2.slice(-40));const u=st.get('aiuse',{});st.set('aiuse',{w:aiWin(),n:(u.w===aiWin()?u.n:0)+1})}
+  catch(e){const c2=aiChat();c2.push({r:'b',t:(e&&e.message==='limit')?'انتهت رسائلك الحالية. تتجدد الساعة '+aiReset()+'.':'تعذّر الاتصال بذكي الآن. جرّب بعد قليل.'+(e&&e.context&&e.context.status?' (رمز '+e.context.status+')':'')});st.set('aichat',c2.slice(-40))}
   aiBusy=false;renderSec('ai');
 }
 ACT.aisend=()=>{const i=$('#ai-in');if(i){const v=i.value;i.value='';aiSend(v)}};
