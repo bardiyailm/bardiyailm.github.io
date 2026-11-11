@@ -5448,7 +5448,7 @@ let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBu
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
   no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
-  bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
+  bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
 const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
 const cmKey=()=>{const e=eduOf();return e&&e.stage?e.stage+(+e.grade):''};
@@ -5565,11 +5565,11 @@ async function cmLoadTeacher(){
   const el=document.getElementById('cm-teach');if(!el)return;
   try{
     const r=await cmRpc('cm_my_teacher');cmTeacher=r&&r[0]||null;
-    if(!cmTeacher){el.innerHTML='<div class="card cm-hero"><div class="b">سجّل كمعلم</div><p class="mut sm">أنشئ مجموعة لطلابك برمز من 10 أرقام. يراجع المشرف طلبك قبل التفعيل.</p>'+
+    if(!cmTeacher){el.innerHTML='<div class="card cm-hero"><div class="b">سجّل كمعلم</div><p class="mut sm">أنشئ مجموعة لطلابك برمز من 10 أرقام. تصل بياناتك للمشرف (للمراجعة فقط، ولا تظهر للطلاب) وتُفعَّل مجموعتك بعد موافقته.</p>'+
       '<label class="f">الاسم الظاهر<input id="cm-tn" maxlength="40" placeholder="أ. أحمد"></label><label class="f">المادة<input id="cm-ts" maxlength="40" placeholder="الرياضيات"></label>'+
       '<label class="f">رمز مجموعتك (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">رمز جديد</button></div></label>'+
       '<button class="btn big" data-a="cmbecome" type="button">إرسال الطلب</button><div class="ar-msg bad" id="cm-tmsg"></div></div>';return}
-    if(!cmTeacher.approved){el.innerHTML='<div class="card"><div class="b">طلبك قيد المراجعة</div><p class="mut sm">سيُفعَّل حسابك كمعلم بعد موافقة المشرف. رمزك المحجوز: <b dir="ltr">'+esc(cmTeacher.code)+'</b></p></div>';return}
+    if(!cmTeacher.approved){el.innerHTML='<div class="card"><div class="b">طلبك قيد المراجعة</div><p class="mut sm">أُرسلت بياناتك إلى المشرف، وتُفعَّل مجموعتك بمجرد موافقته. رمزك المحجوز: <b dir="ltr">'+esc(cmTeacher.code)+'</b></p></div>';return}
     el.innerHTML='<div class="card cm-hero"><div class="b">'+esc(cmTeacher.name)+(cmTeacher.subject?' · '+esc(cmTeacher.subject):'')+'</div><p class="mut sm">رمز مجموعتك. شاركه مع طلابك:</p>'+
       '<div class="cm-code" dir="ltr">'+esc(cmTeacher.code)+'</div><div class="row"><button class="btn g" data-a="cmcopy" type="button">نسخ</button><button class="btn g" data-a="cmnewcode" type="button">تغيير الرمز</button><button class="btn" data-a="cmopen" data-r="g:'+CLOUD.user.id+'" data-t="مجموعتي" type="button">فتح الدردشة</button></div>'+
       '<h3 class="cm-h3">الطلاب ('+cmTeacher.members+')</h3><div id="cm-mem"></div></div>';
@@ -5580,9 +5580,9 @@ async function cmLoadTeacher(){
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='cm-tc'){const v=toLatin(e.target.value).replace(/\D/g,'').slice(0,10);if(v!==e.target.value)e.target.value=v}});
 ACT.cmgen=()=>{const i=document.getElementById('cm-tc');if(i)i.value=cmGen()};
 ACT.cmbecome=async t=>{
-  const n=(document.getElementById('cm-tn').value||'').trim(),s=(document.getElementById('cm-ts').value||'').trim(),c=toLatin(document.getElementById('cm-tc').value||''),m=document.getElementById('cm-tmsg');
-  if(n.length<2){m.textContent=CMERR.bad_name;return}if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
-  t.disabled=true;try{await cmRpc('cm_become_teacher',{p_name:n,p_subject:s,p_code:c});cmLoadTeacher()}catch(e){m.textContent=cmMsg(e);t.disabled=false}
+  const n=(document.getElementById('cm-tn').value||'').trim(),s=(document.getElementById('cm-ts').value||'').trim(),c=toLatin(document.getElementById('cm-tc').value||''),ph=toLatin(document.getElementById('cm-tp').value||''),m=document.getElementById('cm-tmsg');
+  if(n.length<2){m.textContent=CMERR.bad_name;return}if(s.length<2){m.textContent=CMERR.bad_subject;return}if(!/^\+?\d{8,15}$/.test(ph.replace(/[\s\-()]/g,''))){m.textContent=CMERR.bad_phone;return}if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
+  t.disabled=true;try{await cmRpc('cm_become_teacher',{p_name:n,p_subject:s,p_code:c,p_phone:ph});try{await CLOUD.client.functions.invoke('teacher-request',{body:{}})}catch(x){}toast('أُرسل طلبك للمشرف');cmLoadTeacher()}catch(e){m.textContent=cmMsg(e);t.disabled=false}
 };
 ACT.cmcopy=async()=>{try{await navigator.clipboard.writeText(cmTeacher.code);toast('تم نسخ الرمز')}catch(e){toast('انسخ الرمز يدوياً')}};
 ACT.cmnewcode=()=>{sheet('<h3>تغيير رمز المجموعة</h3><p class="mut sm">الطلاب المنضمون يبقون في مجموعتك، والرمز الجديد للمنضمين لاحقاً.</p><label class="f">الرمز (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">عشوائي</button></div></label><button class="btn big" data-a="cmsavecode" type="button">حفظ</button><div class="ar-msg bad" id="cm-tmsg"></div>')};
