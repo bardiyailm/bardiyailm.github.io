@@ -5554,6 +5554,7 @@ ACT.cmjoin=async t=>{
   catch(e){otpState(inp,'bad');m.textContent=cmMsg(e)}
   t.disabled=false;
 };
+ACT.cmcancelt=()=>ask('إلغاء طلب التسجيل كمعلم؟ يمكنك التسجيل من جديد.','إلغاء الطلب',async()=>{try{await cmRpc('cm_cancel_teacher');cmTeacher=null;toast('أُلغي الطلب');cmLoadTeacher()}catch(e){toast(cmMsg(e))}});
 ACT.cmleave=t=>ask('الخروج من هذه المجموعة؟','خروج',async()=>{try{await cmRpc('cm_leave',{p_teacher:t.dataset.i});cmLoadGroups()}catch(e){toast(cmMsg(e))}});
 /* أنا معلم */
 const cmGen=()=>{const a=new Uint32Array(10);crypto.getRandomValues(a);return Array.from(a,x=>x%10).join('')};
@@ -5566,7 +5567,7 @@ async function cmLoadTeacher(){
       '<label class="f">الاسم الظاهر<input id="cm-tn" maxlength="40" placeholder="أ. أحمد"></label><label class="f">المادة<input id="cm-ts" maxlength="40" placeholder="الرياضيات"></label>'+
       '<label class="f">رمز مجموعتك (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">رمز جديد</button></div></label>'+
       '<button class="btn big" data-a="cmbecome" type="button">إرسال الطلب</button><div class="ar-msg bad" id="cm-tmsg"></div></div>';return}
-    if(!cmTeacher.approved){el.innerHTML='<div class="card"><div class="b">طلبك قيد المراجعة</div><p class="mut sm">أُرسلت بياناتك إلى المشرف، وتُفعَّل مجموعتك بمجرد موافقته. رمزك المحجوز: <b dir="ltr">'+esc(cmTeacher.code)+'</b></p></div>';return}
+    if(!cmTeacher.approved){el.innerHTML='<div class="card"><div class="b">طلبك قيد المراجعة</div><p class="mut sm">أُرسلت بياناتك إلى المشرف، وتُفعَّل مجموعتك بمجرد موافقته. رمزك المحجوز: <b dir="ltr">'+esc(cmTeacher.code)+'</b></p><button class="btn g" data-a="cmcancelt" type="button">إلغاء الطلب وإعادة التسجيل</button></div>';return}
     el.innerHTML='<div class="card cm-hero"><div class="b">'+esc(cmTeacher.name)+(cmTeacher.subject?' · '+esc(cmTeacher.subject):'')+'</div><p class="mut sm">رمز مجموعتك. شاركه مع طلابك:</p>'+
       '<div class="cm-code" dir="ltr">'+esc(cmTeacher.code)+'</div><div class="row"><button class="btn g" data-a="cmcopy" type="button">نسخ</button><button class="btn g" data-a="cmnewcode" type="button">تغيير الرمز</button><button class="btn" data-a="cmopen" data-r="g:'+CLOUD.user.id+'" data-t="مجموعتي" type="button">فتح الدردشة</button></div>'+
       '<h3 class="cm-h3">الطلاب ('+cmTeacher.members+')</h3><div id="cm-mem"></div></div>';
