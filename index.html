@@ -5448,7 +5448,7 @@ let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBu
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
   no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
-  bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.'};
+  bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
 const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
 const cmKey=()=>{const e=eduOf();return e&&e.stage?e.stage+(+e.grade):''};
@@ -5532,7 +5532,7 @@ ACT.cmsend=async t=>{
     if(scan){
       const r=await CLOUD.client.functions.invoke('community-send',{body:{room:cmRoom,text:text,image:cmPend&&cmPend.image||'',pdf:cmPend&&cmPend.pdf||'',fname:cmPend&&cmPend.fname||''}});
       if(r.error)throw new Error('offline_fn');if(r.data&&r.data.error)throw new Error(r.data.error);
-    }else await cmRpc('cm_post',{p_room:cmRoom,p_body:text});
+    }else{const d=await cmRpc('cm_post',{p_room:cmRoom,p_body:text});if(d)throw new Error(d)}
     inp.value='';cmPend=null;cmPendShow();if(hint)hint.textContent='الروابط والصور وPDF تمرّ على فحص أمني قبل الإرسال.';await cmLoad(true);
   }catch(e){const m=e&&e.message==='offline_fn'?'خدمة الفحص غير مفعّلة بعد، جرّب رسالة نصية.':cmMsg(e);if(hint)hint.textContent=m;toast(m)}
   finally{cmBusy=false;t.disabled=false}
