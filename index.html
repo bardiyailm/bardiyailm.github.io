@@ -5466,6 +5466,9 @@ async function cmSync(){const k=cmKey(),n=(profile().name||'').trim();if(!k||n.l
 RD.comm=()=>{
   if(typeof CLOUD==='undefined'||!CLOUD.client||!CLOUD.user)return '<div class="card"><b>المجتمع يحتاج حساباً</b><p class="mut sm">سجّل دخولك بحسابك لتشارك زملاءك ومعلميك.</p>'+(typeof CLOUD!=='undefined'&&CLOUD.client&&!CLOUD.user?'<button class="btn big" data-a="guestout" type="button">إنشاء حساب / تسجيل الدخول</button>':'')+'</div>';
   if(cmOff)return '<div class="card cm-off"><b>المجتمع قيد التجهيز</b><p class="mut sm">سيُفتح قريباً بإذن الله. تابع التحديثات.</p></div>';
+  /* تغيّر صفّه الدراسي: اخرج من غرفة الصف القديم وحدّث الخادم فوراً */
+  if(cmRoom&&!cmRoom.startsWith('g:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
+  if(typeof CLOUD!=='undefined'&&CLOUD.user&&cmKey()&&cmSynced.split('|')[0]!==cmKey())cmSync().then(()=>{if(curSec==='comm')renderSec('comm')}).catch(()=>{});
   if(cmRoom)return cmRoomHtml();
   const tabs=[['stage','صفّي'],['groups','مجموعاتي'],['teach','أنا معلم']];
   return '<div class="chips cm-tabs">'+tabs.map(t=>'<button class="chip'+(cmView===t[0]?' on':'')+'" data-a="cmview" data-v="'+t[0]+'" type="button">'+t[1]+'</button>').join('')+'</div>'+
@@ -5543,7 +5546,7 @@ ACT.cmsend=async t=>{
   finally{cmBusy=false;t.disabled=false}
 };
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='cm-in'){e.preventDefault();const b=document.querySelector('.cm-send');b&&b.click()}});
-setInterval(()=>{if(curSec==='comm'&&cmRoom&&!document.hidden&&!cmBusy)cmLoad()},4000);
+setInterval(()=>{if(curSec==='comm'&&cmRoom&&!document.hidden&&!cmBusy){if(!cmRoom.startsWith('g:')&&cmRoom!==cmKey()){renderSec('comm');return}cmLoad()}},4000);
 /* مجموعاتي */
 function cmGroupsHtml(){
   return '<div class="card cm-hero"><div class="b">انضم لمجموعة معلمك</div><p class="mut sm">اكتب الرمز المكوّن من 10 أرقام الذي أعطاك إياه معلمك.</p><div class="o10">'+otpMarkup('cm-join',10)+'</div><button class="btn big" data-a="cmjoin" type="button">انضمام</button><div class="ar-msg bad" id="cm-jmsg" role="alert"></div></div>'+
