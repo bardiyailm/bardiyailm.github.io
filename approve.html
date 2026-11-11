@@ -1,0 +1,20 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>موافقة على معلم · بردية علم</title>
+<style>body{font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#0d3b31,#14503f);min-height:100vh;margin:0;display:grid;place-items:center;color:#eafaf3}
+.c{width:min(420px,92vw);padding:26px 22px;border-radius:26px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(18px);line-height:1.9}
+h1{margin:0 0 10px;font-size:1.3rem}b{color:#8FE3C9}button{font:inherit;font-size:1.1rem;padding:13px 26px;border:0;border-radius:14px;background:#F4A26B;color:#3a1f0a;font-weight:700;cursor:pointer;margin-top:12px}button:disabled{opacity:.6}</style></head>
+<body><div class="c" id="c"><h1>جارٍ التحميل…</h1></div>
+<script>
+const U='https://qrmysfoogtutcnklhvgv.supabase.co/functions/v1/teacher-request',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybXlzZm9vZ3R1dGNua2xodmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2ODc3OTksImV4cCI6MjEwODI2Mzc5OX0.wdyjQyUWkydTrJG1jLzCTY-ZEyUufv3EBWd0iW4eqgg';
+const q=new URLSearchParams(location.search),u=q.get('u'),s=q.get('s'),c=document.getElementById('c');
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const call=a=>fetch(U,{method:'POST',headers:{'content-type':'application/json',apikey:K,Authorization:'Bearer '+K},body:JSON.stringify({action:a,u,s})}).then(r=>r.json());
+(async()=>{
+  if(!u||!s){c.innerHTML='<h1>رابط غير صالح</h1>';return}
+  try{const t=await call('info');
+    if(t.error){c.innerHTML='<h1>رابط غير صالح أو الطلب غير موجود</h1>';return}
+    c.innerHTML='<h1>طلب معلم جديد</h1><p><b>الاسم:</b> '+esc(t.name)+'<br><b>التخصص:</b> '+esc(t.subject)+'<br><b>الهاتف:</b> <span dir="ltr">'+esc(t.phone)+'</span></p>'+(t.approved?'<p>✅ مفعّل بالفعل.</p>':'<button id="ok">✔ موافقة وتفعيل المجموعة</button>');
+    const b=document.getElementById('ok');
+    if(b)b.onclick=async()=>{b.disabled=true;const r=await call('approve');c.innerHTML=r.ok?'<h1>✅ تمت الموافقة</h1><p>أصبحت مجموعة <b>'+esc(r.name)+'</b> مفعّلة، ويستطيع طلابه الانضمام برمزها.</p>':'<h1>تعذّرت الموافقة</h1>'};
+  }catch(e){c.innerHTML='<h1>تعذّر الاتصال، حاول لاحقاً</h1>'}
+})();
+</script></body></html>
