@@ -5,10 +5,17 @@ h1{margin:0 0 10px;font-size:1.3rem}b{color:#8FE3C9}button{font:inherit;font-siz
 <body><div class="c" id="c"><h1>جارٍ التحميل…</h1></div>
 <script>
 const U='https://qrmysfoogtutcnklhvgv.supabase.co/functions/v1/teacher-request',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybXlzZm9vZ3R1dGNua2xodmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2ODc3OTksImV4cCI6MjEwODI2Mzc5OX0.wdyjQyUWkydTrJG1jLzCTY-ZEyUufv3EBWd0iW4eqgg';
-const q=new URLSearchParams(location.search),u=q.get('u'),s=q.get('s'),c=document.getElementById('c');
+const q=new URLSearchParams(location.search),u=q.get('u'),cid=q.get('c'),s=q.get('s'),c=document.getElementById('c');
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const call=a=>fetch(U,{method:'POST',headers:{'content-type':'application/json',apikey:K,Authorization:'Bearer '+K},body:JSON.stringify({action:a,u,s})}).then(r=>r.json());
+const call=a=>fetch(U,{method:'POST',headers:{'content-type':'application/json',apikey:K,Authorization:'Bearer '+K},body:JSON.stringify({action:a,u,s,c:cid})}).then(r=>r.json());
+const KL={group_name:'تغيير اسم المجموعة',username:'تعيين/تغيير اليوزر نيم',password:'السماح بتغيير كلمة المرور'};
 (async()=>{
+  if(cid&&s){try{const t=await call('cinfo');
+    if(t.error){c.innerHTML='<h1>رابط غير صالح أو الطلب غير موجود</h1>';return}
+    c.innerHTML='<h1>'+(KL[t.kind]||'طلب تغيير')+'</h1><p><b>المعلم:</b> '+esc(t.name)+' ('+esc(t.subject)+')<br><b>المجموعة الحالية:</b> '+esc(t.group)+(t.value?'<br><b>المطلوب:</b> <span dir="ltr">'+esc(t.value)+'</span>':'')+'</p>'+(t.status==='pending'?'<button id="ok">✔ موافقة</button>':'<p>الطلب ليس معلّقاً ('+esc(t.status)+').</p>');
+    const b=document.getElementById('ok');
+    if(b)b.onclick=async()=>{b.disabled=true;const r=await call('capprove');c.innerHTML=r.ok?'<h1>✅ تمت الموافقة</h1>':'<h1>تعذّر التنفيذ</h1><p>'+(r.result==='taken'?'هذا اليوزر نيم أصبح مستخدماً.':'ربما نُفّذ الطلب من قبل.')+'</p>'};
+  }catch(e){c.innerHTML='<h1>تعذّر الاتصال، حاول لاحقاً</h1>'}return}
   if(!u||!s){c.innerHTML='<h1>رابط غير صالح</h1>';return}
   try{const t=await call('info');
     if(t.error){c.innerHTML='<h1>رابط غير صالح أو الطلب غير موجود</h1>';return}

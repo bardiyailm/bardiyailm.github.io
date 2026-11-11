@@ -5441,10 +5441,10 @@ document.addEventListener('visibilitychange',()=>{
 });
 
 /* ========== المجتمع: دردشة الصفوف + مجموعات المعلمين (كل المرفقات تُفحص قبل النشر) ========== */
-let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null;
+let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null,cmSup=new Set();
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
-  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
+  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
   bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
 const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
@@ -5486,7 +5486,7 @@ async function cmLoad(first){
   try{
     const rows=await cmRpc('cm_get',{p_room:cmRoom}),el=document.getElementById('cm-list');if(!el)return;
     const near=el.scrollHeight-el.scrollTop-el.clientHeight<90||first;
-    const mineTeacher=cmRoom.startsWith('g:')&&CLOUD.user&&cmRoom.slice(2)===CLOUD.user.id;
+    const mineTeacher=cmRoom.startsWith('g:')&&CLOUD.user&&(cmRoom.slice(2)===CLOUD.user.id||cmSup.has(cmRoom));
     el.innerHTML=rows.length?rows.map(r=>cmBubble(r,mineTeacher)).join(''):'<p class="mut sm" style="text-align:center">لا رسائل بعد. كن أول من يبدأ 👋</p>';
     if(near)el.scrollTop=el.scrollHeight;
   }catch(e){const el=document.getElementById('cm-list');if(el&&!cmOff)el.innerHTML='<p class="mut sm" style="text-align:center">'+esc(cmMsg(e))+'</p>'}
@@ -5496,7 +5496,7 @@ function cmBubble(r,canMod){
   const img=r.image?'<a href="'+cmUrl(r.image)+'" target="_blank" rel="noopener noreferrer"><img class="cm-img" loading="lazy" alt="صورة مرفقة" src="'+cmUrl(r.image)+'"></a>':'';
   const pdf=r.file?'<a class="cm-pdf" href="'+cmUrl(r.file)+'" target="_blank" rel="noopener noreferrer">📄 '+esc(r.fname||'ملف PDF')+'</a>':'';
   const acts=(r.mine||canMod?'<button data-a="cmdel" data-i="'+r.id+'" aria-label="حذف" type="button">حذف</button>':'')+(!r.mine?'<button data-a="cmrep" data-i="'+r.id+'" aria-label="إبلاغ" type="button">إبلاغ</button>':'');
-  return '<div class="cm-m'+(r.mine?' me':'')+(r.is_teacher?' tc':'')+'"><div class="cm-h"><b>'+esc(r.name)+'</b>'+(r.is_teacher?'<span class="cm-badge">معلم</span>':'')+'<i>'+cmTime(r.created_at)+'</i></div>'+body+img+pdf+'<div class="cm-a">'+acts+'</div></div>';
+  return '<div class="cm-m'+(r.mine?' me':'')+(r.is_teacher?' tc':'')+'"><div class="cm-h"><b>'+esc(r.name)+'</b>'+(r.is_teacher?'<span class="cm-badge">معلم</span>':r.is_sup?'<span class="cm-badge">مشرف</span>':'')+'<i>'+cmTime(r.created_at)+'</i></div>'+body+img+pdf+'<div class="cm-a">'+acts+'</div></div>';
 }
 ACT.cmrep=t=>ask('إبلاغ عن هذه الرسالة؟ سيراجعها المشرفون وتُخفى تلقائياً عند تكرار البلاغات.','إبلاغ',async()=>{try{await cmRpc('cm_report',{p_id:+t.dataset.i});toast('تم الإبلاغ، شكراً لك');cmLoad()}catch(e){toast(cmMsg(e))}});
 ACT.cmdel=t=>ask('حذف هذه الرسالة؟','حذف',async()=>{try{await cmRpc('cm_delete',{p_id:+t.dataset.i});cmLoad()}catch(e){toast(cmMsg(e))}},true);
@@ -5543,8 +5543,23 @@ function cmGroupsHtml(){
 }
 async function cmLoadGroups(){
   const el=document.getElementById('cm-groups');if(!el)return;
-  try{const g=await cmRpc('cm_my_groups');el.innerHTML=g.length?'<h3 class="cm-h3">مجموعاتي</h3>'+g.map(x=>'<div class="card cm-g"><div><div class="b">'+esc(x.name)+'</div><div class="mut sm">'+esc(x.subject||'')+'</div></div><div class="row"><button class="btn" data-a="cmopen" data-r="g:'+x.teacher_id+'" data-t="مجموعة '+esc(x.name)+'" type="button">فتح</button><button class="btn g" data-a="cmleave" data-i="'+x.teacher_id+'" type="button">خروج</button></div></div>').join(''):'<p class="mut sm" style="text-align:center">لم تنضم لأي مجموعة بعد.</p>'}catch(e){if(!cmOff)el.innerHTML='<p class="mut sm">'+esc(cmMsg(e))+'</p>'}
+  try{const g=await cmRpc('cm_my_groups');g.forEach(x=>{if(x.is_sup)cmSup.add('g:'+x.teacher_id)});
+    el.innerHTML=g.length?'<h3 class="cm-h3">مجموعاتي</h3>'+g.map(x=>'<div class="card cm-g"><div><div class="b">'+esc(x.name)+(x.is_sup?' <span class="cm-badge">مشرف</span>':'')+'</div><div class="mut sm">'+esc(x.subject||'')+'</div></div><div class="row"><button class="btn" data-a="cmopen" data-r="g:'+x.teacher_id+'" data-t="مجموعة '+esc(x.name)+'" type="button">فتح</button>'+(x.is_sup?'<button class="btn g" data-a="cmmanage" data-i="'+x.teacher_id+'" type="button">الأعضاء</button>':'<button class="btn g" data-a="cmleave" data-i="'+x.teacher_id+'" type="button">خروج</button>')+'</div></div>').join(''):'<p class="mut sm" style="text-align:center">لم تنضم لأي مجموعة بعد.</p>';
+    cmLoadUname()}catch(e){if(!cmOff)el.innerHTML='<p class="mut sm">'+esc(cmMsg(e))+'</p>'}
 }
+async function cmLoadUname(){
+  const el=document.getElementById('cm-groups');if(!el||document.getElementById('cm-un'))return;
+  let u='';try{u=await cmRpc('cm_my_username')||''}catch(e){return}
+  el.insertAdjacentHTML('beforeend','<div class="card cm-hero" id="cm-un"><div class="b">يوزر نيمك</div><p class="mut sm">يستطيع المعلم إضافتك مشرفاً في مجموعته عبر يوزر نيمك. حروف إنجليزية صغيرة وأرقام و _ (3 إلى 20).</p><div class="row"><input id="cm-un-i" dir="ltr" maxlength="20" placeholder="username" value="'+esc(u)+'" style="flex:1"><button class="btn" data-a="cmunsave" type="button">حفظ</button></div><div class="ar-msg bad" id="cm-unmsg"></div></div>')
+}
+ACT.cmunsave=async t=>{const v=(document.getElementById('cm-un-i').value||'').trim().toLowerCase(),m=document.getElementById('cm-unmsg');
+  if(!/^[a-z][a-z0-9_]{2,19}$/.test(v)){m.textContent=CMERR.bad_username;return}
+  t.disabled=true;try{await cmRpc('cm_set_username',{p_username:v});m.textContent='';toast('تم حفظ اليوزر نيم')}catch(e){m.textContent=cmMsg(e)}t.disabled=false};
+ACT.cmmanage=async t=>{
+  const id=t.dataset.i;sheet('<h3>أعضاء المجموعة</h3><p class="mut sm">أنت مشرف: تستطيع حذف الرسائل. إزالة أي عضو تحتاج موافقة المعلم، فيصله طلبك.</p><div id="cm-sm"><p class="mut sm">جارٍ التحميل…</p></div>');
+  try{const m=await cmRpc('cm_group_members',{p_teacher:id}),el=document.getElementById('cm-sm');if(el)el.innerHTML=m.length?m.map(x=>'<div class="cm-g"><span>'+esc(x.name)+' <small class="mut">'+esc(cmLabel(x.stage))+'</small></span>'+(x.kick_pending?'<small class="mut">طلب الإزالة قيد المراجعة</small>':'<button class="btn g s" data-a="cmkreq" data-t="'+id+'" data-i="'+x.student_id+'" type="button">طلب إزالة</button>')+'</div>').join(''):'<p class="mut sm">لا أعضاء.</p>'}catch(e){const el=document.getElementById('cm-sm');if(el)el.textContent=cmMsg(e)}
+};
+ACT.cmkreq=t=>ask('إرسال طلب إزالة هذا العضو إلى المعلم؟','إرسال',async()=>{try{await cmRpc('cm_request_kick',{p_teacher:t.dataset.t,p_student:t.dataset.i});toast('أُرسل الطلب للمعلم');t.outerHTML='<small class="mut">طلب الإزالة قيد المراجعة</small>'}catch(e){toast(cmMsg(e))}});
 ACT.cmjoin=async t=>{
   const v=toLatin(document.getElementById('cm-join').value||'').replace(/\D/g,''),m=document.getElementById('cm-jmsg'),inp=document.getElementById('cm-join');
   if(v.length<10){m.textContent='اكتب الرمز كاملاً (10 أرقام).';return}
@@ -5564,13 +5579,13 @@ async function cmLoadTeacher(){
   try{
     const r=await cmRpc('cm_my_teacher');cmTeacher=r&&r[0]||null;
     if(!cmTeacher){el.innerHTML='<div class="card cm-hero"><div class="b">سجّل كمعلم</div><p class="mut sm">أنشئ مجموعة لطلابك برمز من 10 أرقام. تصل بياناتك للمشرف (للمراجعة فقط، ولا تظهر للطلاب) وتُفعَّل مجموعتك بعد موافقته.</p>'+
-      '<label class="f">الاسم الظاهر<input id="cm-tn" maxlength="40" placeholder="أ. أحمد"></label><label class="f">المادة<input id="cm-ts" maxlength="40" placeholder="الرياضيات"></label>'+
+      '<label class="f">الاسم الظاهر<input id="cm-tn" maxlength="40" placeholder="أ. أحمد"></label><label class="f">اسم المجموعة (يظهر للطلاب)<input id="cm-tg" maxlength="40" placeholder="مجموعة أ. أحمد للرياضيات"></label><label class="f">المادة<input id="cm-ts" maxlength="40" placeholder="الرياضيات"></label><label class="f">رقم هاتفك (للمشرف فقط ولا يظهر للطلاب)<input id="cm-tp" dir="ltr" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX"></label>'+
       '<label class="f">رمز مجموعتك (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">رمز جديد</button></div></label>'+
       '<button class="btn big" data-a="cmbecome" type="button">إرسال الطلب</button><div class="ar-msg bad" id="cm-tmsg"></div></div>';return}
     if(!cmTeacher.approved){el.innerHTML='<div class="card"><div class="b">طلبك قيد المراجعة</div><p class="mut sm">أُرسلت بياناتك إلى المشرف، وتُفعَّل مجموعتك بمجرد موافقته. رمزك المحجوز: <b dir="ltr">'+esc(cmTeacher.code)+'</b></p><button class="btn g" data-a="cmcancelt" type="button">إلغاء الطلب وإعادة التسجيل</button></div>';return}
-    el.innerHTML='<div class="card cm-hero"><div class="b">'+esc(cmTeacher.name)+(cmTeacher.subject?' · '+esc(cmTeacher.subject):'')+'</div><p class="mut sm">رمز مجموعتك. شاركه مع طلابك:</p>'+
+    el.innerHTML='<div class="card cm-hero"><div class="b">'+esc(cmTeacher.group_name||cmTeacher.name)+'</div><div class="mut sm">'+esc(cmTeacher.name)+(cmTeacher.subject?' · '+esc(cmTeacher.subject):'')+(cmTeacher.username?' · <span dir="ltr">@'+esc(cmTeacher.username)+'</span>':'')+'</div><p class="mut sm">رمز مجموعتك. شاركه مع طلابك:</p>'+
       '<div class="cm-code" dir="ltr">'+esc(cmTeacher.code)+'</div><div class="row"><button class="btn g" data-a="cmcopy" type="button">نسخ</button><button class="btn g" data-a="cmnewcode" type="button">تغيير الرمز</button><button class="btn" data-a="cmopen" data-r="g:'+CLOUD.user.id+'" data-t="مجموعتي" type="button">فتح الدردشة</button></div>'+
-      '<h3 class="cm-h3">الطلاب ('+cmTeacher.members+')</h3><div id="cm-mem"></div></div>';
+      '<h3 class="cm-h3">الطلاب ('+cmTeacher.members+')</h3><div id="cm-mem"></div></div><div id="cm-extra"></div>';cmLoadExtra();
     const m=await cmRpc('cm_members'),me=document.getElementById('cm-mem');
     if(me)me.innerHTML=m.length?m.map(x=>'<div class="cm-g"><span>'+esc(x.name)+' <small class="mut">'+esc(cmLabel(x.stage))+'</small></span><button class="btn g s" data-a="cmkick" data-i="'+x.student_id+'" type="button">إزالة</button></div>').join(''):'<p class="mut sm">لا طلاب بعد. شاركهم الرمز.</p>';
   }catch(e){if(!cmOff)el.innerHTML='<p class="mut sm">'+esc(cmMsg(e))+'</p>'}
@@ -5578,15 +5593,58 @@ async function cmLoadTeacher(){
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='cm-tc'){const v=toLatin(e.target.value).replace(/\D/g,'').slice(0,10);if(v!==e.target.value)e.target.value=v}});
 ACT.cmgen=()=>{const i=document.getElementById('cm-tc');if(i)i.value=cmGen()};
 ACT.cmbecome=async t=>{
-  const n=(document.getElementById('cm-tn').value||'').trim(),s=(document.getElementById('cm-ts').value||'').trim(),c=toLatin(document.getElementById('cm-tc').value||''),ph=toLatin(document.getElementById('cm-tp').value||''),m=document.getElementById('cm-tmsg');
-  if(n.length<2){m.textContent=CMERR.bad_name;return}if(s.length<2){m.textContent=CMERR.bad_subject;return}if(!/^\+?\d{8,15}$/.test(ph.replace(/[\s\-()]/g,''))){m.textContent=CMERR.bad_phone;return}if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
-  t.disabled=true;try{await cmRpc('cm_become_teacher',{p_name:n,p_subject:s,p_code:c,p_phone:ph});try{await CLOUD.client.functions.invoke('teacher-request',{body:{}})}catch(x){}toast('أُرسل طلبك للمشرف');cmLoadTeacher()}catch(e){m.textContent=cmMsg(e);t.disabled=false}
+  const n=(document.getElementById('cm-tn').value||'').trim(),s=(document.getElementById('cm-ts').value||'').trim(),c=toLatin(document.getElementById('cm-tc').value||''),ph=toLatin(document.getElementById('cm-tp').value||''),g=(document.getElementById('cm-tg').value||'').trim(),m=document.getElementById('cm-tmsg');
+  if(n.length<2){m.textContent=CMERR.bad_name;return}if(g.length<2){m.textContent=CMERR.bad_group;return}if(s.length<2){m.textContent=CMERR.bad_subject;return}if(!/^\+?\d{8,15}$/.test(ph.replace(/[\s\-()]/g,''))){m.textContent=CMERR.bad_phone;return}if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
+  t.disabled=true;try{await cmRpc('cm_become_teacher',{p_name:n,p_subject:s,p_code:c,p_phone:ph,p_group:g});try{await CLOUD.client.functions.invoke('teacher-request',{body:{}})}catch(x){}toast('أُرسل طلبك للمشرف');cmLoadTeacher()}catch(e){m.textContent=cmMsg(e);t.disabled=false}
 };
 ACT.cmcopy=async()=>{try{await navigator.clipboard.writeText(cmTeacher.code);toast('تم نسخ الرمز')}catch(e){toast('انسخ الرمز يدوياً')}};
 ACT.cmnewcode=()=>{sheet('<h3>تغيير رمز المجموعة</h3><p class="mut sm">الطلاب المنضمون يبقون في مجموعتك، والرمز الجديد للمنضمين لاحقاً.</p><label class="f">الرمز (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">عشوائي</button></div></label><button class="btn big" data-a="cmsavecode" type="button">حفظ</button><div class="ar-msg bad" id="cm-tmsg"></div>')};
 ACT.cmsavecode=async()=>{const c=toLatin(document.getElementById('cm-tc').value||''),m=document.getElementById('cm-tmsg');if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
   try{await cmRpc('cm_set_code',{p_code:c});closeSheet();cmLoadTeacher()}catch(e){m.textContent=cmMsg(e)}};
 ACT.cmkick=t=>ask('إزالة هذا الطالب من مجموعتك؟','إزالة',async()=>{try{await cmRpc('cm_kick',{p_student:t.dataset.i});cmLoadTeacher()}catch(e){toast(cmMsg(e))}},true);
+
+/* المشرفون + إعدادات المعلم + طلبات التغيير */
+const CMKL={group_name:'اسم المجموعة',username:'اليوزر نيم',password:'كلمة المرور'};
+async function cmLoadExtra(){
+  const el=document.getElementById('cm-extra');if(!el)return;const T=cmTeacher;
+  try{
+    const [sup,kr,ch]=await Promise.all([cmRpc('cm_supervisors'),cmRpc('cm_kick_requests'),cmRpc('cm_my_changes')]);
+    const pend=k=>ch.find(x=>x.kind===k);
+    const row=(k,cur,btn)=>'<div class="cm-g"><span><b>'+CMKL[k]+'</b><br><small class="mut">'+cur+'</small>'+(pend(k)?'<br><small class="mut">⏳ طلب قيد المراجعة'+(pend(k).value?': <span dir="ltr">'+esc(pend(k).value)+'</span>':'')+'</small>':'')+'</span>'+btn+'</div>';
+    el.innerHTML=
+      (kr.length?'<h3 class="cm-h3">طلبات إزالة من المشرفين</h3><div class="card">'+kr.map(x=>'<div class="cm-g"><span>'+esc(x.by_name)+' يطلب إزالة <b>'+esc(x.student_name)+'</b></span><span class="row"><button class="btn s" data-a="cmkres" data-i="'+x.id+'" data-ok="1" type="button">موافقة</button><button class="btn g s" data-a="cmkres" data-i="'+x.id+'" data-ok="0" type="button">رفض</button></span></div>').join('')+'</div>':'')+
+      '<h3 class="cm-h3">المشرفون ('+sup.length+'/5)</h3><div class="card"><p class="mut sm">المشرف يقوم بمهامك (حذف الرسائل ومتابعة الأعضاء) عدا إزالة الأعضاء، فإزالتهم تمر بموافقتك.</p>'+
+      sup.map(x=>'<div class="cm-g"><span dir="ltr">@'+esc(x.username)+'</span><button class="btn g s" data-a="cmsupdel" data-i="'+x.user_id+'" type="button">إزالة</button></div>').join('')+
+      '<div class="row"><input id="cm-su" dir="ltr" maxlength="20" placeholder="يوزر نيم المشرف" style="flex:1"><button class="btn" data-a="cmsupadd" type="button">إضافة</button></div><div class="ar-msg bad" id="cm-sumsg"></div></div>'+
+      '<h3 class="cm-h3">إعدادات المعلم</h3><div class="card"><p class="mut sm">أي تغيير هنا يصل إلى المشرف للمراجعة، ويسري بعد موافقته.</p>'+
+      row('group_name',esc(T.group_name||T.name),'<button class="btn g s" data-a="cmreq" data-k="group_name" type="button">طلب تغيير</button>')+
+      row('username',T.username?'<span dir="ltr">@'+esc(T.username)+'</span>':'لم يُحدَّد بعد','<button class="btn g s" data-a="cmreq" data-k="username" type="button">'+(T.username?'طلب تغيير':'طلب تعيين')+'</button>')+
+      row('password','حسابك محمي بكلمة مرور',T.pw_ok?'<button class="btn s" data-a="cmpwnow" type="button">غيّرها الآن</button>':'<button class="btn g s" data-a="cmreq" data-k="password" type="button">طلب تغيير</button>')+'</div>';
+  }catch(e){if(!cmOff)el.innerHTML='<p class="mut sm">'+esc(cmMsg(e))+'</p>'}
+}
+ACT.cmsupadd=async t=>{const v=(document.getElementById('cm-su').value||'').trim().toLowerCase().replace(/^@/,''),m=document.getElementById('cm-sumsg');
+  if(!/^[a-z][a-z0-9_]{2,19}$/.test(v)){m.textContent=CMERR.bad_username;return}
+  t.disabled=true;try{await cmRpc('cm_add_supervisor',{p_username:v});toast('أُضيف المشرف @'+v);cmLoadExtra()}catch(e){m.textContent=cmMsg(e);t.disabled=false}};
+ACT.cmsupdel=t=>ask('إزالة هذا المشرف؟','إزالة',async()=>{try{await cmRpc('cm_remove_supervisor',{p_user:t.dataset.i});cmLoadExtra()}catch(e){toast(cmMsg(e))}},true);
+ACT.cmkres=async t=>{try{await cmRpc('cm_resolve_kick',{p_id:+t.dataset.i,p_ok:t.dataset.ok==='1'});toast(t.dataset.ok==='1'?'أُزيل العضو':'رُفض الطلب');cmLoadTeacher()}catch(e){toast(cmMsg(e))}};
+async function cmSendChange(k,v){
+  const id=await cmRpc('cm_request_change',{p_kind:k,p_value:v});
+  try{await CLOUD.client.functions.invoke('teacher-request',{body:{change:id}})}catch(x){}
+  toast('أُرسل طلبك للمشرف');cmLoadExtra();
+}
+ACT.cmreq=t=>{
+  const k=t.dataset.k;
+  if(k==='password'){ask('طلب السماح لك بتغيير كلمة المرور؟ يصل الطلب للمشرف، وبعد موافقته يظهر زر «غيّرها الآن».','إرسال الطلب',async()=>{try{await cmSendChange('password',null)}catch(e){toast(cmMsg(e))}});return}
+  sheet('<h3>طلب تغيير '+CMKL[k]+'</h3><label class="f">'+(k==='username'?'اليوزر نيم الجديد (إنجليزي صغير وأرقام و _)':'الاسم الجديد للمجموعة')+'<input id="cm-rq" '+(k==='username'?'dir="ltr" maxlength="20"':'maxlength="40"')+'></label><button class="btn big" data-a="cmreqsend" data-k="'+k+'" type="button">إرسال الطلب للمشرف</button><div class="ar-msg bad" id="cm-rqmsg"></div>');
+};
+ACT.cmreqsend=async t=>{const k=t.dataset.k,v=(document.getElementById('cm-rq').value||'').trim(),m=document.getElementById('cm-rqmsg');
+  if(k==='username'&&!/^[a-z][a-z0-9_]{2,19}$/i.test(v)){m.textContent=CMERR.bad_username;return}
+  if(k==='group_name'&&v.length<2){m.textContent=CMERR.bad_group;return}
+  t.disabled=true;try{await cmSendChange(k,v);closeSheet()}catch(e){m.textContent=cmMsg(e);t.disabled=false}};
+ACT.cmpwnow=()=>sheet('<h3>تغيير كلمة المرور</h3><p class="mut sm">وافق المشرف على طلبك. اختر كلمة مرور جديدة (8 أحرف على الأقل).</p><label class="f">كلمة المرور الجديدة<input id="cm-pw" type="password" autocomplete="new-password" minlength="8"></label><button class="btn big" data-a="cmpwsave" type="button">حفظ</button><div class="ar-msg bad" id="cm-pwmsg"></div>');
+ACT.cmpwsave=async t=>{const v=document.getElementById('cm-pw').value||'',m=document.getElementById('cm-pwmsg');
+  if(v.length<8){m.textContent='كلمة المرور 8 أحرف على الأقل.';return}
+  t.disabled=true;try{const r=await CLOUD.client.auth.updateUser({password:v});if(r.error)throw r.error;await cmRpc('cm_pw_done');closeSheet();toast('تم تغيير كلمة المرور');cmLoadTeacher()}catch(e){m.textContent='تعذّر تغيير كلمة المرور، حاول لاحقاً.';t.disabled=false}};
 
 /* ========== الدخول والتشغيل ========== */
 async function unlock(){
