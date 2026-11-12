@@ -1079,6 +1079,18 @@ body.vd .tab svg{stroke-width:1.7}
 .sv-castle-svg{width:100%;display:block;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
 @keyframes svPop{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:none}}
 .sv-wrap.sv-zoomed-gov .sv-land{fill:#24405f}
+.sv-earth{text-align:center;padding:14px 6px}
+.sv-earth-svg{width:220px;max-width:70%;display:block;margin:0 auto;filter:drop-shadow(0 0 22px rgba(80,160,255,.35))}
+.sv-egy-dot circle{fill:#ffd166;animation:svPulse 1.4s ease-in-out infinite}
+.sv-egy-dot text{font-size:13px;fill:#fff;text-anchor:middle;font-weight:700;paint-order:stroke;stroke:#07101f;stroke-width:3px}
+@keyframes svPulse{0%,100%{fill:#2ecc71;r:6}50%{fill:#e74c3c;r:9}}
+.sv-earth-cap{margin:8px 0}
+.sv-earth.sv-fly-out{animation:svFlyOut .6s ease forwards}
+@keyframes svFlyOut{to{transform:scale(2.6);opacity:0}}
+.sv-map-wrap.sv-fly-in{animation:svFlyIn .6s ease}
+@keyframes svFlyIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.sv-flagwave{animation:svWave 1.8s ease-in-out infinite;transform-origin:0% 50%}
+@keyframes svWave{0%,100%{transform:skewY(0deg) scaleX(1)}25%{transform:skewY(3deg) scaleX(.97)}50%{transform:skewY(0deg) scaleX(1.02)}75%{transform:skewY(-3deg) scaleX(.97)}}
 </style>
 </head>
 <body>
@@ -5515,36 +5527,68 @@ function svMarkazPoints(gov){
   const base=GOV_POINTS[gov]||[500,450],list=GEO_EG[gov]||[],rnd=svRand(svHash(gov));
   return list.map(name=>{const a=rnd()*Math.PI*2,r=26+rnd()*34;return{name,x:base[0]+Math.cos(a)*r,y:base[1]+Math.sin(a)*r}});
 }
-const SV_PALETTE=['#8a5a3b','#6b7280','#a05a2c','#5b6b7a','#7a4a2a','#4a6b5a'];
-const SV_ROOF=['#c0392b','#8e44ad','#2980b9','#16a085','#d35400'];
+const SV_STONE=['#4a4a55','#55505f','#3f4550','#4d4752','#464b58'];
+const SV_SCHOOLFLAG=['#7a1f2b','#1f4e79','#145a32','#6b4423','#4a1f6b','#8a6d1f'];
+/* علم يرفرف: 3 خطوط أفقية متذبذبة بأزمنة مختلفة لمحاكاة القماش */
+function svWaveFlag(id,w,h,bands,accent){
+  const rows=bands.map((c,i)=>'<rect x="0" y="'+(i*(h/bands.length))+'" width="'+w+'" height="'+(h/bands.length)+'" fill="'+c+'"/>').join('');
+  return '<g class="sv-flagpole"><rect x="-2" y="-2" width="3" height="'+(h+34)+'" fill="#3a3a3a"/>'+
+    '<g class="sv-flagwave" style="animation-delay:-'+id+'s" transform="translate(1,-2)"><svg width="'+w+'" height="'+h+'" overflow="visible">'+rows+(accent?'<circle cx="'+(w/2)+'" cy="'+(h/2)+'" r="'+(h*.22)+'" fill="'+accent+'"/>':'')+'</svg></g></g>';
+}
 function svCastleSvg(school,gov){
   const seed=svHash((school||'')+'|'+(gov||'')),rnd=svRand(seed);
-  const wallC=SV_PALETTE[Math.floor(rnd()*SV_PALETTE.length)],roofC=SV_ROOF[Math.floor(rnd()*SV_ROOF.length)];
-  const nTow=2+Math.floor(rnd()*3),towers=[];
-  const span=220,startX=40;
+  const stoneC=SV_STONE[Math.floor(rnd()*SV_STONE.length)],stoneDark='#2c2c34';
+  const nTow=3+Math.floor(rnd()*3),towers=[],span=230,startX=35;
   for(let i=0;i<nTow;i++){
-    const tx=startX+(span/(nTow-1||1))*i,th=46+Math.floor(rnd()*26),tw=22+Math.floor(rnd()*10);
-    towers.push('<rect x="'+(tx-tw/2)+'" y="'+(150-th)+'" width="'+tw+'" height="'+th+'" fill="'+wallC+'" stroke="#2a1a10" stroke-width="2"/>'+
-      '<polygon points="'+(tx-tw/2-4)+',150 '+tx+','+(150-th-26)+' '+(tx+tw/2+4)+',150" fill="'+roofC+'"/>'+
-      '<circle cx="'+tx+'" cy="'+(150-th-28)+'" r="3" fill="#ffd166"/>');
+    const tx=startX+(span/(nTow-1||1))*i,th=60+Math.floor(rnd()*48)+(i===Math.floor(nTow/2)?26:0),tw=20+Math.floor(rnd()*8);
+    towers.push('<g>'+
+      '<rect x="'+(tx-tw/2)+'" y="'+(160-th)+'" width="'+tw+'" height="'+th+'" fill="'+stoneC+'" stroke="'+stoneDark+'" stroke-width="1.5"/>'+
+      '<rect x="'+(tx-tw/2)+'" y="'+(160-th)+'" width="'+tw+'" height="7" fill="none" stroke="'+stoneDark+'" stroke-width="1" stroke-dasharray="4,3"/>'+
+      '<polygon points="'+(tx-tw/2-5)+',160 '+tx+','+(160-th-30)+' '+(tx+tw/2+5)+',160" fill="'+stoneDark+'"/>'+
+      '<rect x="'+(tx-3)+'" y="'+(160-th+18)+'" width="6" height="10" rx="3" fill="#ffd166" opacity=".85"/>'+
+      '</g>');
   }
-  const gname=(gov||'مصر').replace(/^ال/,''),shieldC=['#145a32','#7a1f2b','#1f4e79','#6b4423','#4a1f6b'][Math.floor(rnd()*5)],gl=esc(gname[0]||'م');
-  return '<svg viewBox="0 0 300 220" class="sv-castle-svg" role="img" aria-label="قلعة مدرسة '+esc(school||'')+'">'+
-    '<defs><linearGradient id="svsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2a4a"/><stop offset="1" stop-color="#c77b3b"/></linearGradient></defs>'+
-    '<rect x="0" y="0" width="300" height="150" fill="url(#svsky)"/>'+
-    '<rect x="0" y="150" width="300" height="70" fill="#7a5a30"/>'+
-    '<rect x="60" y="120" width="180" height="30" fill="'+wallC+'" stroke="#2a1a10" stroke-width="2"/>'+
+  const midX=startX+span/2;
+  const govC=['#145a32','#7a1f2b','#1f4e79','#6b4423','#4a1f6b'][Math.floor(rnd()*5)],schoolC=SV_SCHOOLFLAG[Math.floor(rnd()*SV_SCHOOLFLAG.length)];
+  return '<svg viewBox="0 0 300 250" class="sv-castle-svg" role="img" aria-label="قلعة مدرسة '+esc(school||'')+'">'+
+    '<defs><linearGradient id="svsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1430"/><stop offset="60%" stop-color="#2a2d5a"/><stop offset="100%" stop-color="#6b5a8a"/></linearGradient></defs>'+
+    '<rect x="0" y="0" width="300" height="160" fill="url(#svsky)"/>'+
+    '<circle cx="250" cy="35" r="16" fill="#f3f0e6" opacity=".9"/>'+
+    '<rect x="0" y="160" width="300" height="60" fill="#3a3540"/>'+
+    '<rect x="55" y="128" width="190" height="34" fill="'+stoneC+'" stroke="'+stoneDark+'" stroke-width="1.5"/>'+
     towers.join('')+
-    '<rect x="140" y="128" width="20" height="22" fill="#2a1a10"/>'+
-    '<g transform="translate(14,10)"><rect width="34" height="22" fill="#fff"/><rect width="34" height="7.3" fill="#c81e2c"/><rect y="14.6" width="34" height="7.3" fill="#111"/><circle cx="17" cy="11" r="3" fill="#c8a33a"/></g>'+
-    '<g transform="translate(252,10)"><rect width="34" height="22" rx="3" fill="'+shieldC+'" stroke="#0a3018"/><text x="17" y="16" font-size="13" text-anchor="middle" fill="#fff">'+gl+'</text></g>'+
-    '<rect x="30" y="196" width="240" height="20" rx="4" fill="#2a1a10"/><text x="150" y="211" font-size="13" text-anchor="middle" fill="#ffe9c7">'+esc(school||'')+'</text>'+
+    '<polygon points="130,128 150,105 170,128" fill="'+stoneDark+'"/>'+
+    '<rect x="138" y="140" width="24" height="22" fill="#1a1a1e"/><path d="M138,140 q12,-14 24,0" fill="none" stroke="'+stoneDark+'" stroke-width="2"/>'+
+    '<rect x="70" y="138" width="8" height="12" fill="#ffd166" opacity=".8"/><rect x="100" y="138" width="8" height="12" fill="#ffd166" opacity=".8"/><rect x="192" y="138" width="8" height="12" fill="#ffd166" opacity=".8"/><rect x="222" y="138" width="8" height="12" fill="#ffd166" opacity=".8"/>'+
+    '<g transform="translate('+(midX-1)+',52)">'+svWaveFlag(0,30,18,[schoolC,schoolC],'#ffd166')+'</g>'+
+    '<g transform="translate(14,14)">'+svWaveFlag(.6,34,20,['#c81e2c','#fff','#111'])+'</g>'+
+    '<g transform="translate(252,14)">'+svWaveFlag(1.1,34,20,[govC,govC])+'</g>'+
+    '<rect x="24" y="226" width="252" height="20" rx="4" fill="#1e1b24"/><text x="150" y="241" font-size="13" text-anchor="middle" fill="#ffe9c7">'+esc(school||'')+'</text>'+
     '</svg>';
+}
+function svEarthHtml(){
+  return '<div class="sv-earth" id="sv-earth">'+
+    '<svg viewBox="0 0 400 400" class="sv-earth-svg">'+
+      '<defs><radialGradient id="svg1" cx="35%" cy="32%" r="75%"><stop offset="0%" stop-color="#bfe3ff"/><stop offset="35%" stop-color="#2f7fd6"/><stop offset="100%" stop-color="#0a2d55"/></radialGradient></defs>'+
+      '<circle cx="200" cy="200" r="150" fill="url(#svg1)"/>'+
+      '<path d="M90,150 q40,-40 90,-10 q30,20 10,55 q-20,30 -70,15 q-50,-15 -30,-60Z" fill="#2e7d4f" opacity=".85"/>'+
+      '<path d="M220,230 q50,-10 70,25 q10,25 -20,35 q-45,12 -60,-20 q-8,-25 10,-40Z" fill="#2e7d4f" opacity=".8"/>'+
+      '<circle cx="200" cy="200" r="150" fill="none" stroke="#8fd3ff" stroke-width="2" opacity=".5"/>'+
+      '<g id="sv-egy-dot" class="sv-egy-dot"><circle cx="233" cy="198" r="7"/><text x="233" y="182">مصر</text></g>'+
+    '</svg>'+
+    '<p class="mut sm sv-earth-cap">قمر صناعي يحدّد موقع مصر…</p>'+
+    '<button class="btn big" type="button" onclick="svEnterEgypt()">ادخل إلى مصر 🛰️</button>'+
+  '</div>';
+}
+function svEnterEgypt(){
+  const e=document.getElementById('sv-earth'),m=document.getElementById('sv-map-wrap');
+  if(e)e.classList.add('sv-fly-out');
+  setTimeout(()=>{if(e)e.hidden=true;if(m){m.hidden=false;m.classList.add('sv-fly-in')}},650);
 }
 function svMapHtml(){
   const govs=GEO_LIST.map(g=>'<g class="sv-node" data-gov="'+esc(g)+'" tabindex="0" role="button" aria-label="'+esc(g)+'" onclick="svClickGov(this)" onkeydown="if(event.key===\'Enter\')svClickGov(this)"><circle cx="'+GOV_POINTS[g][0]+'" cy="'+GOV_POINTS[g][1]+'" r="9"/><text x="'+GOV_POINTS[g][0]+'" y="'+(GOV_POINTS[g][1]-13)+'">'+esc(g)+'</text></g>').join('');
-  return '<svg id="sv-map" class="sv-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">'+
-    '<g id="sv-cam"><path class="sv-land" d="'+EGY_MAINLAND+'"/><path class="sv-land" d="'+EGY_SINAI+'"/><g id="sv-govs">'+govs+'</g><g id="sv-markaz"></g></g></svg>';
+  return '<div class="sv-map-wrap" id="sv-map-wrap" hidden><svg id="sv-map" class="sv-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">'+
+    '<g id="sv-cam"><path class="sv-land" d="'+EGY_MAINLAND+'"/><path class="sv-land" d="'+EGY_SINAI+'"/><g id="sv-govs">'+govs+'</g><g id="sv-markaz"></g></g></svg></div>';
 }
 function svViewBoxFor(cx,cy,half){return (cx-half)+' '+(cy-half)+' '+(half*2)+' '+(half*2)}
 function svAnimateVB(to,ms){
@@ -5599,7 +5643,7 @@ function svInit(){
 let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null,cmSup=new Set();
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
-  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',bad_gov:'اختر محافظتك.',bad_markaz:'اختر أو اكتب اسم المركز/الحي.',bad_place:'اكتب اسم الإدارة التعليمية والمدرسة (حرفان على الأقل لكل منهما).',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
+  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',bad_gov:'اختر محافظتك.',bad_markaz:'اختر أو اكتب اسم المركز/الحي.',bad_place:'اكتب اسم الإدارة التعليمية والمدرسة (حرفان على الأقل لكل منهما).',no_place:'حدّد مدرستك أولاً من تبويب «مدرستي».',no_stage:'حدّد مرحلتك وصفك من الإعدادات أولاً.',bad_subj_code:'مادة غير صالحة.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
   bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
 const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
@@ -5614,7 +5658,7 @@ RD.comm=()=>{
   if(typeof CLOUD==='undefined'||!CLOUD.client||!CLOUD.user)return '<div class="card"><b>المجتمع يحتاج حساباً</b><p class="mut sm">سجّل دخولك بحسابك لتشارك زملاءك ومعلميك.</p>'+(typeof CLOUD!=='undefined'&&CLOUD.client&&!CLOUD.user?'<button class="btn big" data-a="guestout" type="button">إنشاء حساب / تسجيل الدخول</button>':'')+'</div>';
   if(cmOff)return '<div class="card cm-off"><b>المجتمع قيد التجهيز</b><p class="mut sm">سيُفتح قريباً بإذن الله. تابع التحديثات.</p></div>';
   /* تغيّر صفّه الدراسي: اخرج من غرفة الصف القديم وحدّث الخادم فوراً */
-  if(cmRoom&&!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
+  if(cmRoom&&!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&!cmRoom.startsWith('sj:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
   if(typeof CLOUD!=='undefined'&&CLOUD.user&&cmKey()&&cmSynced.split('|')[0]!==cmKey())cmSync().then(()=>{if(curSec==='comm')renderSec('comm')}).catch(()=>{});
   if(cmRoom)return cmRoomHtml();
   const tabs=[['stage','صفّي'],['school','مدرستي'],['groups','مجموعاتي'],['teach','أنا معلم']];
@@ -5693,7 +5737,7 @@ ACT.cmsend=async t=>{
   finally{cmBusy=false;t.disabled=false}
 };
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='cm-in'){e.preventDefault();const b=document.querySelector('.cm-send');b&&b.click()}});
-setInterval(()=>{if(curSec==='comm'&&cmRoom&&!document.hidden&&!cmBusy){if(!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&cmRoom!==cmKey()){renderSec('comm');return}cmLoad()}},4000);
+setInterval(()=>{if(curSec==='comm'&&cmRoom&&!document.hidden&&!cmBusy){if(!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&!cmRoom.startsWith('sj:')&&cmRoom!==cmKey()){renderSec('comm');return}cmLoad()}},4000);
 /* مدرستي: محافظة ← مركز ← إدارة تعليمية ← مدرسة (حكومية). المحافظة والمركز من قائمة ثابتة، الإدارة والمدرسة تُبنى من اختيارات الطلاب الحقيقيين */
 let cmPlace=null;
 function cmSchoolHtml(){return '<div id="cm-school"><p class="mut sm" style="text-align:center">جارٍ التحميل…</p></div>'}
@@ -5703,16 +5747,33 @@ async function cmLoadSchool(){
   try{
     const r=await cmRpc('cm_my_place');cmPlace=r&&r[0]||null;
     if(cmPlace&&cmPlace.room){
-      el.innerHTML='<div class="card cm-hero"><div class="b">مدرستي الحالية</div><p class="mut sm">'+esc(cmPlace.gov)+' · '+esc(cmPlace.markaz)+' · '+esc(cmPlace.idara)+'</p><div class="b">'+esc(cmPlace.school)+'</div><button class="btn big" data-a="cmopen" data-r="'+esc(cmPlace.room)+'" data-t="مدرسة '+esc(cmPlace.school)+'">ادخل غرفة مدرستي</button><button class="btn g" data-a="cmplacechange" type="button">تغيير المدرسة</button></div>';
+      const e=eduOf();
+      el.innerHTML='<div class="card cm-hero"><div class="b">مدرستي الحالية</div><p class="mut sm">'+esc(cmPlace.gov)+' · '+esc(cmPlace.markaz)+' · '+esc(cmPlace.idara)+'</p><div class="b">'+esc(cmPlace.school)+'</div>'+
+        '<button class="btn g" data-a="cmopen" data-r="'+esc(cmPlace.room)+'" data-t="مدرسة '+esc(cmPlace.school)+'">الدردشة العامة للمدرسة</button>'+
+        (e&&e.stage?'<h3 class="cm-h3">دردشة موادي ('+esc(eduLabel(e))+')</h3><p class="mut sm">كل مادة غرفة منفصلة، تجمعك بمن يدرس نفس المادة في نفس صفك بمدرستك.</p><div class="chips cm-subj-grid" id="cm-subj-grid"></div>':'<p class="mut sm">حدّد مرحلتك وصفك من الإعدادات أولاً لتفتح دردشة موادك.</p>')+
+        '<button class="btn g" data-a="cmplacechange" type="button">تغيير المدرسة</button></div>';
+      if(e&&e.stage){
+        const grid=document.getElementById('cm-subj-grid');
+        if(grid)grid.innerHTML=eduSubjects(e).map(s=>'<button class="chip" data-a="cmsubject" data-k="'+esc(s.k)+'" data-n="'+esc(s.n)+'" type="button">'+esc(s.n)+'</button>').join('');
+      }
       return;
     }
     cmRenderSchoolForm(el);
   }catch(e){if(!cmOff)el.innerHTML='<p class="mut sm">'+esc(cmMsg(e))+'</p>'}
 }
 ACT.cmplacechange=()=>{cmPlace={force:true};renderSec('comm')};
+ACT.cmsubject=async t=>{
+  t.disabled=true;
+  try{
+    if(!await cmSync()){toast('اكتب اسمك واختر صفك من الإعدادات أولاً');t.disabled=false;return}
+    const room=await cmRpc('cm_subject_room',{p_subject:t.dataset.k});
+    if(typeof room==='string'&&room[0]==='!')throw new Error(room.slice(1));
+    cmRoom=room;cmTitle=(t.dataset.n||'')+' · '+(cmPlace&&cmPlace.school||'');cmPend=null;renderSec('comm');
+  }catch(e){toast(cmMsg(e));t.disabled=false}
+};
 function cmRenderSchoolForm(el){
   el.innerHTML='<div class="card cm-hero sv-wrap" id="sv-wrap"><div class="b">انضم لمجتمع مدرستك</div><p class="mut sm">حلّق فوق خريطة مصر، اختر محافظتك ومركزك، واكتب الإدارة التعليمية واسم مدرستك (الحكومية). كل طلاب نفس المدرسة يدخلون غرفة واحدة معًا.</p>'+
-    svMapHtml()+
+    svEarthHtml()+svMapHtml()+
     '<label class="f">المحافظة<select id="cm-gov"><option value="">اختر المحافظة…</option>'+GEO_LIST.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('')+'</select></label>'+
     '<label class="f">المركز / الحي<select id="cm-markaz" disabled><option value="">اختر المحافظة أولاً…</option></select></label>'+
     '<label class="f">الإدارة التعليمية<input id="cm-idara" list="cm-idara-dl" maxlength="80" placeholder="مثال: إدارة شرق المنصورة"><datalist id="cm-idara-dl"></datalist></label>'+
