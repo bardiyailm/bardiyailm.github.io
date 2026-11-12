@@ -1065,6 +1065,20 @@ body.vd .tab svg{stroke-width:1.7}
 #pap text{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif}
 #pap text.hg{font-family:'ppHier','Noto Sans Egyptian Hieroglyphs','Segoe UI Historic','Noto Sans Symbols 2',serif}
 @media(prefers-reduced-motion:reduce){#pap{display:none}}
+
+.sv-wrap{overflow:hidden}
+.sv-map{width:100%;max-width:480px;display:block;margin:10px auto;background:radial-gradient(ellipse at center,#0e1b33 0%,#070d1a 75%,#04070f 100%);border-radius:14px;border:1px solid rgba(255,255,255,.08)}
+.sv-land{fill:#1f3350;stroke:#3a5a86;stroke-width:3;transition:fill .4s}
+.sv-node circle{fill:#ffd166;stroke:#07101f;stroke-width:1.5;cursor:pointer;transition:r .2s,fill .2s}
+.sv-node:hover circle,.sv-node:focus circle{fill:#fff;r:12}
+.sv-node text{font-size:13px;fill:#cfe3ff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#04070f;stroke-width:3px}
+.sv-node.sv-mk circle{fill:#6ad1ff;r:5}
+.sv-node.sv-mk text{font-size:11px;fill:#e8f7ff}
+#sv-cam{transform-box:fill-box}
+.sv-castle-prev{margin:10px auto;max-width:300px;animation:svPop .35s ease}
+.sv-castle-svg{width:100%;display:block;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+@keyframes svPop{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:none}}
+.sv-wrap.sv-zoomed-gov .sv-land{fill:#24405f}
 </style>
 </head>
 <body>
@@ -5485,6 +5499,102 @@ const GEO_EG={
 };
 const GEO_LIST=Object.keys(GEO_EG);
 
+/* ========== عالم المدرسة: رحلة قمر صناعي فوق خريطة مصر + قلعة لكل مدرسة (طبقة بصرية فوق نفس بيانات مدرستي الحقيقية) ========== */
+const GOV_POINTS={
+"القاهرة":[612,187],"الجيزة":[609,191],"القليوبية":[606,149],"الإسكندرية":[493,78],"البحيرة":[542,95],"مطروح":[253,64],
+"المنوفية":[591,140],"الغربية":[590,118],"كفر الشيخ":[585,87],"دمياط":[664,58],"الدقهلية":[624,94],
+"شمال سيناء":[842,85],"جنوب سيناء":[826,359],"بورسعيد":[705,73],"الإسماعيلية":[704,135],"السويس":[728,195],
+"الشرقية":[635,136],"بني سويف":[599,280],"المنيا":[568,373],"الفيوم":[576,258],"أسيوط":[606,459],
+"الوادي الجديد":[550,623],"سوهاج":[652,518],"قنا":[744,556],"الأقصر":[737,601],"أسوان":[760,752],"البحر الأحمر":[843,452]
+};
+const EGY_MAINLAND='M60,60 L700,60 L700,230 L850,460 L820,830 L60,820 Z';
+const EGY_SINAI='M715,60 L880,65 L880,330 L715,350 Z';
+function svHash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function svRand(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function svMarkazPoints(gov){
+  const base=GOV_POINTS[gov]||[500,450],list=GEO_EG[gov]||[],rnd=svRand(svHash(gov));
+  return list.map(name=>{const a=rnd()*Math.PI*2,r=26+rnd()*34;return{name,x:base[0]+Math.cos(a)*r,y:base[1]+Math.sin(a)*r}});
+}
+const SV_PALETTE=['#8a5a3b','#6b7280','#a05a2c','#5b6b7a','#7a4a2a','#4a6b5a'];
+const SV_ROOF=['#c0392b','#8e44ad','#2980b9','#16a085','#d35400'];
+function svCastleSvg(school,gov){
+  const seed=svHash((school||'')+'|'+(gov||'')),rnd=svRand(seed);
+  const wallC=SV_PALETTE[Math.floor(rnd()*SV_PALETTE.length)],roofC=SV_ROOF[Math.floor(rnd()*SV_ROOF.length)];
+  const nTow=2+Math.floor(rnd()*3),towers=[];
+  const span=220,startX=40;
+  for(let i=0;i<nTow;i++){
+    const tx=startX+(span/(nTow-1||1))*i,th=46+Math.floor(rnd()*26),tw=22+Math.floor(rnd()*10);
+    towers.push('<rect x="'+(tx-tw/2)+'" y="'+(150-th)+'" width="'+tw+'" height="'+th+'" fill="'+wallC+'" stroke="#2a1a10" stroke-width="2"/>'+
+      '<polygon points="'+(tx-tw/2-4)+',150 '+tx+','+(150-th-26)+' '+(tx+tw/2+4)+',150" fill="'+roofC+'"/>'+
+      '<circle cx="'+tx+'" cy="'+(150-th-28)+'" r="3" fill="#ffd166"/>');
+  }
+  const gname=(gov||'مصر').replace(/^ال/,''),shieldC=['#145a32','#7a1f2b','#1f4e79','#6b4423','#4a1f6b'][Math.floor(rnd()*5)],gl=esc(gname[0]||'م');
+  return '<svg viewBox="0 0 300 220" class="sv-castle-svg" role="img" aria-label="قلعة مدرسة '+esc(school||'')+'">'+
+    '<defs><linearGradient id="svsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2a4a"/><stop offset="1" stop-color="#c77b3b"/></linearGradient></defs>'+
+    '<rect x="0" y="0" width="300" height="150" fill="url(#svsky)"/>'+
+    '<rect x="0" y="150" width="300" height="70" fill="#7a5a30"/>'+
+    '<rect x="60" y="120" width="180" height="30" fill="'+wallC+'" stroke="#2a1a10" stroke-width="2"/>'+
+    towers.join('')+
+    '<rect x="140" y="128" width="20" height="22" fill="#2a1a10"/>'+
+    '<g transform="translate(14,10)"><rect width="34" height="22" fill="#fff"/><rect width="34" height="7.3" fill="#c81e2c"/><rect y="14.6" width="34" height="7.3" fill="#111"/><circle cx="17" cy="11" r="3" fill="#c8a33a"/></g>'+
+    '<g transform="translate(252,10)"><rect width="34" height="22" rx="3" fill="'+shieldC+'" stroke="#0a3018"/><text x="17" y="16" font-size="13" text-anchor="middle" fill="#fff">'+gl+'</text></g>'+
+    '<rect x="30" y="196" width="240" height="20" rx="4" fill="#2a1a10"/><text x="150" y="211" font-size="13" text-anchor="middle" fill="#ffe9c7">'+esc(school||'')+'</text>'+
+    '</svg>';
+}
+function svMapHtml(){
+  const govs=GEO_LIST.map(g=>'<g class="sv-node" data-gov="'+esc(g)+'" tabindex="0" role="button" aria-label="'+esc(g)+'" onclick="svClickGov(this)" onkeydown="if(event.key===\'Enter\')svClickGov(this)"><circle cx="'+GOV_POINTS[g][0]+'" cy="'+GOV_POINTS[g][1]+'" r="9"/><text x="'+GOV_POINTS[g][0]+'" y="'+(GOV_POINTS[g][1]-13)+'">'+esc(g)+'</text></g>').join('');
+  return '<svg id="sv-map" class="sv-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">'+
+    '<g id="sv-cam"><path class="sv-land" d="'+EGY_MAINLAND+'"/><path class="sv-land" d="'+EGY_SINAI+'"/><g id="sv-govs">'+govs+'</g><g id="sv-markaz"></g></g></svg>';
+}
+function svViewBoxFor(cx,cy,half){return (cx-half)+' '+(cy-half)+' '+(half*2)+' '+(half*2)}
+function svAnimateVB(to,ms){
+  const svg=document.getElementById('sv-map');if(!svg)return;
+  svg.style.transition='none';
+  const from=svg.getAttribute('viewBox')||'0 0 1000 1000';
+  svg.setAttribute('viewBox',from);
+  requestAnimationFrame(()=>{svg.style.transition='viewBox '+(ms||1100)+'ms cubic-bezier(.22,.9,.3,1)';svg.setAttribute('viewBox',to)});
+}
+function svRenderMarkazNodes(gov){
+  const g=document.getElementById('sv-markaz');if(!g)return;
+  const pts=svMarkazPoints(gov);
+  g.innerHTML=pts.map(p=>'<g class="sv-node sv-mk" data-markaz="'+esc(p.name)+'" tabindex="0" role="button" aria-label="'+esc(p.name)+'" onclick="svClickMarkaz(this)" onkeydown="if(event.key===\'Enter\')svClickMarkaz(this)"><title>'+esc(p.name)+'</title><circle cx="'+p.x+'" cy="'+p.y+'" r="5"/></g>').join('');
+}
+function svClickGov(el){
+  const gov=el.getAttribute('data-gov'),sel=document.getElementById('cm-gov');
+  if(sel){sel.value=gov;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+  svRenderMarkazNodes(gov);
+  const p=GOV_POINTS[gov]||[500,450];svAnimateVB(svViewBoxFor(p[0],p[1],130),1100);
+  const wrap=document.getElementById('sv-wrap');if(wrap)wrap.classList.add('sv-zoomed-gov');
+  const gl=document.getElementById('sv-govs');if(gl)gl.style.display='none';
+}
+function svResetMap(){
+  const gl=document.getElementById('sv-govs'),mk=document.getElementById('sv-markaz'),wrap=document.getElementById('sv-wrap');
+  if(gl)gl.style.display='';if(mk)mk.innerHTML='';if(wrap)wrap.classList.remove('sv-zoomed-gov','sv-zoomed-mk');
+  svAnimateVB('0 0 1000 1000',900);
+}
+function svClickMarkaz(el){
+  const mk=el.getAttribute('data-markaz'),sel=document.getElementById('cm-markaz');
+  if(sel){sel.value=mk;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+  const gov=document.getElementById('cm-gov').value,pts=svMarkazPoints(gov),hit=pts.find(p=>p.name===mk);
+  if(hit)svAnimateVB(svViewBoxFor(hit.x,hit.y,55),1000);
+  const wrap=document.getElementById('sv-wrap');if(wrap)wrap.classList.add('sv-zoomed-mk');
+}
+let svCastleT=null;
+function svUpdateCastlePreview(){
+  clearTimeout(svCastleT);
+  svCastleT=setTimeout(()=>{
+    const el=document.getElementById('sv-castle');if(!el)return;
+    const gov=(document.getElementById('cm-gov')||{}).value,id_=(document.getElementById('cm-idara')||{}).value||'',sc=(document.getElementById('cm-school')||{}).value||'';
+    if(id_.trim().length>=2&&sc.trim().length>=2){el.innerHTML=svCastleSvg(sc.trim(),gov);el.hidden=false}
+    else{el.hidden=true;el.innerHTML=''}
+  },250);
+}
+document.addEventListener('input',e=>{if(e.target&&(e.target.id==='cm-idara'||e.target.id==='cm-school'))svUpdateCastlePreview()});
+function svInit(){
+  const svg=document.getElementById('sv-map');if(svg)svg.setAttribute('viewBox','0 0 1000 1000');
+  document.getElementById('sv-castle')&&(document.getElementById('sv-castle').hidden=true);
+}
+
 /* ========== المجتمع: دردشة الصفوف + مجموعات المعلمين (كل المرفقات تُفحص قبل النشر) ========== */
 let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null,cmSup=new Set();
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
@@ -5601,21 +5711,28 @@ async function cmLoadSchool(){
 }
 ACT.cmplacechange=()=>{cmPlace={force:true};renderSec('comm')};
 function cmRenderSchoolForm(el){
-  el.innerHTML='<div class="card cm-hero"><div class="b">انضم لمجتمع مدرستك</div><p class="mut sm">اختر محافظتك ومركزك، واكتب الإدارة التعليمية واسم مدرستك (الحكومية). كل طلاب نفس المدرسة يدخلون غرفة واحدة معًا. الإدارة والمدرسة تُبنى من كتابات الطلاب أنفسهم فاكتبها بدقة لتطابق زملاءك.</p>'+
+  el.innerHTML='<div class="card cm-hero sv-wrap" id="sv-wrap"><div class="b">انضم لمجتمع مدرستك</div><p class="mut sm">حلّق فوق خريطة مصر، اختر محافظتك ومركزك، واكتب الإدارة التعليمية واسم مدرستك (الحكومية). كل طلاب نفس المدرسة يدخلون غرفة واحدة معًا.</p>'+
+    svMapHtml()+
     '<label class="f">المحافظة<select id="cm-gov"><option value="">اختر المحافظة…</option>'+GEO_LIST.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('')+'</select></label>'+
     '<label class="f">المركز / الحي<select id="cm-markaz" disabled><option value="">اختر المحافظة أولاً…</option></select></label>'+
     '<label class="f">الإدارة التعليمية<input id="cm-idara" list="cm-idara-dl" maxlength="80" placeholder="مثال: إدارة شرق المنصورة"><datalist id="cm-idara-dl"></datalist></label>'+
     '<label class="f">اسم المدرسة (الحكومية)<input id="cm-school" list="cm-school-dl" maxlength="120" placeholder="مثال: مدرسة النصر الثانوية بنين"><datalist id="cm-school-dl"></datalist></label>'+
+    '<div class="sv-castle-prev" id="sv-castle" hidden></div>'+
     '<button class="btn big" data-a="cmschooljoin" type="button">دخول غرفة مدرستي</button><div class="ar-msg bad" id="cm-plmsg"></div></div>';
+  svInit();
 }
 document.addEventListener('change',async e=>{
   const t=e.target;if(!t)return;
   if(t.id==='cm-gov'){
     const mk=document.getElementById('cm-markaz'),g=t.value;
+    if(!g&&typeof svResetMap==='function'){svResetMap()}
+    if(typeof svRenderMarkazNodes==='function'&&g){svRenderMarkazNodes(g);const gl=document.getElementById('sv-govs');if(gl)gl.style.display='none'}
+    if(typeof svAnimateVB==='function'&&typeof GOV_POINTS!=='undefined'&&g){const p=GOV_POINTS[g]||[500,450];svAnimateVB(svViewBoxFor(p[0],p[1],130),1100)}
     if(!g){mk.disabled=true;mk.innerHTML='<option value="">اختر المحافظة أولاً…</option>';return}
     mk.disabled=false;mk.innerHTML='<option value="">اختر المركز/الحي…</option>'+(GEO_EG[g]||[]).map(m=>'<option value="'+esc(m)+'">'+esc(m)+'</option>').join('');
   }else if(t.id==='cm-markaz'){
     const g=document.getElementById('cm-gov').value,mk=t.value;if(!g||!mk)return;
+    if(typeof svMarkazPoints==='function'){const hit=svMarkazPoints(g).find(p=>p.name===mk);if(hit)svAnimateVB(svViewBoxFor(hit.x,hit.y,55),1000)}
     try{const rows=await cmRpc('cm_idaras',{p_gov:g,p_markaz:mk}),dl=document.getElementById('cm-idara-dl');if(dl)dl.innerHTML=rows.map(r=>'<option value="'+esc(r.idara)+'">').join('')}catch(x){}
   }else if(t.id==='cm-idara'){
     const g=document.getElementById('cm-gov').value,mk=document.getElementById('cm-markaz').value,id_=t.value.trim();if(!g||!mk||!id_)return;
