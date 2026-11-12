@@ -5452,11 +5452,44 @@ document.addEventListener('visibilitychange',()=>{
   if(pinGet()&&pinHid&&Date.now()-pinHid>120000&&!document.body.classList.contains('lock'))pinGate();
 });
 
+// هرم المحافظات والمراكز في مصر — بيانات جغرافية ثابتة (محافظة ← مركز/حي).
+// الإدارة التعليمية والمدرسة الحكومية ليستا هنا: تُبنى ديناميكيًا من اختيارات الطلاب الفعلية (انظر cm_add_place في community.sql).
+const GEO_EG={
+"القاهرة":["مدينة نصر شرق","مدينة نصر غرب","مصر الجديدة","حلوان","المعادي","الزيتون","عين شمس","المرج","الزاوية الحمراء","شبرا","روض الفرج","الساحل","الوايلي","الدرب الأحمر","الجمالية","باب الشعرية","الموسكي","عابدين","بولاق","الأزبكية","قصر النيل","السيدة زينب","مصر القديمة","الخليفة","المقطم","البساتين","دار السلام","التبين","المعصرة","طره","الأميرية","النزهة","المطرية","الشروق","بدر","التجمع الخامس","15 مايو"],
+"الجيزة":["الدقي","العجوزة","الهرم","العمرانية","بولاق الدكرور","إمبابة","الوراق","أوسيم","كرداسة","أبو النمرس","البدرشين","الصف","أطفيح","العياط","الحوامدية","منشأة القناطر","6 أكتوبر","الشيخ زايد","الواحات البحرية"],
+"القليوبية":["بنها","قليوب","شبرا الخيمة","القناطر الخيرية","الخانكة","كفر شكر","طوخ","شبين القناطر","قها","الخصوص","أبو زعبل"],
+"الإسكندرية":["المنتزه أول","المنتزه ثان","شرق الإسكندرية","وسط الإسكندرية","غرب الإسكندرية","الجمرك","الدخيلة","العجمي","العامرية أول","العامرية ثان","برج العرب","الجمرك"],
+"البحيرة":["دمنهور","كفر الدوار","رشيد","إدكو","أبو المطامير","أبو حمص","الدلنجات","المحمودية","الرحمانية","إيتاي البارود","حوش عيسى","شبراخيت","كوم حمادة","بدر","وادي النطرون","النوبارية الجديدة","النجيلة"],
+"مطروح":["مرسى مطروح","الحمام","العلمين","الضبعة","النجيلة","سيدي براني","السلوم","سيوة"],
+"المنوفية":["شبين الكوم","منوف","أشمون","الباجور","قويسنا","بركة السبع","تلا","الشهداء","سرس الليان"],
+"الغربية":["طنطا","المحلة الكبرى","كفر الزيات","زفتى","السنطة","قطور","بسيون","سمنود"],
+"كفر الشيخ":["كفر الشيخ","دسوق","فوه","مطوبس","بلطيم","سيدي سالم","الحامول","بيلا","الرياض","قلين","البرلس"],
+"دمياط":["دمياط","رأس البر","فارسكور","كفر سعد","الزرقا","كفر البطيخ","كفر الشيخ سلام","عزبة البرج","السرو","ميت أبو غالب"],
+"الدقهلية":["المنصورة","طلخا","ميت غمر","دكرنس","أجا","منية النصر","السنبلاوين","بلقاس","المنزلة","تمي الأمديد","الجمالية","شربين","المطرية","نبروه","بني عبيد","الكردي","ميت سلسيل"],
+"شمال سيناء":["العريش","الشيخ زويد","رفح","بئر العبد","الحسنة","نخل"],
+"جنوب سيناء":["الطور","شرم الشيخ","دهب","نويبع","سانت كاترين","رأس سدر","أبو زنيمة","أبو رديس","طابا"],
+"بورسعيد":["بورسعيد","بورفؤاد","الضواحي","الشرق","الزهور","المناخ","حي غرب بورسعيد"],
+"الإسماعيلية":["الإسماعيلية","فايد","القنطرة شرق","القنطرة غرب","أبو صوير","التل الكبير","القصاصين"],
+"السويس":["السويس","عتاقة","الأربعين","الجناين","فيصل"],
+"الشرقية":["الزقازيق","بلبيس","منيا القمح","أبو حماد","أبو كبير","فاقوس","الصالحية الجديدة","القرين","مشتول السوق","كفر صقر","الحسينية","ههيا","أولاد صقر","ديرب نجم","صان الحجر"],
+"بني سويف":["بني سويف","الواسطى","ناصر","إهناسيا","ببا","سمسطا","الفشن"],
+"المنيا":["المنيا","ملوي","سمالوط","مغاغة","بني مزار","مطاي","دير مواس","أبو قرقاص","العدوة"],
+"الفيوم":["الفيوم","سنورس","إطسا","طامية","يوسف الصديق","أبشواي"],
+"أسيوط":["أسيوط","ديروط","منفلوط","أبنوب","أبو تيج","ساحل سليم","القوصية","البداري","صدفا"],
+"الوادي الجديد":["الخارجة","الداخلة","الفرافرة","باريس","بلاط"],
+"سوهاج":["سوهاج","أخميم","جرجا","طما","طهطا","المراغة","البلينا","دار السلام","ساقلتة","جهينة"],
+"قنا":["قنا","نجع حمادي","دشنا","قوص","أبو تشت","فرشوط","الوقف"],
+"الأقصر":["الأقصر","إسنا","أرمنت","البياضية","الطود","القرنة"],
+"أسوان":["أسوان","إدفو","كوم أمبو","دراو","نصر النوبة","أبو سمبل (بلاد النوبة)"],
+"البحر الأحمر":["الغردقة","سفاجا","القصير","مرسى علم","الشلاتين","حلايب","رأس غارب"]
+};
+const GEO_LIST=Object.keys(GEO_EG);
+
 /* ========== المجتمع: دردشة الصفوف + مجموعات المعلمين (كل المرفقات تُفحص قبل النشر) ========== */
 let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null,cmSup=new Set();
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
-  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
+  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',bad_gov:'اختر محافظتك.',bad_markaz:'اختر أو اكتب اسم المركز/الحي.',bad_place:'اكتب اسم الإدارة التعليمية والمدرسة (حرفان على الأقل لكل منهما).',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
   bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
 const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
@@ -5471,14 +5504,14 @@ RD.comm=()=>{
   if(typeof CLOUD==='undefined'||!CLOUD.client||!CLOUD.user)return '<div class="card"><b>المجتمع يحتاج حساباً</b><p class="mut sm">سجّل دخولك بحسابك لتشارك زملاءك ومعلميك.</p>'+(typeof CLOUD!=='undefined'&&CLOUD.client&&!CLOUD.user?'<button class="btn big" data-a="guestout" type="button">إنشاء حساب / تسجيل الدخول</button>':'')+'</div>';
   if(cmOff)return '<div class="card cm-off"><b>المجتمع قيد التجهيز</b><p class="mut sm">سيُفتح قريباً بإذن الله. تابع التحديثات.</p></div>';
   /* تغيّر صفّه الدراسي: اخرج من غرفة الصف القديم وحدّث الخادم فوراً */
-  if(cmRoom&&!cmRoom.startsWith('g:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
+  if(cmRoom&&!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
   if(typeof CLOUD!=='undefined'&&CLOUD.user&&cmKey()&&cmSynced.split('|')[0]!==cmKey())cmSync().then(()=>{if(curSec==='comm')renderSec('comm')}).catch(()=>{});
   if(cmRoom)return cmRoomHtml();
-  const tabs=[['stage','صفّي'],['groups','مجموعاتي'],['teach','أنا معلم']];
+  const tabs=[['stage','صفّي'],['school','مدرستي'],['groups','مجموعاتي'],['teach','أنا معلم']];
   return '<div class="chips cm-tabs">'+tabs.map(t=>'<button class="chip'+(cmView===t[0]?' on':'')+'" data-a="cmview" data-v="'+t[0]+'" type="button">'+t[1]+'</button>').join('')+'</div>'+
-    (cmView==='stage'?cmStageHtml():cmView==='groups'?cmGroupsHtml():cmTeachHtml());
+    (cmView==='stage'?cmStageHtml():cmView==='school'?cmSchoolHtml():cmView==='groups'?cmGroupsHtml():cmTeachHtml());
 };
-PO.comm=()=>{if(cmRoom)cmLoad(true);else if(cmView==='groups')cmLoadGroups();else if(cmView==='teach')cmLoadTeacher()};
+PO.comm=()=>{if(cmRoom)cmLoad(true);else if(cmView==='school')cmLoadSchool();else if(cmView==='groups')cmLoadGroups();else if(cmView==='teach')cmLoadTeacher()};
 ACT.cmview=t=>{cmView=t.dataset.v;cmRoom='';renderSec('comm')};
 function cmStageHtml(){
   const k=cmKey();if(!k)return '<div class="card"><b>اختر صفك أولاً</b><p class="mut sm">حدّد مرحلتك وصفك الدراسي من الإعدادات لتدخل مجتمع صفّك.</p></div>';
@@ -5550,7 +5583,58 @@ ACT.cmsend=async t=>{
   finally{cmBusy=false;t.disabled=false}
 };
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='cm-in'){e.preventDefault();const b=document.querySelector('.cm-send');b&&b.click()}});
-setInterval(()=>{if(curSec==='comm'&&cmRoom&&!document.hidden&&!cmBusy){if(!cmRoom.startsWith('g:')&&cmRoom!==cmKey()){renderSec('comm');return}cmLoad()}},4000);
+setInterval(()=>{if(curSec==='comm'&&cmRoom&&!document.hidden&&!cmBusy){if(!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&cmRoom!==cmKey()){renderSec('comm');return}cmLoad()}},4000);
+/* مدرستي: محافظة ← مركز ← إدارة تعليمية ← مدرسة (حكومية). المحافظة والمركز من قائمة ثابتة، الإدارة والمدرسة تُبنى من اختيارات الطلاب الحقيقيين */
+let cmPlace=null;
+function cmSchoolHtml(){return '<div id="cm-school"><p class="mut sm" style="text-align:center">جارٍ التحميل…</p></div>'}
+async function cmLoadSchool(){
+  const el=document.getElementById('cm-school');if(!el)return;
+  if(cmPlace&&cmPlace.force){cmRenderSchoolForm(el);return}
+  try{
+    const r=await cmRpc('cm_my_place');cmPlace=r&&r[0]||null;
+    if(cmPlace&&cmPlace.room){
+      el.innerHTML='<div class="card cm-hero"><div class="b">مدرستي الحالية</div><p class="mut sm">'+esc(cmPlace.gov)+' · '+esc(cmPlace.markaz)+' · '+esc(cmPlace.idara)+'</p><div class="b">'+esc(cmPlace.school)+'</div><button class="btn big" data-a="cmopen" data-r="'+esc(cmPlace.room)+'" data-t="مدرسة '+esc(cmPlace.school)+'">ادخل غرفة مدرستي</button><button class="btn g" data-a="cmplacechange" type="button">تغيير المدرسة</button></div>';
+      return;
+    }
+    cmRenderSchoolForm(el);
+  }catch(e){if(!cmOff)el.innerHTML='<p class="mut sm">'+esc(cmMsg(e))+'</p>'}
+}
+ACT.cmplacechange=()=>{cmPlace={force:true};renderSec('comm')};
+function cmRenderSchoolForm(el){
+  el.innerHTML='<div class="card cm-hero"><div class="b">انضم لمجتمع مدرستك</div><p class="mut sm">اختر محافظتك ومركزك، واكتب الإدارة التعليمية واسم مدرستك (الحكومية). كل طلاب نفس المدرسة يدخلون غرفة واحدة معًا. الإدارة والمدرسة تُبنى من كتابات الطلاب أنفسهم فاكتبها بدقة لتطابق زملاءك.</p>'+
+    '<label class="f">المحافظة<select id="cm-gov"><option value="">اختر المحافظة…</option>'+GEO_LIST.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('')+'</select></label>'+
+    '<label class="f">المركز / الحي<select id="cm-markaz" disabled><option value="">اختر المحافظة أولاً…</option></select></label>'+
+    '<label class="f">الإدارة التعليمية<input id="cm-idara" list="cm-idara-dl" maxlength="80" placeholder="مثال: إدارة شرق المنصورة"><datalist id="cm-idara-dl"></datalist></label>'+
+    '<label class="f">اسم المدرسة (الحكومية)<input id="cm-school" list="cm-school-dl" maxlength="120" placeholder="مثال: مدرسة النصر الثانوية بنين"><datalist id="cm-school-dl"></datalist></label>'+
+    '<button class="btn big" data-a="cmschooljoin" type="button">دخول غرفة مدرستي</button><div class="ar-msg bad" id="cm-plmsg"></div></div>';
+}
+document.addEventListener('change',async e=>{
+  const t=e.target;if(!t)return;
+  if(t.id==='cm-gov'){
+    const mk=document.getElementById('cm-markaz'),g=t.value;
+    if(!g){mk.disabled=true;mk.innerHTML='<option value="">اختر المحافظة أولاً…</option>';return}
+    mk.disabled=false;mk.innerHTML='<option value="">اختر المركز/الحي…</option>'+(GEO_EG[g]||[]).map(m=>'<option value="'+esc(m)+'">'+esc(m)+'</option>').join('');
+  }else if(t.id==='cm-markaz'){
+    const g=document.getElementById('cm-gov').value,mk=t.value;if(!g||!mk)return;
+    try{const rows=await cmRpc('cm_idaras',{p_gov:g,p_markaz:mk}),dl=document.getElementById('cm-idara-dl');if(dl)dl.innerHTML=rows.map(r=>'<option value="'+esc(r.idara)+'">').join('')}catch(x){}
+  }else if(t.id==='cm-idara'){
+    const g=document.getElementById('cm-gov').value,mk=document.getElementById('cm-markaz').value,id_=t.value.trim();if(!g||!mk||!id_)return;
+    try{const rows=await cmRpc('cm_schools',{p_gov:g,p_markaz:mk,p_idara:id_}),dl=document.getElementById('cm-school-dl');if(dl)dl.innerHTML=rows.map(r=>'<option value="'+esc(r.school)+'">').join('')}catch(x){}
+  }
+});
+ACT.cmschooljoin=async t=>{
+  const gov=(document.getElementById('cm-gov').value||'').trim(),markaz=(document.getElementById('cm-markaz').value||'').trim(),
+    idara=(document.getElementById('cm-idara').value||'').trim(),school=(document.getElementById('cm-school').value||'').trim(),m=document.getElementById('cm-plmsg');
+  if(!gov){m.textContent=CMERR.bad_gov;return}if(!markaz){m.textContent=CMERR.bad_markaz;return}
+  if(idara.length<2||school.length<2){m.textContent=CMERR.bad_place;return}
+  t.disabled=true;m.textContent='';
+  try{
+    if(!await cmSync()){m.textContent='اكتب اسمك واختر صفك من الإعدادات أولاً.';t.disabled=false;return}
+    const room=await cmRpc('cm_set_place',{p_gov:gov,p_markaz:markaz,p_idara:idara,p_school:school});
+    if(typeof room==='string'&&room[0]==='!')throw new Error(room.slice(1));
+    cmPlace={gov,markaz,idara,school,room};cmRoom=room;cmTitle='مدرسة '+school;cmPend=null;renderSec('comm');
+  }catch(e){m.textContent=cmMsg(e);t.disabled=false}
+};
 /* مجموعاتي */
 function cmGroupsHtml(){
   return '<div class="card cm-hero"><div class="b">انضم لمجموعة معلمك</div><p class="mut sm">اكتب الرمز المكوّن من 10 أرقام الذي أعطاك إياه معلمك.</p><div class="o10">'+otpMarkup('cm-join',10)+'</div><button class="btn big" data-a="cmjoin" type="button">انضمام</button><div class="ar-msg bad" id="cm-jmsg" role="alert"></div></div>'+
