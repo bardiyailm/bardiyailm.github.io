@@ -5452,7 +5452,7 @@ document.addEventListener('visibilitychange',()=>{
 let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null,cmSup=new Set();
 const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
-  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
+  no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
   bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
 const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
@@ -5576,7 +5576,7 @@ ACT.cmjoin=async t=>{
   if(v.length<10){m.textContent='اكتب الرمز كاملاً (10 أرقام).';return}
   t.disabled=true;m.textContent='';
   try{if(!await cmSync()){m.textContent='اكتب اسمك واختر صفك من الإعدادات أولاً.';t.disabled=false;return}
-    const n=await cmRpc('cm_join',{p_code:v});otpState(inp,'ok');toast('تم الانضمام لمجموعة '+n);setTimeout(()=>{if(cmView==='groups')renderSec('comm')},900)}
+    const n=await cmRpc('cm_join',{p_code:v});if(typeof n==='string'&&n[0]==='!')throw new Error(n.slice(1));otpState(inp,'ok');toast('تم الانضمام لمجموعة '+n);setTimeout(()=>{if(cmView==='groups')renderSec('comm')},900)}
   catch(e){otpState(inp,'bad');m.textContent=cmMsg(e)}
   t.disabled=false;
 };
@@ -5606,12 +5606,12 @@ ACT.cmgen=()=>{const i=document.getElementById('cm-tc');if(i)i.value=cmGen()};
 ACT.cmbecome=async t=>{
   const n=(document.getElementById('cm-tn').value||'').trim(),s=(document.getElementById('cm-ts').value||'').trim(),c=toLatin(document.getElementById('cm-tc').value||''),ph=toLatin(document.getElementById('cm-tp').value||''),g=(document.getElementById('cm-tg').value||'').trim(),m=document.getElementById('cm-tmsg');
   if(n.length<2){m.textContent=CMERR.bad_name;return}if(g.length<2){m.textContent=CMERR.bad_group;return}if(s.length<2){m.textContent=CMERR.bad_subject;return}if(!/^\+?\d{8,15}$/.test(ph.replace(/[\s\-()]/g,''))){m.textContent=CMERR.bad_phone;return}if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
-  t.disabled=true;try{await cmRpc('cm_become_teacher',{p_name:n,p_subject:s,p_code:c,p_phone:ph,p_group:g});try{await CLOUD.client.functions.invoke('teacher-request',{body:{}})}catch(x){}toast('أُرسل طلبك للمشرف');cmLoadTeacher()}catch(e){m.textContent=cmMsg(e);t.disabled=false}
+  t.disabled=true;try{const rb=await cmRpc('cm_become_teacher',{p_name:n,p_subject:s,p_code:c,p_phone:ph,p_group:g});if(rb===null)throw new Error('code_taken');try{await CLOUD.client.functions.invoke('teacher-request',{body:{}})}catch(x){}toast('أُرسل طلبك للمشرف');cmLoadTeacher()}catch(e){m.textContent=cmMsg(e);t.disabled=false}
 };
 ACT.cmcopy=async()=>{try{await navigator.clipboard.writeText(cmTeacher.code);toast('تم نسخ الرمز')}catch(e){toast('انسخ الرمز يدوياً')}};
 ACT.cmnewcode=()=>{sheet('<h3>تغيير رمز المجموعة</h3><p class="mut sm">الطلاب المنضمون يبقون في مجموعتك، والرمز الجديد للمنضمين لاحقاً.</p><label class="f">الرمز (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">عشوائي</button></div></label><button class="btn big" data-a="cmsavecode" type="button">حفظ</button><div class="ar-msg bad" id="cm-tmsg"></div>')};
 ACT.cmsavecode=async()=>{const c=toLatin(document.getElementById('cm-tc').value||''),m=document.getElementById('cm-tmsg');if(!/^\d{10}$/.test(c)){m.textContent='الرمز 10 أرقام بالضبط.';return}
-  try{await cmRpc('cm_set_code',{p_code:c});closeSheet();cmLoadTeacher()}catch(e){m.textContent=cmMsg(e)}};
+  try{const rc=await cmRpc('cm_set_code',{p_code:c});if(typeof rc==='string'&&rc[0]==='!')throw new Error(rc.slice(1));closeSheet();cmLoadTeacher()}catch(e){m.textContent=cmMsg(e)}};
 ACT.cmkick=t=>ask('إزالة هذا الطالب من مجموعتك؟','إزالة',async()=>{try{await cmRpc('cm_kick',{p_student:t.dataset.i});cmLoadTeacher()}catch(e){toast(cmMsg(e))}},true);
 
 /* المشرفون + إعدادات المعلم + طلبات التغيير */
