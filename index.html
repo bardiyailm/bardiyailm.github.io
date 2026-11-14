@@ -5970,13 +5970,15 @@ async function cmLockSync(canCtl){
   if(inp){inp.disabled=lockedForMe;inp.placeholder=lockedForMe?'الدردشة مغلقة الآن':'اكتب رسالتك…'}
   if(btn)btn.disabled=lockedForMe;if(att)att.style.opacity=lockedForMe?.4:'';
   if(hint&&!cmBusy)hint.textContent=v?(canCtl?'الدردشة مغلقة على الطلاب. أنت وحدك تستطيع الكتابة.':'🔒 أغلق المعلم الدردشة. ستفتح عندما يسمح بذلك.'):'الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.';
-  let lb=document.getElementById('cm-lockbtn');
-  if(canCtl&&bar){if(!lb){lb=document.createElement('button');lb.id='cm-lockbtn';lb.type='button';lb.className='btn g s';lb.dataset.a='cmlock';bar.appendChild(lb)}lb.textContent=v?'🔓 فتح الدردشة':'🔒 غلق الدردشة'}
-  else if(lb)lb.remove();
+  let lb=document.getElementById('cm-lockbtns');
+  if(canCtl&&bar){
+    if(!lb){lb=document.createElement('span');lb.id='cm-lockbtns';lb.style.cssText='display:inline-flex;gap:6px;margin-inline-start:auto';bar.appendChild(lb)}
+    lb.innerHTML='<button type="button" class="btn s'+(v?' g':'')+'" data-a="cmlock" data-v="open"'+(v?'':' disabled')+'>🔓 فتح للجميع</button><button type="button" class="btn s'+(v?'':' g')+'" data-a="cmlock" data-v="close"'+(v?' disabled':'')+'>🔒 إغلاق</button>';
+  }else if(lb)lb.remove();
 }
-ACT.cmlock=()=>{
-  if(!cmRoom.startsWith('g:'))return;const to=!cmLocked;
-  ask(to?'غلق الدردشة؟ لن يستطيع الطلاب الكتابة حتى تفتحها.':'فتح الدردشة للطلاب؟',to?'غلق':'فتح',async()=>{
+ACT.cmlock=t=>{
+  if(!cmRoom.startsWith('g:'))return;const to=t&&t.dataset&&t.dataset.v?t.dataset.v==='close':!cmLocked;if(to===cmLocked)return;
+  ask(to?'إغلاق الدردشة؟ سيقرأ الأعضاء رسائلك ورسائل المشرف، لكن لن يستطيعوا الإرسال حتى تفتحها.':'فتح الدردشة لجميع الأعضاء؟',to?'إغلاق':'فتح',async()=>{
     try{const r=await CLOUD.client.rpc('cm_set_lock',{p_teacher:cmRoom.slice(2),p_locked:to});if(r.error)throw r.error;toast(to?'أُغلقت الدردشة':'فُتحت الدردشة');await cmLockSync(true)}catch(e){toast('تعذّر التنفيذ. تأكد من تشغيل ملف community6.sql في Supabase.')}
   },to);
 };
