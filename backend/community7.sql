@@ -13,7 +13,7 @@ begin
   if me is null then raise exception 'denied'; end if;
   if p_file !~ ('^'||me::text||'/[0-9a-f-]{36}\.pdf$') then raise exception 'denied'; end if;
   if not exists(select 1 from storage.objects where bucket_id='community' and name=p_file) then raise exception 'denied'; end if;
-  fn:=left(regexp_replace(coalesce(p_fname,'ملف.pdf'),'[\x00-\x1f<>"\\/]','','g'),80);
+  fn:=left(regexp_replace(coalesce(p_fname,'ملف.pdf'),'[\x01-\x1f<>"\\/]','','g'),80);
   return cm_post_core(me,p_room,p_body,null,p_file,coalesce(nullif(fn,''),'ملف.pdf'),true);
 end $$;
 revoke all on function cm_post_file(text,text,text,text) from public,anon;
