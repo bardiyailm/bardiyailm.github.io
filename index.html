@@ -5335,7 +5335,7 @@ function hbGens0(S){
   if(k==='stc')return hbPick(HB_GRP.dyn).concat(HB_X.stc.map(f=>({w:2,f})));
   const fg=ftGens(k,S);return fg.length?fg:hbPick(HB_GRP.alg);
 }
-const HB_CACHE={},HB_PER=100;
+const HB_CACHE={},HB_PER=30;
 function hbStream(S){
   const key=hbKey(S);if(HB_CACHE[key])return HB_CACHE[key];
   const gens=hbGens(S);let salt=0;for(let i=0;i<key.length;i++)salt=(salt*131+key.charCodeAt(i))>>>0;
@@ -5371,13 +5371,13 @@ function hbCard(){
   const stages=Object.keys(EDU).map(k=>chip('hbstage','',k,EDU[k].n,S.stage===k)).join('');
   const grades=EDU[S.stage].g.map(g=>chip('hbgrade','',g,EDU[S.stage].gn(g).replace(/ (الابتدائي|الإعدادي|الثانوي)$/,'').replace('الصف ','')+'',S.grade===g)).join('');
   const tr=eduNeedsTrack(S.stage,S.grade)?'<div class="chips hbr">'+Object.keys(TRACKS[S.stage]).map(k=>chip('hbtrack','',k,TRACKS[S.stage][k],S.track===k)).join('')+'</div>':'';
-  const LV=[['b','مبتدئ'],['m','متوسط'],['h','متفوق']],lvs='<div class="chips hbr hblv">'+LV.map(x=>chip('hblv','',x[0],x[1],(S.lv||'m')===x[0])).join('')+'</div>';
+  const LV=[['b','مبتدئ'],['m','متوسط'],['h','قوي / متفوق']],lvs='<div class="chips hbr hblv">'+LV.map(x=>chip('hblv','',x[0],x[1],(S.lv||'m')===x[0])).join('')+'</div>';
   const sj='<div class="chips hbr">'+subs.map(s=>chip('hbsubj','',s.k,s.n,S.subj===s.k)).join('')+'</div>';
   const pool=gens?gens.reduce((a,g)=>a+(g.w||1),0):0,info=gens?('<p class="mut sm">'+(HB_QUANT(S)?'مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. ':'أسئلة هذه المادة مبنية من جداول حقائق مراجَعة، والمشتتات من نفس الجدول. ')+(HB_QUANT(S)?'كل اختبار 100 سؤال.':(pool<400?'عدد حقائق هذه المادة محدود (نحو '+pool.toLocaleString('ar-EG')+' سؤال فريد) فتتكرر الأسئلة بين الاختبارات. ':'')+'كل اختبار 100 سؤال.')+'</p>'):'';
   const row=(kind,title)=>'<div class="hbrow"><b>'+title+'</b><div class="row"><input type="number" min="1" max="'+HB_N+'" value="'+(S.n||1)+'" class="hbn" id="hbn-'+kind+'" inputmode="numeric"><button class="btn" data-a="hbgo" data-k="'+kind+'">ابدأ</button><button class="btn g" data-a="hbgo" data-k="'+kind+'" data-r="1">عشوائي</button></div><small class="mut">أنجزت '+(kind==='t'?nt:np)+' من '+HB_N+'</small></div>';
   return '<div class="card full hbcard"><h3><span>الاختبارات</span><small>لكل مادة '+HB_N+' اختبار و'+HB_N+' مسألة</small></h3>'+
     '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+lvs+info+
-    (S.subj?row('t','اختبارات (100 سؤال)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
+    (S.subj?row('t','اختبارات (30 سؤالاً)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
 RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+exPracCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
 const _rdExam=()=>RD.exam();
@@ -5392,7 +5392,7 @@ const S=hbSt(),kind=t.dataset.k;
   let n=t.dataset.r?1+Math.floor(Math.random()*HB_N):Math.max(1,Math.min(HB_N,+(($('#hbn-'+kind)||{}).value)||1));
   S.n=n;hbSave(S);const hb={key:hbKey(S),k:kind,n:n};
   const sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n;
-  const meta={type:'prac',subj:S.subj,title:(kind==='t'?'اختبار ':'مسألة ')+n+' · '+sn+' · '+({b:'مبتدئ',m:'متوسط',h:'متفوق'}[S.lv||'m']),hb:hb};
+  const meta={type:'prac',subj:S.subj,title:(kind==='t'?'اختبار ':'مسألة ')+n+' · '+sn+' · '+({b:'مبتدئ',m:'متوسط',h:'قوي / متفوق'}[S.lv||'m']),hb:hb};
   exStart(hbBuild(S,kind,n),meta);
 };
 
