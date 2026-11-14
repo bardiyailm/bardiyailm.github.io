@@ -5942,7 +5942,7 @@ function cmRoomHtml(){
    '<div class="cm-pend" id="cm-pend" hidden></div>'+
    '<div class="cm-comp"><label class="ib cm-att" title="إرفاق صورة أو PDF"><input id="cm-file" type="file" accept="image/*,application/pdf" hidden>📎</label>'+
    '<input id="cm-in" type="text" maxlength="400" placeholder="اكتب رسالتك…" autocomplete="off"><button class="btn cm-send" data-a="cmsend" type="button">إرسال</button></div>'+
-   '<p class="mut sm cm-hint" id="cm-hint">الروابط والصور وPDF (حتى 14 ميجا) تمرّ على فحص أمني قبل الإرسال.</p>';
+   '<p class="mut sm cm-hint" id="cm-hint">الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.</p>';
 }
 async function cmLoad(first){
   if(!cmRoom||cmBusy&&!first)return;
@@ -5963,16 +5963,8 @@ function cmBubble(r,canMod){
 }
 ACT.cmrep=t=>ask('إبلاغ عن هذه الرسالة؟ سيراجعها المشرفون وتُخفى تلقائياً عند تكرار البلاغات.','إبلاغ',async()=>{try{await cmRpc('cm_report',{p_id:+t.dataset.i});toast('تم الإبلاغ، شكراً لك');cmLoad()}catch(e){toast(cmMsg(e))}});
 ACT.cmdel=t=>ask('حذف هذه الرسالة؟','حذف',async()=>{try{await cmRpc('cm_delete',{p_id:+t.dataset.i});cmLoad()}catch(e){toast(cmMsg(e))}},true);
-/* اختيار مرفق: صورة تُصغَّر، وPDF حتى 14 ميجا بعد فحص أولي في الجهاز (والفحص الأمني الكامل في الخادم) */
+/* اختيار مرفق: صورة تُصغَّر، وPDF حتى 14 ميجا بلا فحص */
 const CM_PDF_MAX=14e6;
-async function cmPdfScan(f){
-  const buf=new Uint8Array(await f.arrayBuffer());
-  if(String.fromCharCode.apply(null,buf.subarray(0,5))!=='%PDF-')return 'الملف ليس PDF صالحاً.';
-  let bin='';for(let i=0;i<buf.length;i+=32768)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+32768));
-  if(/\/(JavaScript|JS|Launch|EmbeddedFile|OpenAction|AA|RichMedia|XFA|SubmitForm|URI)\b/.test(bin))return 'الملف يحتوي أكواداً أو روابط مضمّنة غير مسموحة.';
-  if(bin.lastIndexOf('%%EOF')<bin.length-2048)return 'الملف تالف أو غير مكتمل.';
-  return '';
-}
 const cmRead=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
 async function cmShrink(f){
   const url=await cmRead(f),im=new Image();await new Promise((a,b)=>{im.onload=a;im.onerror=b;im.src=url});
@@ -5982,7 +5974,7 @@ async function cmShrink(f){
 document.addEventListener('change',async e=>{
   const t=e.target;if(!t||t.id!=='cm-file'||!t.files[0])return;const f=t.files[0];t.value='';
   try{
-    if(f.type==='application/pdf'){if(f.size>CM_PDF_MAX)return toast('الحد الأقصى لملف PDF هو 14 ميجا. حجم ملفك '+(f.size/1e6).toFixed(1)+' ميجا.');toast('جارٍ فحص الملف…');const bad=await cmPdfScan(f);if(bad)return toast(bad);cmPend={pdf:await cmRead(f),fname:f.name,kind:'pdf'}}
+    if(f.type==='application/pdf'){if(f.size>CM_PDF_MAX)return toast('الحد الأقصى لملف PDF هو 14 ميجا. حجم ملفك '+(f.size/1e6).toFixed(1)+' ميجا.');cmPend={pdf:await cmRead(f),fname:f.name,kind:'pdf'}}
     else if(/^image\//.test(f.type)){cmPend={image:await cmShrink(f),kind:'img'}}
     else return toast('اختر صورة أو ملف PDF فقط.');
     cmPendShow();
@@ -6002,7 +5994,7 @@ ACT.cmsend=async t=>{
       const r=await CLOUD.client.functions.invoke('community-send',{body:{room:cmRoom,text:text,image:cmPend&&cmPend.image||'',pdf:cmPend&&cmPend.pdf||'',fname:cmPend&&cmPend.fname||''}});
       if(r.error)throw new Error('offline_fn');if(r.data&&r.data.error)throw new Error(r.data.error);
     }else{const d=await cmRpc('cm_post',{p_room:cmRoom,p_body:text});if(d)throw new Error(d)}
-    inp.value='';cmPend=null;cmPendShow();if(hint)hint.textContent='الروابط والصور وPDF (حتى 14 ميجا) تمرّ على فحص أمني قبل الإرسال.';await cmLoad(true);
+    inp.value='';cmPend=null;cmPendShow();if(hint)hint.textContent='الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.';await cmLoad(true);
   }catch(e){const m=e&&e.message==='offline_fn'?'خدمة الفحص غير مفعّلة بعد، جرّب رسالة نصية.':cmMsg(e);if(hint)hint.textContent=m;toast(m)}
   finally{cmBusy=false;t.disabled=false}
 };
