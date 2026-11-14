@@ -5931,7 +5931,7 @@ const CMERR={locked:'الدردشة مغلقة الآن. فتحها بيد ال�
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
   no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',bad_gov:'اختر محافظتك.',bad_markaz:'اختر أو اكتب اسم المركز/الحي.',bad_place:'اكتب اسم الإدارة التعليمية والمدرسة (حرفان على الأقل لكل منهما).',no_place:'حدّد مدرستك أولاً من تبويب «مدرستي».',no_stage:'حدّد مرحلتك وصفك من الإعدادات أولاً.',bad_subj_code:'مادة غير صالحة.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
   bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
-const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
+const cmMsg=e=>{const m=String((e&&(e.message||e.error))||e||'').split('\n')[0].trim();if(m==='bigfile')return 'الملف أكبر مما يسمح به الخادم المجاني (50 ميجا).';if(m.indexOf('upfail:')===0)return 'تعذّر رفع الملف: '+m.slice(7,80);return CMERR[m]||(/Failed to fetch|NetworkError/i.test(m)?'تحتاج اتصالاً بالإنترنت.':'تعذّر تنفيذ الطلب، حاول بعد قليل.')};
 const cmMissing=e=>!!e&&(e.code==='PGRST202'||/could not find the function|schema cache/i.test(e.message||''));
 const cmKey=()=>{const e=eduOf();return e&&e.stage?e.stage+(+e.grade):''};
 const cmLabel=k=>{const m=/^(prim|prep|sec|bac)(\d)$/.exec(k||'');return m?EDU[m[1]].gn(+m[2]):''};
@@ -5969,7 +5969,7 @@ function cmRoomHtml(){
    '<div class="cm-pend" id="cm-pend" hidden></div>'+
    '<div class="cm-comp"><label class="ib cm-att" title="إرفاق صورة أو PDF"><input id="cm-file" type="file" accept="image/*,application/pdf" hidden>📎</label>'+
    '<input id="cm-in" type="text" maxlength="400" placeholder="اكتب رسالتك…" autocomplete="off"><button class="btn cm-send" data-a="cmsend" type="button">إرسال</button></div>'+
-   '<p class="mut sm cm-hint" id="cm-hint">الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.</p>';
+   '<p class="mut sm cm-hint" id="cm-hint">الروابط والصور تمرّ على فحص أمني قبل الإرسال. </p>';
 }
 /* غلق/فتح دردشة المجموعة: المعلم والمشرف يتحكمان، والطالب يرى الحالة ولا يستطيع الإرسال وهي مغلقة */
 let cmLocked=false;
@@ -5980,7 +5980,7 @@ async function cmLockSync(canCtl){
   const lockedForMe=v&&!canCtl;
   if(inp){inp.disabled=lockedForMe;inp.placeholder=lockedForMe?'الدردشة مغلقة الآن':'اكتب رسالتك…'}
   if(btn)btn.disabled=lockedForMe;if(att)att.style.opacity=lockedForMe?.4:'';
-  if(hint&&!cmBusy)hint.textContent=v?(canCtl?'الدردشة مغلقة على الطلاب. أنت وحدك تستطيع الكتابة.':'🔒 أغلق المعلم الدردشة. ستفتح عندما يسمح بذلك.'):'الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.';
+  if(hint&&!cmBusy)hint.textContent=v?(canCtl?'الدردشة مغلقة على الطلاب. أنت وحدك تستطيع الكتابة.':'🔒 أغلق المعلم الدردشة. ستفتح عندما يسمح بذلك.'):'الروابط والصور تمرّ على فحص أمني قبل الإرسال. ';
   let lb=document.getElementById('cm-lockbtns');
   if(canCtl&&bar){
     if(!lb){lb=document.createElement('span');lb.id='cm-lockbtns';lb.style.cssText='display:inline-flex;gap:6px;margin-inline-start:auto';bar.appendChild(lb)}
@@ -6024,7 +6024,7 @@ async function cmShrink(f){
 document.addEventListener('change',async e=>{
   const t=e.target;if(!t||t.id!=='cm-file'||!t.files[0])return;const f=t.files[0];t.value='';
   try{
-    if(f.type==='application/pdf'){if(f.size>CM_PDF_MAX)return toast('الحد الأقصى لملف PDF هو 14 ميجا. حجم ملفك '+(f.size/1e6).toFixed(1)+' ميجا.');cmPend={file:f,fname:f.name,kind:'pdf'}}
+    if(f.type==='application/pdf'){cmPend={file:f,fname:f.name,kind:'pdf'}}
     else if(/^image\//.test(f.type)){cmPend={image:await cmShrink(f),kind:'img'}}
     else return toast('اختر صورة أو ملف PDF فقط.');
     cmPendShow();
@@ -6046,13 +6046,14 @@ ACT.cmsend=async t=>{
       const path=CLOUD.user.id+'/'+crypto.randomUUID()+'.pdf';
       try{
         const up=await CLOUD.client.storage.from('community').upload(path,cmPend.file,{contentType:'application/pdf',upsert:false});
+        if(up.error){const m=String(up.error.message||'');if(/exceeded|too large|payload|413/i.test(m))throw new Error('bigfile');throw new Error('upfail:'+m)}
         if(!up.error){
           const rp=await CLOUD.client.rpc('cm_post_file',{p_room:cmRoom,p_body:text,p_file:path,p_fname:cmPend.fname});
           if(!rp.error){if(rp.data)throw new Error(rp.data);done=true}
           else{try{await CLOUD.client.storage.from('community').remove([path])}catch(x){}
             if(!/does not exist|PGRST202|404/i.test(String(rp.error.message||rp.error.code||'')))throw rp.error}
         }
-      }catch(e){if(e&&e.message&&/^(denied|locked|bad_len|blocked|slow|profane|banned|no_profile)$/.test(e.message))throw e}
+      }catch(e){if(e&&e.message&&/^(denied|locked|bad_len|blocked|slow|profane|banned|no_profile|bigfile|upfail:.*)$/.test(e.message))throw e}
     }
     if(!done){
       if(scan||isPdf){
@@ -6061,7 +6062,7 @@ ACT.cmsend=async t=>{
         if(r.error)throw new Error('offline_fn');if(r.data&&r.data.error)throw new Error(r.data.error);
       }else{const d=await cmRpc('cm_post',{p_room:cmRoom,p_body:text});if(d)throw new Error(d)}
     }
-    inp.value='';cmPend=null;cmPendShow();if(hint)hint.textContent='الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.';await cmLoad(true);
+    inp.value='';cmPend=null;cmPendShow();if(hint)hint.textContent='الروابط والصور تمرّ على فحص أمني قبل الإرسال. ';await cmLoad(true);
   }catch(e){const m=e&&e.message==='offline_fn'?'خدمة الفحص غير مفعّلة بعد، جرّب رسالة نصية.':cmMsg(e);if(hint)hint.textContent=m;toast(m)}
   finally{cmBusy=false;t.disabled=false}
 };

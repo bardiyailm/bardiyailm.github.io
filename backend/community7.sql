@@ -1,6 +1,6 @@
 -- المرحلة 7: إرسال PDF بسرعة: رفع مباشر إلى التخزين ثم نشر الرسالة (بلا مرور الملف عبر Edge Function ولا فحصه)
 -- شغّل هذا الملف مرة واحدة في Supabase → SQL Editor.
-update storage.buckets set file_size_limit=15728640 where id='community';
+update storage.buckets set file_size_limit=null where id='community';
 
 -- يسمح للمستخدم المسجّل برفع PDF داخل مجلده فقط: <uid>/<uuid>.pdf
 drop policy if exists "cm_pdf_upload" on storage.objects;
