@@ -5963,7 +5963,7 @@ function cmRoomHtml(){
 /* غلق/فتح دردشة المجموعة: المعلم والمشرف يتحكمان، والطالب يرى الحالة ولا يستطيع الإرسال وهي مغلقة */
 let cmLocked=false;
 async function cmLockSync(canCtl){
-  let v=cmLocked;try{v=!!await cmRpc('cm_room_locked',{p_room:cmRoom})}catch(e){return}
+  let v=cmLocked;try{const r=await CLOUD.client.rpc('cm_room_locked',{p_room:cmRoom});if(r.error)return;v=!!r.data}catch(e){return}
   cmLocked=v;
   const inp=document.getElementById('cm-in'),btn=document.querySelector('.cm-send'),att=document.querySelector('.cm-att'),hint=document.getElementById('cm-hint'),bar=document.querySelector('.cm-bar');
   const lockedForMe=v&&!canCtl;
@@ -5977,7 +5977,7 @@ async function cmLockSync(canCtl){
 ACT.cmlock=()=>{
   if(!cmRoom.startsWith('g:'))return;const to=!cmLocked;
   ask(to?'غلق الدردشة؟ لن يستطيع الطلاب الكتابة حتى تفتحها.':'فتح الدردشة للطلاب؟',to?'غلق':'فتح',async()=>{
-    try{await cmRpc('cm_set_lock',{p_teacher:cmRoom.slice(2),p_locked:to});toast(to?'أُغلقت الدردشة':'فُتحت الدردشة');await cmLockSync(true)}catch(e){toast('تعذّر التنفيذ. تأكد من تشغيل ملف community6.sql في Supabase.')}
+    try{const r=await CLOUD.client.rpc('cm_set_lock',{p_teacher:cmRoom.slice(2),p_locked:to});if(r.error)throw r.error;toast(to?'أُغلقت الدردشة':'فُتحت الدردشة');await cmLockSync(true)}catch(e){toast('تعذّر التنفيذ. تأكد من تشغيل ملف community6.sql في Supabase.')}
   },to);
 };
 async function cmLoad(first){
