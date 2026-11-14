@@ -4615,7 +4615,7 @@ function weekId(){const d=Math.floor((Date.now()+3*3600e3)/864e5);return 'w'+Mat
 function weekLabel(){const d=Math.floor((Date.now()+3*3600e3)/864e5),s=d-((d-2)%7+7)%7;return new Date(s*864e5).toLocaleDateString('ar-EG',{day:'numeric',month:'long',timeZone:'UTC'})}
 function buildQs(subjs,n,seed){
   const r=rng(seed),band=examBand(),pools=subjs.map(s=>({s:s,p:shuf(poolFor(s.k,band),r)})),out=[];let i=0,guard=0;
-  while(out.length<n&&guard++<500){const x=pools[i%pools.length];i++;const q=x.p.shift();if(q&&!out.find(o=>o.id===qid(q)))out.push({id:qid(q),s:x.s.k,sn:x.s.n,q:q[2],o:q[3],a:q[4],e:q[5]});if(pools.every(z=>!z.p.length))break}
+  while(out.length<n&&guard++<500){const x=pools[i%pools.length];i++;const q=x.p.shift();if(q&&!out.find(o=>o.id===qid(q))){const ord=shuf(q[3].map((_,k)=>k),r);out.push({id:qid(q),s:x.s.k,sn:x.s.n,q:q[2],o:ord.map(k=>q[3][k]),a:ord.indexOf(q[4]),e:q[5]})}if(pools.every(z=>!z.p.length))break}
   return shuf(out,r);
 }
 const XH=()=>st.get('xhist',[]);
