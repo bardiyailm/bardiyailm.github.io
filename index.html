@@ -2399,6 +2399,8 @@ function dayItems(k,o){
   if(r!=null)add('rd',r,r+target,'قراءة كتاب خارجي','read');
   if(fri){const t=slotFree(it,P.asr+15,30,20*60);if(t!=null)add('wr',t,t+30,'مراجعة الأسبوع وتخطيط القادم','study')}
   (st.get('rtc',[])).forEach(c=>{if((c.days||[]).includes(w)){const t=pm(c.t);add('c'+c.id,t,t+(c.len||0),c.label,c.tag||'custom',{custom:c.id})}});
+  const ov=st.get('rtov',{});
+  it.forEach(x=>{const o2=ov[x.id];if(o2&&!x.custom){const len=x.t1-x.t0;if(o2.label)x.label=o2.label;if(o2.t){x.t0=pm(o2.t);x.t1=x.t0+(o2.len!=null?o2.len:len);x.ed=1}else if(o2.len!=null){x.t1=x.t0+o2.len;x.ed=1}if(o2.label)x.ed=1}});
   const hidden=st.get('rthide',[]);
   const items=it.filter(x=>!hidden.includes(x.id));
   const lastEnd=Math.max.apply(null,items.map(x=>x.t1));
@@ -3508,12 +3510,12 @@ RD.routine=()=>{
     const canFocus=x.tag==='study'&&x.subj&&x.id!=='en'||x.tag==='read';
     return '<li class="'+(dn[x.id]?'done':'')+(isNow?' now':'')+'" style="border-inline-start:3px solid '+col+';padding-inline-start:10px"><input type="checkbox" data-c="rtchk" data-id="'+x.id+'" '+(dn[x.id]?'checked':'')+' aria-label="تم"><div class="t"><b>'+esc(x.label)+'</b><div class="mut sm num">'+t12(x.t0)+(x.t1>x.t0?' – '+t12(x.t1):'')+' · '+(TAGN[x.tag]||'')+(x.cf?' <span class="bad">تعارض</span>':'')+(x.warn?' <span class="warn">'+esc(x.warn)+'</span>':'')+'</div></div>'+
       (canFocus&&isT?'<button class="btn s" data-a="rtfocus" data-id="'+x.id+'">ابدأ</button>':'')+
-      (x.custom?'<button class="x" data-a="rtcdel" data-id="'+x.custom+'" aria-label="حذف">×</button>':(x.tag!=='sleep'&&x.tag!=='pray'?'<button class="x" data-a="rthide" data-id="'+x.id+'" aria-label="إخفاء" title="إخفاء">–</button>':''))+'</li>';
+      (x.tag!=='sleep'?'<button class="x" data-a="rted" data-id="'+x.id+'" aria-label="تعديل" title="تعديل">✏️</button>':'')+(x.custom?'<button class="x" data-a="rtcdel" data-id="'+x.custom+'" aria-label="حذف">×</button>':(x.tag!=='sleep'&&x.tag!=='pray'?'<button class="x" data-a="rthide" data-id="'+x.id+'" aria-label="إخفاء" title="إخفاء">–</button>':''))+'</li>';
   }).join('');
   const hidden=st.get('rthide',[]);
   const tl=card('جدول '+(isT?'اليوم':DN[wdOf(k)]),'<ul class="list rt">'+rows+'</ul>'+(hidden.length?'<button class="btn g s" data-a="rtunhide">إظهار المخفي ('+hidden.length+')</button>':''),{cls:'full'});
   const rtc=st.get('rtc',[]);
-  const add=card('أضف نشاطاً ثابتاً','<div class="row"><input type="text" id="rc_l" placeholder="مثال: كورس إضافي" class="grow"><input type="time" id="rc_t" value="18:00"><input type="number" id="rc_len" min="5" max="300" value="45" style="width:80px" aria-label="المدة بالدقائق"></div><div style="margin:8px 0 4px" class="sm mut">الأيام</div><div class="chips" id="rc_d">'+WORD.map(w=>chip(0,'data-a="rcday" data-w="'+w+'"',DN[w])).join('')+'</div><div class="row" style="margin-top:10px"><button class="btn" data-a="rcadd">إضافة</button></div>'+
+  const add=card('أضف نشاطاً أو عدّل أي نشاط (✏️)','<div class="row"><input type="text" id="rc_l" placeholder="مثال: كورس إضافي" class="grow"><input type="time" id="rc_t" value="18:00"><input type="number" id="rc_len" min="5" max="300" value="45" style="width:80px" aria-label="المدة بالدقائق"></div><div style="margin:8px 0 4px" class="sm mut">الأيام</div><div class="chips" id="rc_d">'+WORD.map(w=>chip(0,'data-a="rcday" data-w="'+w+'"',DN[w])).join('')+'</div><div class="row" style="margin-top:10px"><button class="btn" data-a="rcadd">إضافة</button></div>'+
     (rtc.length?'<ul class="list" style="margin-top:8px">'+rtc.map(c=>'<li><span class="t"><b>'+esc(c.label)+'</b><div class="mut sm">'+t12(pm(c.t))+' · '+(c.days||[]).map(d=>DN[d]).join('، ')+'</div></span><button class="x" data-a="rtcdel" data-id="'+c.id+'" aria-label="حذف">×</button></li>').join('')+'</ul>':''));
   const tips=card('كيف يعمل الجدول','<ul class="list"><li><span class="t">يُبنى تلقائياً من مواعيد الصلاة في '+esc(cfg.loc.name)+' ودروسك وخيار الجيم الذي اخترته.</span></li><li><span class="t">إن تداخل نشاطان ظهرت كلمة «تعارض».</span></li><li><span class="t">موعد النوم يُحسب من آخر نشاط ليتبيّن لك كم ساعة نوم ستحصل.</span></li></ul>');
   return strip+'<div class="grid">'+head+tl+add+tips+'</div>';
@@ -3535,6 +3537,29 @@ ACT.rcadd=()=>{
   if(!l||!tm||!rcDays.length){toast('اكتب الاسم والوقت واختر يوماً واحداً على الأقل');return}
   const a=st.get('rtc',[]);a.push({id:uid(),label:l,t:tm,len:len,days:rcDays.slice(),tag:'custom'});st.set('rtc',a);rcDays=[];renderSec('routine');toast('أُضيف النشاط');
 };
+const rtHm=m=>pad(Math.floor(m/60)%24)+':'+pad(m%60);
+ACT.rted=t=>{
+  const id=t.dataset.id,k=rtDate||td(),x=dayItems(k).items.find(i=>i.id===id);if(!x)return;
+  const cu=x.custom?st.get('rtc',[]).find(c=>c.id===x.custom):null,ov=st.get('rtov',{})[id];
+  const days=cu?(cu.days||[]):[];
+  sheet('<h3>تعديل النشاط</h3><label class="f">الاسم<input type="text" id="re_l" maxlength="60" value="'+esc(x.label)+'"></label>'+
+    '<div class="row" style="gap:12px"><label class="f grow">البداية<input type="time" id="re_t" value="'+rtHm(x.t0)+'"></label><label class="f grow">المدة (دقيقة)<input type="number" id="re_len" min="5" max="600" value="'+Math.max(5,x.t1-x.t0||15)+'"></label></div>'+
+    (cu?'<div class="sm mut" style="margin:8px 0 4px">الأيام</div><div class="chips" id="re_d">'+[6,0,1,2,3,4,5].map(w=>chip(days.includes(w),'data-a="redday" data-w="'+w+'"',DN[w])).join('')+'</div>':'<p class="mut sm">التعديل يسري على هذا النشاط في كل الأيام التي يظهر فيها.</p>')+
+    '<div class="row" style="margin-top:12px"><button class="btn" data-a="redsave" data-id="'+id+'" type="button">حفظ</button>'+(ov?'<button class="btn g" data-a="redreset" data-id="'+id+'" type="button">استعادة الأصل</button>':'')+'</div>');
+  window.__reD=days.slice();
+};
+ACT.redday=t=>{const w=+t.dataset.w,a=window.__reD||[],i=a.indexOf(w);if(i<0)a.push(w);else a.splice(i,1);window.__reD=a;t.classList.toggle('on',i<0)};
+ACT.redsave=t=>{
+  const id=t.dataset.id,l=$('#re_l').value.trim(),tm=$('#re_t').value,len=clamp(parseInt($('#re_len').value,10)||30,5,600);
+  if(!l||!tm){toast('اكتب الاسم والوقت');return}
+  const x=dayItems(rtDate||td()).items.find(i=>i.id===id);
+  if(x&&x.custom){
+    if(!(window.__reD||[]).length){toast('اختر يوماً واحداً على الأقل');return}
+    const a=st.get('rtc',[]),c=a.find(c=>c.id===x.custom);if(c){c.label=l;c.t=tm;c.len=len;c.days=window.__reD.slice()}st.set('rtc',a);
+  }else{const o=st.get('rtov',{});o[id]={label:l,t:tm,len:len};st.set('rtov',o)}
+  closeSheet();renderSec('routine');toast('حُفظ التعديل');
+};
+ACT.redreset=t=>{const o=st.get('rtov',{});delete o[t.dataset.id];st.set('rtov',o);closeSheet();renderSec('routine');toast('عادت القيمة الأصلية')};
 ACT.rtcdel=t=>{st.set('rtc',st.get('rtc',[]).filter(c=>c.id!==t.dataset.id));renderSec('routine')};
 
 /* ========== القراءة ========== */
