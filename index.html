@@ -5902,7 +5902,7 @@ document.addEventListener('input',e=>{if(e.target&&(e.target.id==='cm-idara'||e.
 
 /* ========== المجتمع: دردشة الصفوف + مجموعات المعلمين (كل المرفقات تُفحص قبل النشر) ========== */
 let cmView='stage',cmRoom='',cmTitle='',cmOff=false,cmSynced='',cmPend=null,cmBusy=false,cmMine=null,cmTeacher=null,cmSup=new Set();
-const CMERR={denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
+const CMERR={locked:'الدردشة مغلقة الآن. فتحها بيد المعلم.',denied:'ليس لك صلاحية في هذه الغرفة.',blocked:'غير مسموح بأرقام الهاتف أو حسابات التواصل الخاصة، حفاظاً على سلامتك.',slow:'مهلاً، انتظر ثانيتين بين كل رسالة.',
   link:'الرابط لم يجتز الفحص الأمني فلم يُرسل.',image:'الصورة لم تجتز الفحص فلم تُرسل.',image_bad:'الصورة غير صالحة أو كبيرة جداً.',pdf:'الملف لم يجتز الفحص فلم يُرسل.',pdf_bad:'ملف PDF غير صالح أو يحتوي على عناصر غير آمنة أو كبير جداً (الحد 3 ميجا).',
   no_profile:'أكمل بياناتك أولاً (الاسم والصف).',bad_len:'الرسالة فارغة أو أطول من 400 حرف.',bad_gov:'اختر محافظتك.',bad_markaz:'اختر أو اكتب اسم المركز/الحي.',bad_place:'اكتب اسم الإدارة التعليمية والمدرسة (حرفان على الأقل لكل منهما).',no_place:'حدّد مدرستك أولاً من تبويب «مدرستي».',no_stage:'حدّد مرحلتك وصفك من الإعدادات أولاً.',bad_subj_code:'مادة غير صالحة.',needs_scan:'الرسائل التي فيها روابط أو ملفات تمر على الفحص أولاً.',too_many_tries:'محاولات كثيرة خاطئة. انتظر قليلاً ثم حاول مجدداً.',bad_group:'اكتب اسماً للمجموعة (حرفان على الأقل).',bad_username:'اليوزر نيم: 3 إلى 20 حرفاً إنجليزياً صغيراً أو أرقاماً أو _ ويبدأ بحرف.',username_taken:'هذا اليوزر نيم مستخدم، اختر غيره.',teacher_request:'كمعلم، يُعيَّن اليوزر نيم بطلب من تبويب «أنا معلم».',no_user:'لا يوجد مستخدم بهذا اليوزر نيم.',too_many:'الحد الأقصى 5 مشرفين.',code_taken:'هذا الرمز مستخدم، اختر رمزاً آخر.',
   bad_subject:'اكتب تخصصك (مثل: رياضيات).',bad_phone:'اكتب رقم هاتف صحيح (أرقام فقط، ويجوز + في أوله).',bad_code:'الرمز غير صحيح.',self:'هذا رمزك أنت.',bad_name:'اكتب اسماً من حرفين على الأقل.',auth:'سجّل دخولك أولاً.',upload:'تعذّر رفع المرفق، حاول لاحقاً.',profane:'الألفاظ النابية ممنوعة نهائياً. تكرارها يوقف حسابك في المجتمع.',banned:'أُوقف حسابك في المجتمع بسبب تكرار الألفاظ النابية.'};
@@ -5944,12 +5944,33 @@ function cmRoomHtml(){
    '<input id="cm-in" type="text" maxlength="400" placeholder="اكتب رسالتك…" autocomplete="off"><button class="btn cm-send" data-a="cmsend" type="button">إرسال</button></div>'+
    '<p class="mut sm cm-hint" id="cm-hint">الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.</p>';
 }
+/* غلق/فتح دردشة المجموعة: المعلم والمشرف يتحكمان، والطالب يرى الحالة ولا يستطيع الإرسال وهي مغلقة */
+let cmLocked=false;
+async function cmLockSync(canCtl){
+  let v=cmLocked;try{v=!!await cmRpc('cm_room_locked',{p_room:cmRoom})}catch(e){return}
+  cmLocked=v;
+  const inp=document.getElementById('cm-in'),btn=document.querySelector('.cm-send'),att=document.querySelector('.cm-att'),hint=document.getElementById('cm-hint'),bar=document.querySelector('.cm-bar');
+  const lockedForMe=v&&!canCtl;
+  if(inp){inp.disabled=lockedForMe;inp.placeholder=lockedForMe?'الدردشة مغلقة الآن':'اكتب رسالتك…'}
+  if(btn)btn.disabled=lockedForMe;if(att)att.style.opacity=lockedForMe?.4:'';
+  if(hint&&!cmBusy)hint.textContent=v?(canCtl?'الدردشة مغلقة على الطلاب. أنت وحدك تستطيع الكتابة.':'🔒 أغلق المعلم الدردشة. ستفتح عندما يسمح بذلك.'):'الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.';
+  let lb=document.getElementById('cm-lockbtn');
+  if(canCtl&&bar){if(!lb){lb=document.createElement('button');lb.id='cm-lockbtn';lb.type='button';lb.className='btn g s';lb.dataset.a='cmlock';bar.appendChild(lb)}lb.textContent=v?'🔓 فتح الدردشة':'🔒 غلق الدردشة'}
+  else if(lb)lb.remove();
+}
+ACT.cmlock=()=>{
+  if(!cmRoom.startsWith('g:'))return;const to=!cmLocked;
+  ask(to?'غلق الدردشة؟ لن يستطيع الطلاب الكتابة حتى تفتحها.':'فتح الدردشة للطلاب؟',to?'غلق':'فتح',async()=>{
+    try{await cmRpc('cm_set_lock',{p_teacher:cmRoom.slice(2),p_locked:to});toast(to?'أُغلقت الدردشة':'فُتحت الدردشة');await cmLockSync(true)}catch(e){toast('تعذّر التنفيذ. تأكد من تشغيل ملف community6.sql في Supabase.')}
+  },to);
+};
 async function cmLoad(first){
   if(!cmRoom||cmBusy&&!first)return;
   try{
     const rows=await cmRpc('cm_get',{p_room:cmRoom}),el=document.getElementById('cm-list');if(!el)return;
     const near=el.scrollHeight-el.scrollTop-el.clientHeight<90||first;
     const mineTeacher=cmRoom.startsWith('g:')&&CLOUD.user&&(cmRoom.slice(2)===CLOUD.user.id||cmSup.has(cmRoom));
+    if(cmRoom.startsWith('g:'))await cmLockSync(!!mineTeacher);
     el.innerHTML=rows.length?rows.map(r=>cmBubble(r,mineTeacher)).join(''):'<p class="mut sm" style="text-align:center">لا رسائل بعد. كن أول من يبدأ 👋</p>';
     if(near)el.scrollTop=el.scrollHeight;
   }catch(e){const el=document.getElementById('cm-list');if(el&&!cmOff)el.innerHTML='<p class="mut sm" style="text-align:center">'+esc(cmMsg(e))+'</p>'}
