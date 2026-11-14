@@ -5335,7 +5335,8 @@ function hbGens0(S){
   if(k==='stc')return hbPick(HB_GRP.dyn).concat(HB_X.stc.map(f=>({w:2,f})));
   const fg=ftGens(k,S);return fg.length?fg:hbPick(HB_GRP.alg);
 }
-const HB_CACHE={},HB_PER=30;
+const HB_CACHE={},HB_COUNTS=[15,30,50,70,100];
+const hbCnt=S=>HB_COUNTS.includes(+S.cnt)?+S.cnt:30;
 function hbStream(S){
   const key=hbKey(S);if(HB_CACHE[key])return HB_CACHE[key];
   const gens=hbGens(S);let salt=0;for(let i=0;i<key.length;i++)salt=(salt*131+key.charCodeAt(i))>>>0;
@@ -5350,14 +5351,14 @@ function hbAt(sm,idx){
 function hbToQ(q,sn,id){return {id:id,s:q.s,sn:sn+' · '+q.s,q:q.q.replace(/[⟦⟧]/g,''),o:q.o,a:q.a,e:q.y.replace(/[⟦⟧]/g,'')}}
 function hbBuild(S,kind,n){
   const sm=hbStream(S),sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n,K=hbKey(S);
-  const cnt=kind==='t'?HB_PER:1,base=(kind==='t'?0:1e8)+n*2000,seen=new Set(),L=[];
-  for(let a=0;L.length<cnt&&a<(kind==='t'?900:50);a++){
+  const cnt=kind==='t'?hbCnt(S):1,base=(kind==='t'?0:1e8)+n*2000,seen=new Set(),L=[];
+  const norm=t=>String(t).replace(/\s+/g,' ').trim();
+  /* لا تكرار داخل الاختبار: نصّ السؤال فريد. إن كان رصيد المادة أقل من العدد المطلوب نعيد المتاح فقط. */
+  for(let a=0;L.length<cnt&&a<(kind==='t'?Math.min(1900,cnt*18):50);a++){
     let q;try{q=hbAt(sm,base+a)}catch(e){continue}
-    const ks=q.q+'|'+q.o.slice().sort().join('~');if(seen.has(ks))continue;seen.add(ks);L.push(q);
+    const ks=norm(q.q);if(seen.has(ks))continue;seen.add(ks);L.push(q);
   }
-  if(!L.length)return[];
-  for(let i=0;L.length<cnt;i++)L.push(L[i%L.length]);
-  return L.map((q,i)=>hbToQ(q,sn,'h'+K+kind+n+'_'+i));
+  const out=L.map((q,i)=>hbToQ(q,sn,'h'+K+kind+n+'_'+i));out.want=cnt;return out;
 }
 /* ---- الواجهة ---- */
 const hbDone=()=>st.get('hbdone',{});
@@ -5374,10 +5375,12 @@ function hbCard(){
   const LV=[['b','مبتدئ'],['m','متوسط'],['h','قوي / متفوق']],lvs='<div class="chips hbr hblv">'+LV.map(x=>chip('hblv','',x[0],x[1],(S.lv||'m')===x[0])).join('')+'</div>';
   const sj='<div class="chips hbr">'+subs.map(s=>chip('hbsubj','',s.k,s.n,S.subj===s.k)).join('')+'</div>';
   const pool=gens?gens.reduce((a,g)=>a+(g.w||1),0):0,info=gens?('<p class="mut sm">'+(HB_QUANT(S)?'مادة كمية: أسئلتها مولَّدة وإجاباتها محسوبة بالمعادلة. ':'أسئلة هذه المادة مبنية من جداول حقائق مراجَعة، والمشتتات من نفس الجدول. ')+(HB_QUANT(S)?'كل اختبار 100 سؤال.':(pool<400?'عدد حقائق هذه المادة محدود (نحو '+pool.toLocaleString('ar-EG')+' سؤال فريد) فتتكرر الأسئلة بين الاختبارات. ':'')+'كل اختبار 100 سؤال.')+'</p>'):'';
+  let av=100;try{av=S.subj?hbBuild(Object.assign({},S,{cnt:100}),'t',S.n||1).length:100}catch(e){}
+  const cntRow='<div class="hbrow"><b>عدد الأسئلة</b><div class="chips hbr">'+HB_COUNTS.map(c=>chip('hbcnt','',c,String(c),hbCnt(S)===c)).join('')+'</div>'+(av<100?'<p class="mut sm">أسئلة هذه المادة غير المكررة المتاحة في الاختبار الواحد: '+av+' سؤالاً. إن اخترت عدداً أكبر يبدأ الاختبار بالمتاح فقط، بلا تكرار.</p>':'')+'</div>';
   const row=(kind,title)=>'<div class="hbrow"><b>'+title+'</b><div class="row"><input type="number" min="1" max="'+HB_N+'" value="'+(S.n||1)+'" class="hbn" id="hbn-'+kind+'" inputmode="numeric"><button class="btn" data-a="hbgo" data-k="'+kind+'">ابدأ</button><button class="btn g" data-a="hbgo" data-k="'+kind+'" data-r="1">عشوائي</button></div><small class="mut">أنجزت '+(kind==='t'?nt:np)+' من '+HB_N+'</small></div>';
   return '<div class="card full hbcard"><h3><span>الاختبارات</span><small>لكل مادة '+HB_N+' اختبار و'+HB_N+' مسألة</small></h3>'+
     '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+lvs+info+
-    (S.subj?row('t','اختبارات (30 سؤالاً)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
+    (S.subj?cntRow+row('t','اختبارات ('+hbCnt(S)+' سؤالاً)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
 RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+exPracCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
 const _rdExam=()=>RD.exam();
@@ -5386,6 +5389,7 @@ ACT.hbstage=t=>hbUp(S=>{S.stage=t.dataset.k;S.grade=EDU[S.stage].g[0];S.track=ed
 ACT.hbgrade=t=>hbUp(S=>{S.grade=+t.dataset.k;S.track=eduNeedsTrack(S.stage,S.grade)?(S.track&&TRACKS[S.stage]&&TRACKS[S.stage][S.track]?S.track:Object.keys(TRACKS[S.stage])[0]):'';S.subj=''});
 ACT.hbtrack=t=>hbUp(S=>{S.track=t.dataset.k;S.subj=''});
 ACT.hblv=t=>hbUp(S=>{S.lv=t.dataset.k});
+ACT.hbcnt=t=>hbUp(S=>{S.cnt=+t.dataset.k});
 ACT.hbsubj=t=>hbUp(S=>{S.subj=t.dataset.k});
 ACT.hbgo=t=>{
 const S=hbSt(),kind=t.dataset.k;
@@ -5393,7 +5397,9 @@ const S=hbSt(),kind=t.dataset.k;
   S.n=n;hbSave(S);const hb={key:hbKey(S),k:kind,n:n};
   const sn=(eduSubjects({stage:S.stage,grade:S.grade,track:S.track}).find(x=>x.k===S.subj)||{n:''}).n;
   const meta={type:'prac',subj:S.subj,title:(kind==='t'?'اختبار ':'مسألة ')+n+' · '+sn+' · '+({b:'مبتدئ',m:'متوسط',h:'قوي / متفوق'}[S.lv||'m']),hb:hb};
-  exStart(hbBuild(S,kind,n),meta);
+  const qs=hbBuild(S,kind,n);
+  if(kind==='t'&&qs.length&&qs.length<qs.want)toast('المتاح لهذه المادة والمستوى '+qs.length+' سؤالاً غير مكرر فقط، فبدأ الاختبار بها.',4500);
+  exStart(qs,meta);
 };
 
 /* ========== بنوك الحقائق: أسئلة المواد غير الكمية (بلا ذكاء اصطناعي) ==========
