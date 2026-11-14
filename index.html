@@ -5933,6 +5933,7 @@ RD.comm=()=>{
   if(typeof CLOUD==='undefined'||!CLOUD.client||!CLOUD.user)return '<div class="card"><b>المجتمع يحتاج حساباً</b><p class="mut sm">سجّل دخولك بحسابك لتشارك زملاءك ومعلميك.</p>'+(typeof CLOUD!=='undefined'&&CLOUD.client&&!CLOUD.user?'<button class="btn big" data-a="guestout" type="button">إنشاء حساب / تسجيل الدخول</button>':'')+'</div>';
   if(cmOff)return '<div class="card cm-off"><b>المجتمع قيد التجهيز</b><p class="mut sm">سيُفتح قريباً بإذن الله. تابع التحديثات.</p></div>';
   /* تغيّر صفّه الدراسي: اخرج من غرفة الصف القديم وحدّث الخادم فوراً */
+  if(!window.__cmTv&&st.get('cmIsTeacher',0)){window.__cmTv=1;if(!cmRoom)cmView='teach'}/* معلم معتمد: يفتح قسم مجتمعه على «أنا معلم» مباشرة، وهو مسجّل بحسابه فلا يُطلب منه شيء */
   if(cmRoom&&!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&!cmRoom.startsWith('sj:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
   if(typeof CLOUD!=='undefined'&&CLOUD.user&&cmKey()&&cmSynced.split('|')[0]!==cmKey())cmSync().then(()=>{if(curSec==='comm')renderSec('comm')}).catch(()=>{});
   if(cmRoom)return cmRoomHtml();
@@ -6169,7 +6170,7 @@ function cmTeachHtml(){return '<div id="cm-teach"><p class="mut sm" style="text-
 async function cmLoadTeacher(){
   const el=document.getElementById('cm-teach');if(!el)return;
   try{
-    const r=await cmRpc('cm_my_teacher');cmTeacher=r&&r[0]||null;
+    const r=await cmRpc('cm_my_teacher');cmTeacher=r&&r[0]||null;st.set('cmIsTeacher',cmTeacher&&cmTeacher.approved?1:0);
     if(!cmTeacher){el.innerHTML='<div class="card cm-hero"><div class="b">سجّل كمعلم</div><p class="mut sm">أنشئ مجموعة لطلابك برمز من 10 أرقام. تصل بياناتك للمشرف (للمراجعة فقط، ولا تظهر للطلاب) وتُفعَّل مجموعتك بعد موافقته.</p>'+
       '<label class="f">الاسم الظاهر<input id="cm-tn" maxlength="40" placeholder="أ. أحمد"></label><label class="f">اسم المجموعة (يظهر للطلاب)<input id="cm-tg" maxlength="40" placeholder="مجموعة أ. أحمد للرياضيات"></label><label class="f">المادة<input id="cm-ts" maxlength="40" placeholder="الرياضيات"></label><label class="f">رقم هاتفك (للمشرف فقط ولا يظهر للطلاب)<input id="cm-tp" dir="ltr" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX"></label>'+
       '<label class="f">رمز مجموعتك (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">رمز جديد</button></div></label>'+
