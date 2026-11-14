@@ -2187,7 +2187,7 @@ const DEF={
   sleep:{target:480,bed:'21:30'},
   loc:{name:'القاهرة',lat:30.04,lng:31.24},
   notify:false,remWater:false,
-  alarm:{on:true,mode:'auto',lead:10,fixed:'03:20',days:[0,1,2,3,4,5,6],sound:'siren',vol:90,vib:true,rug:[],sens:'mid',skip:'',log:{}},
+  alarm:{on:false,mode:'auto',lead:10,fixed:'03:20',days:[0,1,2,3,4,5,6],sound:'siren',vol:90,vib:true,rug:[],sens:'mid',skip:'',log:{}},
   subs:[],
   theme:{},
   bg:{mode:'fixed',fixed:'vd',per:{},ver:3,dim:.38,custom:{kind:'',color:'#101820'}}
@@ -2591,10 +2591,10 @@ const bgTx=(m,fn)=>DB.tx('ab-bg','k',{},m,fn);
 
 /* ========== التنقل ========== */
 const ICO={comm:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',tests:'M6 2h9l5 5v15H6zM14 2v6h6M9 13l2 2 4-4M9 18h6',elite:'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z',ai:'M12 1.9C6.8 1.9 4.9 6 4.9 10.5L3.8 18.8 7.5 21.8 8.6 15.4H15.4L16.5 21.8 20.2 18.8 19.1 10.5C19.1 6 17.2 1.9 12 1.9zM8.6 15.4C8.2 12.8 8.2 9 8.6 7.5 9.8 5.6 14.2 5.6 15.4 7.5 15.8 9 15.8 12.8 15.4 15.4M10.1 10.5h1.5M12.8 10.5h1.5M12 10.9v1.9M10.5 14.2q1.5 0.8 3 0M10.9 17.2h2.2l-0.4 3.4h-1.5z',exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',study:'M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',fit:'M13 3L4 14h7l-1 7 9-11h-7z',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
-const NAVPRI=['home','study','tests','tasks'];
+const NAVPRI=['home','study','sched','tests','tasks'];
 const FULLM=()=>{try{return localStorage.getItem('ab:full')==='1'}catch(e){return false}};
-const CORE=['home','study','tests','tasks'];
-const MGRP=[['الأساسي',['home','study','tests','tasks','comm','ai','lib','elite']],['تنظيم يومك',['routine','alarm','notes','read','log','insp']],['الصحة واللياقة',['gym','fit','food','water']],['الإعدادات',['set']]];
+const CORE=['home','study','sched','tests','tasks'];
+const MGRP=[['الأساسي',['home','study','sched','tests','tasks','comm','ai','lib','elite']],['تنظيم يومك',['routine','alarm','notes','read','log','insp']],['الصحة واللياقة',['gym','fit','food','water']],['الإعدادات',['set']]];
 const tabBtn=(s,cls)=>'<button class="tab'+(cls||'')+'" data-a="go" data-g="'+s.id+'" style="--c:'+s.c+'" aria-label="'+s.n+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO[s.id]+'"/></svg><span>'+s.n+'</span></button>';
 function buildShell(){
   $('#tabs').innerHTML=SEC.filter(s=>s.id!=='ai'&&(FULLM()||CORE.includes(s.id))).map(s=>tabBtn(s,NAVPRI.includes(s.id)?' pri':'')).join('')+'<button class="tab moreb" data-a="more" style="--c:var(--acc)" aria-label="المزيد"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO.more+'"/></svg><span>المزيد</span></button>';
@@ -3742,7 +3742,7 @@ function nextAlarm(){
   return null;
 }
 function alarmInfo(){
-  const a=cfg.alarm;if(!a.on)return{text:'المنبه متوقف',sub:'فعّله من قسم المنبه.',canCancel:false,skipped:false};
+  const a=cfg.alarm;if(!a.on)return{text:'المنبه متوقف',sub:'المنبه اختياري. فعّله من قسم المنبه إن أردته.',canCancel:false,skipped:false};
   const x=nextAlarm();if(!x)return{text:'لا منبه قادم',sub:'اختر أيام التشغيل.',canCancel:false,skipped:false};
   const day=x.i===0?'اليوم':x.i===1?'غداً':DN[wdOf(x.d)];
   return{text:day+' '+t12(x.m)+(x.skipped?' (ملغى)':''),sub:x.skipped?'ألغيت هذا المنبه. لن يرن.':'لا يتوقف حتى تصوّر الماء على وجهك ورأسك وسجادة الصلاة.',canCancel:true,skipped:x.skipped};
@@ -3988,6 +3988,9 @@ function alarmTick(){
   nightTick();taskTick();waterTick();
 }
 function alarmInit(){ensureOverlay();setInterval(alarmTick,1000);alarmTick()}
+
+/* المنبه اختياري: من لم يستخدمه من قبل يبدأ متوقفاً (مرة واحدة) */
+(()=>{try{if(!st.get('almOpt1',0)){st.set('almOpt1',1);if(cfg.alarm.on&&!Object.keys(cfg.alarm.log||{}).length){cfg.alarm.on=false;saveCfg()}}}catch(e){}})();
 
 /* ========== الحسابات والمزامنة السحابية (اختيارية) ==========
    - تسجيل باسم + اسم مستخدم + كلمة مرور فقط.
@@ -5922,12 +5925,13 @@ RD.comm=()=>{
   if(cmRoom&&!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&!cmRoom.startsWith('sj:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
   if(typeof CLOUD!=='undefined'&&CLOUD.user&&cmKey()&&cmSynced.split('|')[0]!==cmKey())cmSync().then(()=>{if(curSec==='comm')renderSec('comm')}).catch(()=>{});
   if(cmRoom)return cmRoomHtml();
-  const tabs=[['stage','صفّي'],['school','مدرستي'],['groups','مجموعاتي'],['teach','أنا معلم']];
+  if(cmView==='school')cmView='stage';
+  const tabs=[['stage','صفّي'],['groups','مجموعاتي'],['teach','أنا معلم']];
   return '<div class="chips cm-tabs">'+tabs.map(t=>'<button class="chip'+(cmView===t[0]?' on':'')+'" data-a="cmview" data-v="'+t[0]+'" type="button">'+t[1]+'</button>').join('')+'</div>'+
     (cmView==='stage'?cmStageHtml():cmView==='school'?cmSchoolHtml():cmView==='groups'?cmGroupsHtml():cmTeachHtml());
 };
 PO.comm=()=>{if(cmRoom)cmLoad(true);else if(cmView==='school')cmLoadSchool();else if(cmView==='groups')cmLoadGroups();else if(cmView==='teach')cmLoadTeacher()};
-ACT.cmview=t=>{cmView=t.dataset.v;cmRoom='';renderSec('comm')};
+ACT.cmview=t=>{if(t.dataset.v==='school')return;cmView=t.dataset.v;cmRoom='';renderSec('comm')};
 function cmStageHtml(){
   const k=cmKey();if(!k)return '<div class="card"><b>اختر صفك أولاً</b><p class="mut sm">حدّد مرحلتك وصفك الدراسي من الإعدادات لتدخل مجتمع صفّك.</p></div>';
   return '<div class="card cm-hero"><div class="b">مجتمع '+cmLabel(k)+'</div><p class="mut sm">دردشة مع زملاء صفّك فقط. ممنوع أرقام الهاتف وحسابات التواصل. كل الروابط والصور والملفات تُفحص قبل نشرها.</p><button class="btn big" data-a="cmopen" data-r="'+k+'" data-t="مجتمع '+cmLabel(k)+'">ادخل الدردشة</button></div>';
@@ -5995,7 +5999,7 @@ async function cmShrink(f){
 document.addEventListener('change',async e=>{
   const t=e.target;if(!t||t.id!=='cm-file'||!t.files[0])return;const f=t.files[0];t.value='';
   try{
-    if(f.type==='application/pdf'){if(f.size>CM_PDF_MAX)return toast('الحد الأقصى لملف PDF هو 14 ميجا. حجم ملفك '+(f.size/1e6).toFixed(1)+' ميجا.');cmPend={pdf:await cmRead(f),fname:f.name,kind:'pdf'}}
+    if(f.type==='application/pdf'){if(f.size>CM_PDF_MAX)return toast('الحد الأقصى لملف PDF هو 14 ميجا. حجم ملفك '+(f.size/1e6).toFixed(1)+' ميجا.');cmPend={file:f,fname:f.name,kind:'pdf'}}
     else if(/^image\//.test(f.type)){cmPend={image:await cmShrink(f),kind:'img'}}
     else return toast('اختر صورة أو ملف PDF فقط.');
     cmPendShow();
@@ -6008,13 +6012,30 @@ ACT.cmsend=async t=>{
   const inp=document.getElementById('cm-in'),hint=document.getElementById('cm-hint');if(!inp||cmBusy)return;
   const text=inp.value.trim();if(!text&&!cmPend)return;
   if(!navigator.onLine)return toast('تحتاج اتصالاً بالإنترنت.');
-  const scan=!!cmPend||/(https?:|www\.|\.(com|net|org|me)\b)/i.test(text);
-  cmBusy=true;t.disabled=true;if(hint)hint.textContent=scan?'جارٍ فحص المرفق أو الرابط…':'';
+  const isPdf=!!cmPend&&cmPend.kind==='pdf',scan=(!!cmPend&&!isPdf)||/(https?:|www\.|\.(com|net|org|me)\b)/i.test(text);
+  cmBusy=true;t.disabled=true;if(hint)hint.textContent=isPdf?'جارٍ رفع الملف…':scan?'جارٍ فحص المرفق أو الرابط…':'';
   try{
-    if(scan){
-      const r=await CLOUD.client.functions.invoke('community-send',{body:{room:cmRoom,text:text,image:cmPend&&cmPend.image||'',pdf:cmPend&&cmPend.pdf||'',fname:cmPend&&cmPend.fname||''}});
-      if(r.error)throw new Error('offline_fn');if(r.data&&r.data.error)throw new Error(r.data.error);
-    }else{const d=await cmRpc('cm_post',{p_room:cmRoom,p_body:text});if(d)throw new Error(d)}
+    let done=false;
+    if(isPdf){
+      /* مسار سريع: رفع مباشر إلى التخزين ثم نشر الرسالة (بلا base64 ولا فحص). يتطلب community7.sql، وإلا نرجع للمسار القديم. */
+      const path=CLOUD.user.id+'/'+crypto.randomUUID()+'.pdf';
+      try{
+        const up=await CLOUD.client.storage.from('community').upload(path,cmPend.file,{contentType:'application/pdf',upsert:false});
+        if(!up.error){
+          const rp=await CLOUD.client.rpc('cm_post_file',{p_room:cmRoom,p_body:text,p_file:path,p_fname:cmPend.fname});
+          if(!rp.error){if(rp.data)throw new Error(rp.data);done=true}
+          else{try{await CLOUD.client.storage.from('community').remove([path])}catch(x){}
+            if(!/does not exist|PGRST202|404/i.test(String(rp.error.message||rp.error.code||'')))throw rp.error}
+        }
+      }catch(e){if(e&&e.message&&/^(denied|locked|bad_len|blocked|slow|profane|banned|no_profile)$/.test(e.message))throw e}
+    }
+    if(!done){
+      if(scan||isPdf){
+        const pdf64=isPdf?await cmRead(cmPend.file):'';
+        const r=await CLOUD.client.functions.invoke('community-send',{body:{room:cmRoom,text:text,image:cmPend&&cmPend.image||'',pdf:pdf64,fname:cmPend&&cmPend.fname||''}});
+        if(r.error)throw new Error('offline_fn');if(r.data&&r.data.error)throw new Error(r.data.error);
+      }else{const d=await cmRpc('cm_post',{p_room:cmRoom,p_body:text});if(d)throw new Error(d)}
+    }
     inp.value='';cmPend=null;cmPendShow();if(hint)hint.textContent='الروابط والصور تمرّ على فحص أمني قبل الإرسال. ملفات PDF حتى 14 ميجا.';await cmLoad(true);
   }catch(e){const m=e&&e.message==='offline_fn'?'خدمة الفحص غير مفعّلة بعد، جرّب رسالة نصية.':cmMsg(e);if(hint)hint.textContent=m;toast(m)}
   finally{cmBusy=false;t.disabled=false}
