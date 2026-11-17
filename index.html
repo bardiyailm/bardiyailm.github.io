@@ -5116,13 +5116,13 @@ function exLeftDays(){const v=st.get('exam','');if(!v)return null;return Math.ma
 function exPlanCard(){
   const L=exLeftDays(),due=mbDue().length;
   if(L==null)return card('خطتك حتى الامتحان','<p class="mut sm">حدّد موعد امتحانك من الأعلى لتظهر لك الأيام المتبقية والمطلوب يومياً.</p>');
-  const rem=+st.get('exLessons',0)||0,per=rem&&L?Math.ceil(rem/L*10)/10:0,wk=Math.floor(L/7);
+  const rem=+st.get('exlessons',0)||0,per=rem&&L?Math.ceil(rem/L*10)/10:0,wk=Math.floor(L/7);
   return card('خطتك حتى الامتحان','<div class="tiles"><div class="tile"><b class="'+(L<=14?'warn':'ac')+'">'+L+'</b><span>يوماً متبقياً'+(wk?' (≈ '+wk+' أسبوع)':'')+'</span></div><div class="tile"><b>'+(rem||'—')+'</b><span>درساً متبقياً</span></div><div class="tile"><b class="'+(per>3?'bad':'ok')+'">'+(per||'—')+'</b><span>درس يومياً</span></div></div>'+
     '<label class="f" style="margin-top:10px">كم درساً بقي لك في المنهج؟<input type="number" min="0" max="999" value="'+(rem||'')+'" data-c="exlessons" placeholder="مثال: 40" style="width:120px"></label>'+
     (per>3?'<p class="warn sm" style="margin:8px 0 0">المطلوب أكثر من 3 دروس يومياً. فكّر في تقليل الأنشطة الجانبية أو إضافة جلسات مذاكرة.</p>':'')+
     '<div class="row" style="margin-top:8px">'+(due?'<button class="btn s" data-a="mbrev">راجع '+Math.min(due,20)+' سؤالاً من أخطائك</button>':'')+'<button class="btn g s" data-a="weekRep">🖼️ تقريري الأسبوعي</button></div>');
 }
-CHG.exlessons=t=>{st.set('exLessons',clamp(parseInt(t.value,10)||0,0,999));renderSec('home')};
+CHG.exlessons=t=>{st.set('exlessons',clamp(parseInt(t.value,10)||0,0,999));renderSec('home')};
 
 /* ========== تحليل الدروس: أضعف الدروس من نتائجك الفعلية ========== */
 function topicStats(){
@@ -5136,6 +5136,8 @@ function tpCard(){
 }
 ACT.mbtopic=t=>{const a=MB().filter(m=>m.q.t===t.dataset.t&&m.q.sn===t.dataset.s);if(!a.length)return toast('لا أخطاء محفوظة في هذا الدرس');exStart(mbQs(a,20),{type:'prac',rev:1,title:'مراجعة: '+t.dataset.t})};
 
+/* ترحيل مفاتيح كانت بأحرف كبيرة (لا تُرفع للسحابة) إلى أحرف صغيرة */
+(()=>{try{[['exLessons','exlessons'],['fcLast','fclast'],['lbOn','lbon']].forEach(([o,n])=>{const v=localStorage.getItem('ab:'+o);if(v!==null){if(localStorage.getItem('ab:'+n)===null)st.set(n,JSON.parse(v));localStorage.removeItem('ab:'+o)}})}catch(e){}})();
 /* ========== التقرير الأسبوعي (صورة) + بطاقات المراجعة ========== */
 function weekStats(){
   const k=td(),days=[];for(let i=6;i>=0;i--){const d=addDays(k,-i);days.push({d:d,v:Math.round(D.study(d)||0)})}
@@ -5172,9 +5174,9 @@ function fcCard(){
     '<div class="tiles"><div class="tile"><b class="'+(d.length?'warn':'ok')+'">'+d.length+'</b><span>مستحقة الآن</span></div><div class="tile"><b>'+a.length+'</b><span>إجمالي البطاقات</span></div></div>'+
     '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" data-a="fcnew">+ بطاقة جديدة</button><button class="btn g" data-a="fcrev"'+(d.length?'':' disabled')+'>راجع المستحقة ('+Math.min(d.length,20)+')</button>'+(a.length?'<button class="btn g" data-a="fclist">إدارة</button>':'')+'</div>');
 }
-ACT.fcnew=()=>sheet('<h3>بطاقة جديدة</h3><label class="f">المادة أو الدرس<input type="text" id="fc_s" maxlength="40" value="'+esc(st.get('fcLast',''))+'"></label><label class="f">السؤال (وجه البطاقة)<textarea id="fc_f" rows="2" maxlength="300"></textarea></label><label class="f">الإجابة (ظهر البطاقة)<textarea id="fc_b" rows="3" maxlength="600"></textarea></label><div class="row" style="margin-top:10px"><button class="btn" data-a="fcsave">حفظ</button><button class="btn g" data-close>إغلاق</button></div>');
+ACT.fcnew=()=>sheet('<h3>بطاقة جديدة</h3><label class="f">المادة أو الدرس<input type="text" id="fc_s" maxlength="40" value="'+esc(st.get('fclast',''))+'"></label><label class="f">السؤال (وجه البطاقة)<textarea id="fc_f" rows="2" maxlength="300"></textarea></label><label class="f">الإجابة (ظهر البطاقة)<textarea id="fc_b" rows="3" maxlength="600"></textarea></label><div class="row" style="margin-top:10px"><button class="btn" data-a="fcsave">حفظ</button><button class="btn g" data-close>إغلاق</button></div>');
 ACT.fcsave=()=>{const s=$('#fc_s').value.trim(),f=$('#fc_f').value.trim(),b=$('#fc_b').value.trim();if(!f||!b)return toast('اكتب السؤال والإجابة');
-  const a=FC();a.push({id:uid(),s:s,f:f,b:b,box:0,due:Date.now()});fcSave(a);st.set('fcLast',s);$('#fc_f').value='';$('#fc_b').value='';$('#fc_f').focus();toast('حُفظت البطاقة ('+a.length+')');renderSec('tests')};
+  const a=FC();a.push({id:uid(),s:s,f:f,b:b,box:0,due:Date.now()});fcSave(a);st.set('fclast',s);$('#fc_f').value='';$('#fc_b').value='';$('#fc_f').focus();toast('حُفظت البطاقة ('+a.length+')');renderSec('tests')};
 let fcQ=[],fcI=0;
 ACT.fcrev=()=>{fcQ=FC().filter(x=>x.due<=Date.now()).sort((a,b)=>a.due-b.due).slice(0,20).map(x=>x.id);fcI=0;if(!fcQ.length)return toast('لا بطاقات مستحقة');fcShow(false)};
 function fcShow(back){
@@ -5193,12 +5195,12 @@ function lbPoints(){
   return{mins:mins,points:mins+ok*3};
 }
 async function lbSync(){
-  if(!st.get('lbOn',0)||!window.CLOUD||!CLOUD.client||!CLOUD.user)return;
+  if(!st.get('lbon',0)||!window.CLOUD||!CLOUD.client||!CLOUD.user)return;
   const p=lbPoints();try{await CLOUD.client.rpc('lb_submit',{p_points:p.points,p_mins:p.mins})}catch(e){}
 }
 ACT.lbopen=async()=>{
   if(!cmRoom||!cmRoom.startsWith('g:'))return;
-  const on=!!st.get('lbOn',0);await lbSync();
+  const on=!!st.get('lbon',0);await lbSync();
   sheet('<h3>🏆 لوحة الشرف هذا الأسبوع</h3><div id="lb-body"><p class="mut sm">جارٍ التحميل…</p></div>'+
     '<label class="mgsw" style="margin-top:12px"><input type="checkbox" data-c="lbon" '+(on?'checked':'')+'><span><b>أشارك نقاطي مع مجموعتي</b><small>تظهر نقاطك واسمك لأعضاء هذه المجموعة فقط. النقاط = دقائق المذاكرة + 3 لكل إجابة صحيحة. تبدأ من جديد كل أسبوع.</small></span></label>');
   try{
@@ -5206,7 +5208,7 @@ ACT.lbopen=async()=>{
     el.innerHTML=a.length?'<ol class="list">'+a.map((x,i)=>'<li'+(x.mine?' class="now"':'')+'><span class="t"><b>'+(['🥇','🥈','🥉'][i]||(i+1)+'.')+' '+esc(x.name)+(x.mine?' (أنت)':'')+'</b><div class="mut sm">'+Math.round(x.mins/6)/10+' ساعة مذاكرة</div></span><b class="num">'+x.points+'</b></li>').join('')+'</ol>':'<p class="mut sm">لا أحد شارك بعد هذا الأسبوع. فعّل المشاركة لتكون أول المتصدرين.</p>';
   }catch(e){const el=$('#lb-body');if(el)el.innerHTML='<p class="mut sm">اللوحة قيد التجهيز، تظهر قريباً بإذن الله.</p>'}
 };
-CHG.lbon=async t=>{st.set('lbOn',t.checked?1:0);try{if(t.checked)await lbSync();else await CLOUD.client.rpc('lb_clear')}catch(e){}toast(t.checked?'تمت المشاركة':'أُوقفت المشاركة وحُذفت نقاطك من اللوحة');if(cmRoom)ACT.lbopen()};
+CHG.lbon=async t=>{st.set('lbon',t.checked?1:0);try{if(t.checked)await lbSync();else await CLOUD.client.rpc('lb_clear')}catch(e){}toast(t.checked?'تمت المشاركة':'أُوقفت المشاركة وحُذفت نقاطك من اللوحة');if(cmRoom)ACT.lbopen()};
 setInterval(lbSync,5*60*1000);
 /* ========== شهادة بعد كل اختبار ========== */
 const CERT_TIERS=[[90,'امتياز','#c9962a','#f6e3a4'],[75,'جيد جداً','#8a97a6','#e4e9ee'],[60,'جيد','#b4713c','#f1d4bb'],[0,'مشاركة','#5f7f9f','#dbe6f1']];
