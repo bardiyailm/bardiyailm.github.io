@@ -4702,7 +4702,7 @@ function exQuestion(){
 function exResult(){
   const items=EX.qs.map((q,i)=>({q:q,a:EX.ans[i]})),score=items.filter(x=>x.a===x.q.a).length,p=Math.round(score/EX.qs.length*100);
   return '<div class="card glow"><h3><span>النتيجة</span><small>'+esc(EX.meta.title)+'</small></h3><div class="exscore">'+score+' من '+EX.qs.length+'</div><div class="b" style="text-align:center">'+p+'% · '+grade(p)+'</div>'+
-    '<div class="mut sm" style="text-align:center">صحيحة: '+score+' · خاطئة: '+items.filter(x=>x.a>=0&&x.a!==x.q.a).length+' · بلا إجابة: '+items.filter(x=>x.a<0).length+'</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn" data-a="exnew">رجوع للاختبارات</button><button class="btn g" data-a="exPdf" data-m="r">📄 تنزيل النتيجة PDF</button></div></div>'+
+    '<div class="mut sm" style="text-align:center">صحيحة: '+score+' · خاطئة: '+items.filter(x=>x.a>=0&&x.a!==x.q.a).length+' · بلا إجابة: '+items.filter(x=>x.a<0).length+'</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn" data-a="cert">🏅 شهادتي</button><button class="btn" data-a="exnew">رجوع للاختبارات</button><button class="btn g" data-a="exPdf" data-m="r">📄 تنزيل النتيجة PDF</button></div></div>'+
     '<div class="card" style="margin-top:12px"><h3>الحلول والشرح</h3><div class="chips" style="margin-bottom:8px"><button class="chip'+(EX.rf!=='bad'?' on':'')+'" data-a="exrf" data-k="all">كل الأسئلة</button><button class="chip'+(EX.rf==='bad'?' on':'')+'" data-a="exrf" data-k="bad">الأخطاء فقط</button></div>'+items.map((x,i)=>{const ok=x.a===x.q.a;if(EX.rf==='bad'&&ok)return '';
       return '<div class="exrev '+(ok?'ok':'no')+'"><div class="mut sm">'+(i+1)+'. '+esc(x.q.sn)+' · '+(ok?'إجابة صحيحة':x.a<0?'بلا إجابة':'إجابة خاطئة')+'</div><div class="b">'+esc(x.q.q)+'</div>'+
       (ok?'':'<div class="sm">إجابتك: '+(x.a<0?'—':esc(x.q.o[x.a]))+'</div>')+'<div class="sm">الصحيح: <b>'+esc(x.q.o[x.q.a])+'</b></div><div class="mut sm">'+esc(x.q.e)+'</div></div>'}).join('')+'</div>';
@@ -5199,6 +5199,40 @@ ACT.lbopen=async()=>{
 };
 CHG.lbon=async t=>{st.set('lbOn',t.checked?1:0);try{if(t.checked)await lbSync();else await CLOUD.client.rpc('lb_clear')}catch(e){}toast(t.checked?'تمت المشاركة':'أُوقفت المشاركة وحُذفت نقاطك من اللوحة');if(cmRoom)ACT.lbopen()};
 setInterval(lbSync,5*60*1000);
+/* ========== شهادة بعد كل اختبار ========== */
+const CERT_TIERS=[[90,'امتياز','#c9962a','#f6e3a4'],[75,'جيد جداً','#8a97a6','#e4e9ee'],[60,'جيد','#b4713c','#f1d4bb'],[0,'مشاركة','#5f7f9f','#dbe6f1']];
+async function certCanvas(o){
+  await XP.ready();const W=1754,H=1240,c=XP.cv(W,H),x=c.getContext('2d');x.direction='rtl';x.textAlign='center';
+  const th=XTH(),T=XTHEMES[th]||XTHEMES.none,tier=CERT_TIERS.find(t=>o.pct>=t[0]);
+  x.fillStyle='#fffdf6';x.fillRect(0,0,W,H);xBg(x,W,H,th);
+  x.strokeStyle=tier[2];x.lineWidth=10;XP.rr(x,50,50,W-100,H-100,24);x.stroke();x.strokeStyle=T.a;x.lineWidth=3;XP.rr(x,76,76,W-152,H-152,16);x.stroke();
+  const cx=W/2;x.fillStyle=T.c;XP.font(x,40,0);x.fillText('بردية علم',cx,150);
+  x.fillStyle=tier[2];XP.font(x,92,1);x.fillText('شهادة '+(o.pct>=60?'إنجاز':'مشاركة'),cx,270);
+  x.fillStyle='#4a5a6a';XP.font(x,34,0);x.fillText('تُمنح هذه الشهادة إلى '+(th==='girl'?'الطالبة':th==='boy'?'الطالب':'الطالب/ـة'),cx,350);
+  x.fillStyle=T.c;XP.font(x,84,1);x.fillText(o.name||'..............................',cx,462);
+  x.strokeStyle=tier[2];x.lineWidth=3;x.beginPath();x.moveTo(cx-330,490);x.lineTo(cx+330,490);x.stroke();
+  x.fillStyle='#4a5a6a';XP.font(x,34,0);x.fillText('تقديراً لإتمامه الاختبار التالي:',cx,560);
+  x.fillStyle='#16324f';XP.font(x,48,1);XP.dir(x,o.title);x.fillText(XP.fit(x,o.title,W-360),cx,630);x.direction='rtl';
+  // ميدالية
+  const my=860,mr=130;x.fillStyle=tier[3];x.beginPath();x.arc(cx,my,mr+14,0,7);x.fill();x.fillStyle=tier[2];x.beginPath();x.arc(cx,my,mr,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(cx,my,mr-16,0,7);x.fill();
+  x.fillStyle=tier[2];XP.font(x,84,1);x.direction='ltr';x.fillText(o.pct+'%',cx,my+22);x.direction='rtl';XP.font(x,30,1);x.fillText(tier[1],cx,my+72);
+  x.fillStyle='#4a5a6a';XP.font(x,32,0);x.fillText('الدرجة: '+o.score+' من '+o.total,cx-420,my+10);x.fillText('عدد الأسئلة: '+o.total,cx+420,my+10);
+  xStar(x,cx-420,my-70,26,tier[2]);xStar(x,cx+420,my-70,26,tier[2]);
+  x.fillStyle='#4a5a6a';XP.font(x,28,0);x.fillText(new Date().toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}),cx,1090);
+  x.fillStyle=tier[2];XP.font(x,24,0);x.fillText('bardiyailm.github.io',cx,1140);
+  return c;
+}
+function certData(){
+  const n=EX.qs.length,score=EX.qs.filter((q,i)=>EX.ans[i]===q.a).length;
+  return{name:me(),title:(EX.meta&&EX.meta.title)||'اختبار',score:score,total:n,pct:n?Math.round(score/n*100):0};
+}
+ACT.cert=()=>{
+  if(!EX.qs.length)return;const d=certData();
+  sheet('<h3>🏅 شهادتك</h3><p class="mut sm">'+esc(d.title)+' · '+d.score+' من '+d.total+' ('+d.pct+'%)</p><label class="f">الاسم على الشهادة<input type="text" id="ct_n" maxlength="40" value="'+esc(d.name)+'" placeholder="اكتب اسمك"></label>'+xThemePick()+
+    '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" id="ct_pdf">تنزيل PDF</button><button class="btn g" id="ct_png">تنزيل صورة</button><button class="btn g" data-close>إغلاق</button></div>',s=>{xThemeBind(s);
+    const go=async pdf=>{d.name=$('#ct_n',s).value.trim();closeSheet();toast('جارٍ تجهيز الشهادة…');try{const cv=await certCanvas(d),nm='بردية-علم-شهادة-'+d.title;if(pdf)XP.pdfSave([cv],'شهادة',nm,true);else await XP.png(cv,nm);toast('تم تنزيل الشهادة')}catch(e){console.error(e);toast('تعذّر إنشاء الشهادة')}};
+    $('#ct_pdf',s).onclick=()=>go(true);$('#ct_png',s).onclick=()=>go(false)});
+};
 
 /* ========== المتفوقون: 10,000 سؤال للثانوية العامة (علمي علوم / علمي رياضة) ==========
    كل سؤال يُولَّد برمجيًا من بذرة ثابتة، وإجابته تُحسب بالمعادلة نفسها فهي صحيحة بالبناء.
