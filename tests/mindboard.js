@@ -1,0 +1,24 @@
+const { chromium } = require('playwright');
+(async()=>{const b=await chromium.launch();const p=await (await b.newContext({viewport:{width:390,height:850}})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push('C:'+m.text().slice(0,120))});
+await p.goto((process.env.BASE||'http://localhost:8765')+'/index.html');await p.waitForTimeout(1500);
+const r=await p.evaluate(async()=>{buildShell();const o={};const sl=ms=>new Promise(r=>setTimeout(r,ms||300));
+ st.set('profile',Object.assign({},profile(),{name:'عبدالرحمن',edu:{stage:'sec',grade:3,track:'sci'}}));
+ st.set('mdused',[]);st.set('mddone',{});st.set('mdrun',null);localStorage.removeItem('ab:mdshare');
+ const calls=[];
+ CLOUD.on=true;CLOUD.user={id:'u1'};CLOUD.client={rpc:async(fn,a)=>{calls.push([fn,a]);
+   if(fn==='mind_board')return {data:[{pos:1,name:'سلمى',pct:95,score:57,total:60,secs:3600,mine:false},{pos:2,name:'عبدالرحمن',pct:92,score:55,total:60,secs:4100,mine:true}]};
+   if(fn==='mind_rank')return {data:[{pos:2,players:37}]};return {data:true}}};
+ o.grp=mdGrp(eduOf());
+ // اختبار كامل ثم سؤال المشاركة
+ const qs=mdBuild(eduOf());exStart(qs,{type:'prac',title:'اختبار العقل',md:{wk:mdWeek(),end:Date.now()+600000}});
+ EX.ans=EX.qs.map(q=>q.a);EX.force=1;ACT.exfinish();await sl(2200);
+ o.askSheet=document.body.innerHTML.includes('قائمة المراكز الأولى');
+ document.querySelector('[data-a=mdshareyes]').click();await sl(700);
+ o.share=st.get('mdshare',0);o.submitted=calls.filter(c=>c[0]==='mind_submit').map(c=>c[1]);
+ o.boardOpen=document.body.innerHTML.includes('المراكز الأولى ·');
+ o.rows=document.querySelectorAll('#md-board li').length;
+ o.mine=!!document.querySelector('#md-board li.now');
+ o.rankLine=(document.querySelector('#md-board p')||{}).textContent||'';
+ o.html=(document.querySelector('#md-board')||{}).innerText||'';
+ return o});
+console.log(JSON.stringify(r,null,1));console.log('ERRS',errs);await b.close()})();
