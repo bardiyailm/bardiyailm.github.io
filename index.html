@@ -4674,7 +4674,7 @@ ACT.exquit=()=>ask('إنهاء الامتحان بلا حفظ النتيجة؟',
 ACT.exfinish=()=>{
   const un=EX.ans.filter(x=>x<0).length;
   const fin=()=>{
-    const items=EX.qs.map((q,i)=>({id:q.id,s:q.s,ok:EX.ans[i]===q.a}));
+    const items=EX.qs.map((q,i)=>({id:q.id,s:q.s,t:q.t||'',sn:q.sn||'',ok:EX.ans[i]===q.a,u:EX.ans[i]<0}));
     const score=items.filter(x=>x.ok).length,h=XH();
     h.push({at:Date.now(),type:EX.meta.type,subj:EX.meta.subj||'',score:score,total:EX.qs.length,items:items,mins:Math.round((Date.now()-EX.t0)/60000)});
     saveXH(h);try{const r=mbRecord(EX.qs,EX.ans,!!EX.meta.rev);if(r.add||r.done)setTimeout(()=>toast((r.add?'حُفظ '+r.add+' سؤالاً في بنك أخطائك. ':'')+(r.done?'ثبّتَّ '+r.done+' سؤالاً نهائياً 🎉':''),4000),400)}catch(e){console.error(e)}if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);EX.done=true;EX.i=0;EX.rf='all';exTop();
@@ -5093,7 +5093,7 @@ function mbCard(){
     '<div class="chips" style="flex-wrap:wrap;margin-top:8px">'+Object.keys(subs).slice(0,6).map(k=>'<span class="chip">'+esc(k)+' · '+subs[k]+'</span>').join('')+'</div>'+
     '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" data-a="mbrev"'+(d.length?'':' disabled')+'>راجع المستحق ('+Math.min(d.length,20)+')</button><button class="btn g" data-a="mball">تدريب على كل الأخطاء</button><button class="btn g" data-a="mbpdf">📄 حزمة ليلة الامتحان</button></div>');
 }
-const mbQs=(arr,n)=>arr.slice(0,n).map(x=>{const q=x.q;return{id:q.id,s:q.s,sn:q.sn,q:q.q,o:q.o,a:q.a,e:q.e}});
+const mbQs=(arr,n)=>arr.slice(0,n).map(x=>{const q=x.q;return{id:q.id,s:q.s,t:q.t,sn:q.sn,q:q.q,o:q.o,a:q.a,e:q.e}});
 ACT.mbrev=()=>{const d=mbDue().sort((a,b)=>a.due-b.due);if(!d.length)return toast('لا شيء مستحق الآن');exStart(mbQs(d,20),{type:'prac',rev:1,title:'مراجعة أخطائي'})};
 ACT.mball=()=>{const a=MB().slice().sort(()=>Math.random()-.5);if(!a.length)return toast('البنك فارغ');exStart(mbQs(a,30),{type:'prac',title:'تدريب على أخطائي'})};
 ACT.mbpdf=()=>{
@@ -5114,6 +5114,18 @@ function exPlanCard(){
     '<div class="row" style="margin-top:8px">'+(due?'<button class="btn s" data-a="mbrev">راجع '+Math.min(due,20)+' سؤالاً من أخطائك</button>':'')+'<button class="btn g s" data-a="weekRep">🖼️ تقريري الأسبوعي</button></div>');
 }
 CHG.exlessons=t=>{st.set('exLessons',clamp(parseInt(t.value,10)||0,0,999));renderSec('home')};
+
+/* ========== تحليل الدروس: أضعف الدروس من نتائجك الفعلية ========== */
+function topicStats(){
+  const m={};XH().forEach(h=>(h.items||[]).forEach(x=>{if(!x.t||x.u)return;const k=x.sn||x.t;const o=m[k]=m[k]||{k:k,t:x.t,ok:0,n:0};o.n++;if(x.ok)o.ok++}));
+  return Object.values(m).map(o=>({k:o.k,t:o.t,n:o.n,p:Math.round(o.ok/o.n*100)}));
+}
+function tpCard(){
+  const a=topicStats().filter(x=>x.n>=3).sort((x,y)=>x.p-y.p||y.n-x.n).slice(0,5);
+  if(!a.length)return card('دروسي الأضعف','<p class="mut sm">بعد أن تحلّ بضعة اختبارات من «الاختبارات حسب المادة» سيظهر هنا ترتيب الدروس من الأضعف، لتعرف أين تراجع.</p>');
+  return card('دروسي الأضعف','<ul class="list">'+a.map(x=>{const mb=MB().filter(m=>m.q.t===x.t&&m.q.sn===x.k).length;return '<li><span class="t"><b>'+esc(x.t)+'</b><div class="mut sm">'+esc(x.k.split(' · ')[0])+' · '+x.n+' سؤالاً</div></span><b class="'+(x.p<50?'bad':x.p<75?'warn':'ok')+'">'+x.p+'٪</b>'+(mb?'<button class="btn g s" data-a="mbtopic" data-t="'+esc(x.t)+'" data-s="'+esc(x.k)+'">راجع ('+mb+')</button>':'')+'</li>'}).join('')+'</ul>');
+}
+ACT.mbtopic=t=>{const a=MB().filter(m=>m.q.t===t.dataset.t&&m.q.sn===t.dataset.s);if(!a.length)return toast('لا أخطاء محفوظة في هذا الدرس');exStart(mbQs(a,20),{type:'prac',rev:1,title:'مراجعة: '+t.dataset.t})};
 
 /* ========== التقرير الأسبوعي (صورة) + بطاقات المراجعة ========== */
 function weekStats(){
@@ -5521,7 +5533,7 @@ function hbAt(sm,idx){
   if(gi>=sm.gens.length)gi=sm.gens.length-1;
   return sm.gens[gi].f(elRng(((sm.salt^(idx*40503))+gi)>>>0));
 }
-function hbToQ(q,sn,id){return {id:id,s:q.s,sn:sn+' · '+q.s,q:q.q.replace(/[⟦⟧]/g,''),o:q.o,a:q.a,e:q.y.replace(/[⟦⟧]/g,'')}}
+function hbToQ(q,sn,id){return {id:id,s:q.s,t:q.s,sn:sn+' · '+q.s,q:q.q.replace(/[⟦⟧]/g,''),o:q.o,a:q.a,e:q.y.replace(/[⟦⟧]/g,'')}}
 const hbNorm=t=>String(t).replace(/\s+/g,' ').trim();
 /* قائمة أسئلة فريدة لكل (مرحلة/صف/مادة/مستوى): يأخذ كل اختبار شريحة خاصة به فلا تتكرر الأسئلة بين الاختبارات.
    تتوسع عند الحاجة، وتتوقف عند تشبّع رصيد المادة (لا أسئلة جديدة بعد 3000 محاولة متتالية) أو عند سقف 150 ألف محاولة. */
@@ -5569,7 +5581,7 @@ function hbCard(){
     '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+lvs+info+
     (S.subj?cntRow+row('t','اختبارات ('+hbCnt(S)+' سؤالاً)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
-RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+exPracCard()+mbCard()+fcCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
+RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+exPracCard()+mbCard()+tpCard()+fcCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
 const _rdExam=()=>RD.exam();
 const hbUp=f=>{const S=hbSt();f(S);hbSave(S);renderSec('tests')};
 ACT.hbstage=t=>hbUp(S=>{S.stage=t.dataset.k;S.grade=EDU[S.stage].g[0];S.track=eduNeedsTrack(S.stage,S.grade)?Object.keys(TRACKS[S.stage])[0]:'';S.subj=''});
