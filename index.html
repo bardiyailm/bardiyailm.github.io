@@ -5201,25 +5201,54 @@ CHG.lbon=async t=>{st.set('lbOn',t.checked?1:0);try{if(t.checked)await lbSync();
 setInterval(lbSync,5*60*1000);
 /* ========== شهادة بعد كل اختبار ========== */
 const CERT_TIERS=[[90,'امتياز','#c9962a','#f6e3a4'],[75,'جيد جداً','#8a97a6','#e4e9ee'],[60,'جيد','#b4713c','#f1d4bb'],[0,'مشاركة','#5f7f9f','#dbe6f1']];
+const CERT_PAL={boy:{m:'#0b3d6b',g:'#c9962a',gl:'#f3dc9a',bg:'#fbf8ee',t:'#16324f'},girl:{m:'#7a1f4b',g:'#c9962a',gl:'#f3dc9a',bg:'#fff8f6',t:'#4a1a33'},none:{m:'#1f5e4a',g:'#c9962a',gl:'#f3dc9a',bg:'#fbf9ef',t:'#173a2e'}};
+function certCorner(x,px,py,sx,sy,P,k){
+  x.save();x.translate(px,py);x.scale(sx,sy);x.strokeStyle=P.g;x.fillStyle=P.g;x.lineWidth=5*k;x.lineCap='round';
+  x.beginPath();x.moveTo(0,150*k);x.lineTo(0,40*k);x.quadraticCurveTo(0,0,40*k,0);x.lineTo(150*k,0);x.stroke();
+  x.lineWidth=2.5*k;x.beginPath();x.moveTo(26*k,120*k);x.lineTo(26*k,58*k);x.quadraticCurveTo(26*k,26*k,58*k,26*k);x.lineTo(120*k,26*k);x.stroke();
+  x.beginPath();x.arc(64*k,64*k,34*k,Math.PI,Math.PI*1.5);x.stroke();x.beginPath();x.arc(64*k,64*k,18*k,0,7);x.fillStyle=P.gl;x.fill();x.strokeStyle=P.g;x.lineWidth=3*k;x.stroke();
+  for(let i=0;i<5;i++){x.beginPath();x.arc((82+i*14)*k,13*k,3.2*k,0,7);x.fillStyle=P.g;x.fill();x.beginPath();x.arc(13*k,(82+i*14)*k,3.2*k,0,7);x.fill()}
+  x.restore();
+}
+function certLaurel(x,cx,cy,dir,col,k){
+  x.save();x.fillStyle=col;x.strokeStyle=col;const R=178*k;
+  x.lineWidth=4*k;x.beginPath();for(let i=0;i<=24;i++){const a=(112+i*5.2)*Math.PI/180,px=cx+dir*(-Math.cos(a))*R*-1,py=cy+Math.sin(a)*R;i?x.lineTo(px,py):x.moveTo(px,py)}x.stroke();
+  for(let i=0;i<9;i++){const a=(118+i*14.5)*Math.PI/180,px=cx+dir*(-Math.cos(a))*R*-1,py=cy+Math.sin(a)*R;
+    for(const side of [-1,1]){x.save();x.translate(px+dir*side*-8*k*Math.sin(a),py+side*8*k*Math.cos(a)*0+side*10*k);x.rotate(dir*(Math.PI/2-a)*0+(dir>0?1:-1)*(a-Math.PI/2)+side*.5*dir);x.beginPath();x.ellipse(0,0,8*k,24*k,0,0,7);x.fill();x.restore()}}
+  x.restore();
+}
 async function certCanvas(o){
   await XP.ready();const W=1754,H=1240,c=XP.cv(W,H),x=c.getContext('2d');x.direction='rtl';x.textAlign='center';
-  const th=XTH(),T=XTHEMES[th]||XTHEMES.none,tier=CERT_TIERS.find(t=>o.pct>=t[0]);
-  x.fillStyle='#fffdf6';x.fillRect(0,0,W,H);xBg(x,W,H,th);
-  x.strokeStyle=tier[2];x.lineWidth=10;XP.rr(x,50,50,W-100,H-100,24);x.stroke();x.strokeStyle=T.a;x.lineWidth=3;XP.rr(x,76,76,W-152,H-152,16);x.stroke();
-  const cx=W/2;x.fillStyle=T.c;XP.font(x,40,0);x.fillText('بردية علم',cx,150);
-  x.fillStyle=tier[2];XP.font(x,92,1);x.fillText('شهادة '+(o.pct>=60?'إنجاز':'مشاركة'),cx,270);
-  x.fillStyle='#4a5a6a';XP.font(x,34,0);x.fillText('تُمنح هذه الشهادة إلى '+(th==='girl'?'الطالبة':th==='boy'?'الطالب':'الطالب/ـة'),cx,350);
-  x.fillStyle=T.c;XP.font(x,84,1);x.fillText(o.name||'..............................',cx,462);
-  x.strokeStyle=tier[2];x.lineWidth=3;x.beginPath();x.moveTo(cx-330,490);x.lineTo(cx+330,490);x.stroke();
-  x.fillStyle='#4a5a6a';XP.font(x,34,0);x.fillText('تقديراً لإتمامه الاختبار التالي:',cx,560);
-  x.fillStyle='#16324f';XP.font(x,48,1);XP.dir(x,o.title);x.fillText(XP.fit(x,o.title,W-360),cx,630);x.direction='rtl';
-  // ميدالية
-  const my=860,mr=130;x.fillStyle=tier[3];x.beginPath();x.arc(cx,my,mr+14,0,7);x.fill();x.fillStyle=tier[2];x.beginPath();x.arc(cx,my,mr,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(cx,my,mr-16,0,7);x.fill();
-  x.fillStyle=tier[2];XP.font(x,84,1);x.direction='ltr';x.fillText(o.pct+'%',cx,my+22);x.direction='rtl';XP.font(x,30,1);x.fillText(tier[1],cx,my+72);
-  x.fillStyle='#4a5a6a';XP.font(x,32,0);x.fillText('الدرجة: '+o.score+' من '+o.total,cx-420,my+10);x.fillText('عدد الأسئلة: '+o.total,cx+420,my+10);
-  xStar(x,cx-420,my-70,26,tier[2]);xStar(x,cx+420,my-70,26,tier[2]);
-  x.fillStyle='#4a5a6a';XP.font(x,28,0);x.fillText(new Date().toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}),cx,1090);
-  x.fillStyle=tier[2];XP.font(x,24,0);x.fillText('bardiyailm.github.io',cx,1140);
+  const th=XTH(),P=CERT_PAL[th]||CERT_PAL.none,tier=CERT_TIERS.find(t=>o.pct>=t[0]),cx=W/2;
+  x.fillStyle=P.bg;x.fillRect(0,0,W,H);
+  try{const w=x.globalAlpha;x.globalAlpha=.55;xBg(x,W,H,th);x.globalAlpha=w}catch(e){}
+  const rg=x.createRadialGradient(cx,H/2,200,cx,H/2,H);rg.addColorStop(0,'rgba(255,255,255,.88)');rg.addColorStop(1,'rgba(255,255,255,.35)');x.fillStyle=rg;x.fillRect(0,0,W,H);
+  // أنماط دقيقة خلف النص
+  x.save();x.globalAlpha=.05;x.strokeStyle=P.m;x.lineWidth=2;for(let i=-H;i<W;i+=26){x.beginPath();x.moveTo(i,0);x.lineTo(i+H,H);x.stroke()}x.restore();
+  // الإطار
+  x.strokeStyle=P.m;x.lineWidth=14;XP.rr(x,44,44,W-88,H-88,10);x.stroke();x.strokeStyle=P.g;x.lineWidth=4;XP.rr(x,66,66,W-132,H-132,6);x.stroke();x.lineWidth=2;XP.rr(x,82,82,W-164,H-164,4);x.stroke();
+  const k=1;certCorner(x,70,70,1,1,P,k);certCorner(x,W-70,70,-1,1,P,k);certCorner(x,70,H-70,1,-1,P,k);certCorner(x,W-70,H-70,-1,-1,P,k);
+  // الترويسة
+  x.fillStyle=P.m;XP.font(x,40,1);x.fillText('بردية علم',cx,160);
+  x.strokeStyle=P.g;x.lineWidth=3;x.beginPath();x.moveTo(cx-180,182);x.lineTo(cx+180,182);x.stroke();xStar(x,cx,182,12,P.g);
+  const rb=x.createLinearGradient(cx-420,0,cx+420,0);rb.addColorStop(0,'rgba(255,255,255,0)');rb.addColorStop(.18,P.m);rb.addColorStop(.82,P.m);rb.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=rb;x.fillRect(cx-460,228,920,104);
+  x.fillStyle='#fff';XP.font(x,80,1);x.fillText('شهادة '+(o.pct>=60?'إنجاز':'مشاركة'),cx,308);
+  x.fillStyle='#4a5a6a';XP.font(x,34,0);x.fillText('تُمنح هذه الشهادة إلى '+(th==='girl'?'الطالبة':th==='boy'?'الطالب':'الطالب/ـة'),cx,404);
+  x.fillStyle=P.m;XP.font(x,92,1);x.fillText(XP.fit(x,o.name||'..............................',W-420),cx,512);
+  x.strokeStyle=P.g;x.lineWidth=3;x.beginPath();x.moveTo(cx-360,540);x.lineTo(cx+360,540);x.stroke();
+  x.fillStyle='#4a5a6a';XP.font(x,34,0);x.fillText('تقديراً لإتمامه الاختبار التالي:',cx,606);
+  x.fillStyle=P.t;XP.font(x,50,1);XP.dir(x,o.title);x.fillText(XP.fit(x,o.title,W-420),cx,676);x.direction='rtl';
+  // الختم
+  const my=880,mr=116;certLaurel(x,cx,my,1,P.g,.9);certLaurel(x,cx,my,-1,P.g,.9);
+  x.fillStyle=tier[2];x.beginPath();x.moveTo(cx-70,my+80);x.lineTo(cx-100,my+170);x.lineTo(cx-60,my+150);x.lineTo(cx-30,my+182);x.lineTo(cx-18,my+100);x.fill();x.beginPath();x.moveTo(cx+70,my+80);x.lineTo(cx+100,my+170);x.lineTo(cx+60,my+150);x.lineTo(cx+30,my+182);x.lineTo(cx+18,my+100);x.fill();
+  x.save();x.shadowColor='rgba(0,0,0,.25)';x.shadowBlur=18;x.shadowOffsetY=6;x.fillStyle=tier[3];x.beginPath();for(let i=0;i<36;i++){const a=i*Math.PI/18,r=i%2?mr+10:mr+24;x.lineTo(cx+Math.cos(a)*r,my+Math.sin(a)*r)}x.closePath();x.fill();x.restore();
+  x.fillStyle=tier[2];x.beginPath();x.arc(cx,my,mr,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(cx,my,mr-14,0,7);x.fill();x.strokeStyle=tier[2];x.lineWidth=3;x.beginPath();x.arc(cx,my,mr-26,0,7);x.stroke();
+  x.fillStyle=tier[2];XP.font(x,78,1);x.direction='ltr';x.fillText(o.pct+'%',cx,my+16);x.direction='rtl';XP.font(x,30,1);x.fillText(tier[1],cx,my+62);
+  x.fillStyle='#4a5a6a';XP.font(x,32,0);x.fillText('الدرجة: '+o.score+' من '+o.total,cx-470,my+8);x.fillText('عدد الأسئلة: '+o.total,cx+470,my+8);
+  xStar(x,cx-470,my-60,24,P.g);xStar(x,cx+470,my-60,24,P.g);
+  x.fillStyle='#4a5a6a';XP.font(x,28,0);x.fillText(new Date().toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}),cx,1098);
+  x.fillStyle=P.g;XP.font(x,24,0);x.fillText('bardiyailm.github.io',cx,1138);
   return c;
 }
 function certData(){
