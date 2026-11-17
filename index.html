@@ -2621,9 +2621,18 @@ CHG.fullmode=t=>{try{localStorage.setItem('ab:full',t.checked?'1':'0')}catch(e){
 function declutter(el){if(!matchMedia('(max-width:700px)').matches)return;el.querySelectorAll('.mut.sm,p.mut,.sm.mut').forEach(e=>{if(e.textContent.trim().length>45&&!e.closest('li,table,.row.sp,.ringbox,.hero,.warn'))e.classList.add('xl')})}
 const ART={home:['l3','بردية علم'],study:['l4','بردية علم: المذاكرة'],lib:['l2','بردية علم: المكتبة'],fit:['l1','بردية علم: الصحة والرياضة']};
 function secArt(id){const a=ART[id];return a&&typeof BR!=='undefined'?'<div class="secart"><img src="'+BR[a[0]]+'" alt="'+a[1]+'" decoding="async"></div>':''}
+const A11Y_C={wstartD:'بداية المذاكرة',wendD:'نهاية المذاكرة',plansel:'مادة الجلسة',split:'تمرين اليوم',gymopt:'وقت التمرين',scTheme:'خلفية الملف'};
+function a11yLabel(root){
+  try{root.querySelectorAll('input:not([type=checkbox]):not([type=hidden]):not([aria-label]),select:not([aria-label]),textarea:not([aria-label])').forEach(e=>{
+    if(e.id&&root.querySelector('label[for="'+e.id+'"]')||e.closest('label')||e.placeholder)return;
+    let t=A11Y_C[e.dataset.c]||'';if(!t)return;
+    if(e.dataset.w!=null&&typeof DN!=='undefined'&&DN[+e.dataset.w])t+=' يوم '+DN[+e.dataset.w];
+    if(e.dataset.i!=null)t+=' '+(+e.dataset.i+1);
+    e.setAttribute('aria-label',t)})}catch(x){}
+}
 function renderSec(id){
   id=id||curSec;const f=RD[id];if(!f)return;const el=$('#b-'+id);if(!el)return;
-  const keep=window.scrollY;el.innerHTML=secArt(id)+f();if(PO[id])PO[id]();declutter(el);animRings();drawCharts(el);if(keep&&id===curSec)window.scrollTo(0,keep);
+  const keep=window.scrollY;el.innerHTML=secArt(id)+f();if(PO[id])PO[id]();declutter(el);a11yLabel(el);animRings();drawCharts(el);if(keep&&id===curSec)window.scrollTo(0,keep);
 }
 function go(id){
   if(!SEC.find(s=>s.id===id))id='home';
