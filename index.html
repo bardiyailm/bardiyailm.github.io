@@ -3920,7 +3920,7 @@ RD.set=()=>{
   const bk=card('النسخ الاحتياطي','<p class="mut sm">بياناتك محفوظة على هذا الجهاز فقط. صدّر نسخة بين وقت وآخر، واستعدها على أي جهاز.</p><div class="row"><button class="btn" data-a="bkexp">تصدير نسخة</button><label class="btn g">استيراد<input type="file" accept="application/json" hidden data-c="bkimp"></label></div><p class="mut sm" style="margin-top:8px">لا تشمل النسخة ملفات المكتبة وصورة الخلفية.</p>');
   const dg=card('منطقة حساسة','<div class="row"><button class="btn d" data-a="wipe">مسح كل البيانات</button></div>');
   const tourC=card('جولة سريعة','<p class="mut sm">تعرّف على أقسام التطبيق في 6 خطوات.</p><button class="btn" data-a="tour">ابدأ الجولة</button>');
-  return '<div class="grid">'+edc+tourC+bg+loc+sch+nt+bk+dg+'</div>';
+  return '<div class="grid">'+edc+tourC+bg+loc+sch+nt+bk+(typeof fbCard==='function'?fbCard():'')+dg+'</div>';
 };
 CHG.locn=t=>{cfg.loc.name=t.value;saveCfg()};
 CHG.lat=t=>{cfg.loc.lat=num(t.value,30.59);saveCfg();renderSec('set')};
@@ -4271,7 +4271,7 @@ function alarmInit(){ensureOverlay();setInterval(alarmTick,1000);alarmTick()}
    - البيانات تُحفظ محلياً أولاً (تعمل بلا إنترنت) ثم تُرفع إلى جدول user_kv.
    - كل مستخدم يرى صفوفه فقط (RLS في قاعدة البيانات). */
 const CLOUD={on:false,client:null,user:null,q:{},timer:null,busy:false,last:0,err:'',off:false};
-const LOCAL_ONLY=['tab','snooze','wrem','wsh','xbank','lang'];
+const LOCAL_ONLY=['tab','snooze','wrem','wsh','xbank','lang','fbout','fblog'];
 const lsk=k=>'ab:'+k;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -4547,6 +4547,85 @@ CLOUD.mountUi=function(){
   w.innerHTML='<span class="wav">'+(firstName()?esc(nm.charAt(0)):'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.8-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>')+'</span><span class="wnm">'+esc(nm)+'</span>';
   t.insertBefore(w,t.firstChild);if(CLOUD.on)CLOUD.paint()
 };
+
+/* ========== الشكاوى والاقتراحات (في الإعدادات) ==========
+   تُرسل إلى بريد صاحب التطبيق عبر Web3Forms (مجاني، بلا خادم). البريد نفسه غير موجود
+   في الكود العام إطلاقاً: الكود يحمل «مفتاح وصول» فقط، والبريد محفوظ لدى الخدمة.
+   - صندوق صادر محلي: إن تعذّر الإرسال (لا إنترنت/خطأ/المفتاح لم يُضبط بعد) تُحفظ الرسالة
+     وتُعاد محاولتها تلقائياً، فلا تضيع أي شكوى.
+   - حماية من الإزعاج: رسالة كل 45 ثانية، و10 رسائل يومياً كحد أقصى من الجهاز الواحد.
+   - تُرفق تلقائياً معلومات تساعد على المتابعة: الاسم، اسم المستخدم، المرحلة، الجهاز، اللغة. */
+const FB_KEY='';
+const FB_URL='https://api.web3forms.com/submit';
+const FB_TYPES=['شكوى','اقتراح','مشكلة تقنية','سؤال'];
+let fbDraft={t:FB_TYPES[0],m:'',c:''},fbBusy=false;
+
+const fbOut=()=>st.get('fbout',[]);
+const fbLog=()=>st.get('fblog',[]);
+function fbPayload(x){
+  const p=profile()||{};
+  return {
+    access_key:FB_KEY,
+    subject:'بردية علم — '+x.t+' جديدة من '+(p.name||'مستخدم'),
+    from_name:'بردية علم',botcheck:'',
+    'النوع':x.t,'الرسالة':x.m,'وسيلة التواصل':x.c||'—',
+    'الاسم':p.name||'—','اسم المستخدم':p.username||'—','المرحلة':(typeof eduLabel==='function'&&eduLabel())||'—',
+    'التاريخ':new Date(x.at).toLocaleString('ar-EG',{timeZone:'Africa/Cairo'}),
+    'لغة الواجهة':(typeof lang==='function'&&lang()==='en')?'English':'العربية',
+    'الجهاز':(navigator.userAgent||'').slice(0,180)
+  };
+}
+async function fbPost(x){
+  if(!FB_KEY)throw new Error('nokey');
+  const r=await fetch(FB_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(fbPayload(x))});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(!r.ok||!j||j.success!==true)throw new Error((j&&j.message)||('HTTP '+r.status));
+}
+/* إرسال كل ما في الصندوق الصادر بالترتيب؛ يتوقف عند أول فشل ويعيد المحاولة لاحقاً */
+async function fbFlush(){
+  if(fbBusy||!navigator.onLine||!FB_KEY)return 0;
+  const q=fbOut();if(!q.length)return 0;
+  fbBusy=true;let sent=0;
+  try{
+    while(q.length){
+      await fbPost(q[0]);
+      const done=q.shift();st.set('fbout',q);
+      const lg=fbLog();lg.push({at:done.at,t:done.t});st.set('fblog',lg.slice(-50));sent++;
+    }
+  }catch(e){}
+  fbBusy=false;
+  return sent;
+}
+function fbCard(){
+  const pend=fbOut().length,lg=fbLog();
+  const opts=FB_TYPES.map(t=>'<option'+(fbDraft.t===t?' selected':'')+'>'+t+'</option>').join('');
+  return card('الشكاوى والاقتراحات',
+    '<p class="mut sm">اكتب شكواك أو اقتراحك، وتصل مباشرة لإدارة التطبيق.</p>'+
+    '<label class="f">النوع<select data-c="fbtype">'+opts+'</select></label>'+
+    '<label class="f">رسالتك<textarea data-i="fbmsg" rows="5" maxlength="3000" placeholder="اكتب التفاصيل هنا…">'+esc(fbDraft.m)+'</textarea></label>'+
+    '<label class="f">وسيلة للتواصل معك (اختياري)<input type="text" data-i="fbcon" maxlength="120" value="'+esc(fbDraft.c)+'" placeholder="بريدك أو رقمك إن أردت رداً"></label>'+
+    '<div class="row" style="margin-top:8px"><button class="btn" data-a="fbsend" type="button">إرسال</button></div>'+
+    (pend?'<p class="sm" style="opacity:.8">في الانتظار: '+pend+' — ستُرسل تلقائياً عند توفر الإنترنت.</p>':'')+
+    (lg.length?'<p class="sm" style="opacity:.8">أرسلت '+lg.length+' رسالة سابقاً. شكراً لك.</p>':''));
+}
+CHG.fbtype=t=>{fbDraft.t=t.value};
+INP.fbmsg=t=>{fbDraft.m=t.value};
+INP.fbcon=t=>{fbDraft.c=t.value};
+ACT.fbsend=async()=>{
+  const m=(fbDraft.m||'').trim(),c=(fbDraft.c||'').trim();
+  if(m.length<10){toast('اكتب رسالتك بتفصيل أكثر (10 أحرف على الأقل)');return}
+  const now=Date.now(),lg=fbLog().concat(fbOut()),today=lg.filter(x=>now-x.at<864e5).length,last=lg.reduce((a,x)=>Math.max(a,x.at),0);
+  if(now-last<45000){toast('انتظر قليلاً قبل إرسال رسالة أخرى');return}
+  if(today>=10){toast('وصلت للحد اليومي للرسائل. حاول غداً');return}
+  const q=fbOut();q.push({at:now,t:FB_TYPES.includes(fbDraft.t)?fbDraft.t:FB_TYPES[0],m:m.slice(0,3000),c:c.slice(0,120)});st.set('fbout',q);
+  fbDraft={t:FB_TYPES[0],m:'',c:''};
+  toast('جارٍ الإرسال…');
+  const n=await fbFlush();
+  toast(n?'وصلت رسالتك. شكراً لك 🌿':'حُفظت رسالتك وستُرسل تلقائياً عند توفر الإنترنت',3600);
+  if(curSec==='set')renderSec('set');
+};
+addEventListener('online',()=>{fbFlush()});
+setTimeout(()=>{fbFlush()},8000);
 
 /* ========== منبّهات النظام (Android عبر Capacitor) ==========
    تُجدول إشعارات دقيقة يشغّلها نظام أندرويد نفسه، فتعمل والتطبيق مغلق والشاشة مقفلة.
