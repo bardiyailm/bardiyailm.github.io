@@ -1121,7 +1121,7 @@ html.sv-lock,html.sv-lock body{overflow:hidden}
 <div id="skin" aria-hidden="true"><div class="sk a"></div><div class="sk b"></div><div class="dim"></div></div><div id="wmk" aria-hidden="true"></div>
 <div class="wm" aria-hidden="true"></div>
 <div class="wrap">
-<header class="top"><div class="brand" aria-label="بردية علم"><span class="wmt hd" role="img" aria-label="بردية علم"><b>بَرْدِيَّة</b> <em>عِلْم</em></span></div><div class="tact"><button class="ib" data-a="bgsheet" aria-label="تغيير الخلفية"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg></button><button class="ib" data-a="themesheet" aria-label="ألواني"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.5-2.2-.5-1.2.2-2.3 1.6-2.3H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10" r="1"/></svg></button><span id="clock" class="num"></span></div></header>
+<header class="top"><div class="brand" aria-label="بردية علم"><span class="wmt hd" role="img" aria-label="بردية علم"><b>بَرْدِيَّة</b> <em>عِلْم</em></span></div><div class="tact"><button class="ib" data-a="bgsheet" aria-label="تغيير الخلفية"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg></button><button class="ib" data-a="themesheet" aria-label="ألواني"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.5-2.2-.5-1.2.2-2.3 1.6-2.3H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10" r="1"/></svg></button><button class="ib" id="langbtn" data-a="langtoggle" aria-label="English / العربية"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M4.5 7.5h15M4.5 16.5h15"/></svg></button><span id="clock" class="num"></span></div></header>
 <nav id="tabs" aria-label="الأقسام"></nav>
 <main id="main"></main>
 </div>
@@ -2426,6 +2426,74 @@ const rtDone=k=>st.get('rtdone',{})[k]||{};
 function setRtDone(k,id,v){const a=st.get('rtdone',{});a[k]=a[k]||{};if(v)a[k][id]=1;else delete a[k][id];st.set('rtdone',a)}
 const TAGN={study:'مذاكرة',pray:'عبادة',lesson:'درس',gym:'تمرين',food:'أكل',rest:'راحة',read:'قراءة',sleep:'نوم',move:'تنقّل',school:'مدرسة',custom:'خاص'};
 
+/* ========== تعدد اللغات: عربي/إنجليزي ==========
+   المنهج: لا تعديل على منطق أي ملف آخر. مفتاح واحد lang (ar/en) في التخزين،
+   وقاموس ترجمة يُطبَّق تلقائياً على كل نص يظهر في الصفحة (TreeWalker + MutationObserver)،
+   فتُترجم كل الواجهة (عناوين الأقسام، الأزرار، التسميات) أولاً بأول دون الحاجة لتمرير على كل ملف. */
+const lang=()=>st.get('lang','ar');
+function setLang(l){
+  st.set('lang',l);
+  document.documentElement.lang=l;
+  document.documentElement.dir=l==='en'?'ltr':'rtl';
+}
+
+const I18N={
+  /* أقسام التطبيق (الشريط والعناوين) */
+  'الرئيسية':'Home','نظرة واحدة على يومك كله':'One glance at your whole day',
+  'المذاكرة':'Study','جلسات مركّزة بلا تشتت':'Focused, distraction-free sessions',
+  'جدولي':'Schedule','جدول أسبوعي بالساعات · PDF أو صورة':'Weekly hourly schedule · PDF or image',
+  'المتفوقون':'Top Students','10,000 سؤال لمتفوقي الثانوية العامة':'10,000 questions for top secondary students',
+  'الاختبارات':'Tests','مبتدئ · متوسط · متفوق لكل مادة':'Beginner · Intermediate · Advanced for every subject',
+  'ذكي':'Smart','فاهمك: اسأل واشرح وتدرّب':'Fahmak: ask, learn, and practice',
+  'المجتمع':'Community','زملاء صفّك ومجموعات معلميك':'Your classmates and your teachers’ groups',
+  'المهام':'Tasks','اكتب، رتّب، أنجز':'Write, organize, get it done',
+  'السجل اليومي':'Daily Log','ماذا فعلت اليوم وكيف كان شعورك':'What you did today and how you felt',
+  'التمارين':'Workout','الجيم، الأوزان، والتقدّم':'Gym, weights, and progress',
+  'الرياضة والصحة':'Fitness & Health','رياضات وروتينات بمعايير عالمية':'Sports and routines by global standards',
+  'الأكل':'Food','سعرات محسوبة وسكر قليل':'Counted calories, less sugar',
+  'الماء والنوم':'Water & Sleep','ماء وقهوة وشاي ونوم كافٍ':'Water, coffee, tea, and enough sleep',
+  'الروتين':'Routine','جدول يومك بالدقيقة':'Your day, minute by minute',
+  'المنبه':'Alarm','استيقاظ بإثبات حقيقي':'Wake up with real proof',
+  'القراءة':'Reading','ساعة إلى ساعة ونصف كل يوم':'One to one-and-a-half hours a day',
+  'الملاحظات':'Notes','اكتب ما تشاء':'Write anything',
+  'مكتبتي':'My Library','ملفاتك وملخصاتك':'Your files and summaries',
+  'إلهام':'Inspiration','آيات وأحاديث وحِكَم':'Verses, hadiths, and wisdom',
+  'الإعدادات':'Settings','الخلفية والألوان والنسخ الاحتياطي':'Background, colors, and backup',
+  'المزيد':'More','كل الأقسام':'All sections',
+  'الأساسي':'Main','تنظيم يومك':'Organize your day','الصحة واللياقة':'Health & fitness',
+  /* أيام الأسبوع */
+  'الأحد':'Sunday','الاثنين':'Monday','الثلاثاء':'Tuesday','الأربعاء':'Wednesday','الخميس':'Thursday','الجمعة':'Friday','السبت':'Saturday',
+  /* عناصر عامة متكررة */
+  'حفظ':'Save','إلغاء':'Cancel','إضافة':'Add','حذف':'Delete','تعديل':'Edit','إرسال':'Send',
+  'نعم':'Yes','لا':'No','بحث':'Search','رجوع':'Back','التالي':'Next','السابق':'Previous',
+  'تم':'Done','موافق':'OK','إغلاق':'Close','تأكيد':'Confirm','حفظ التغييرات':'Save changes',
+  'تسجيل الدخول':'Log in','تسجيل الخروج':'Log out','حساب جديد':'New account',
+  'كلمة المرور':'Password','اسم المستخدم':'Username','الاسم':'Name','ابدأ':'Start',
+  'تصدير':'Export','طباعة':'Print','مشاركة':'Share','تحميل':'Download',
+  'اليوم':'Today','أمس':'Yesterday','غداً':'Tomorrow','الأسبوع':'Week','الشهر':'Month',
+  'كل الاقتباسات':'All quotes','دروسي':'My lessons','موادي':'My subjects','خطة الأسبوع':'Weekly plan',
+  'إحصاءات':'Stats','تقدّمك':'Your progress','منبه الصباح':'Morning alarm',
+};
+function i18nApply(){
+  if(lang()!=='en')return;
+  try{
+    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
+    let n;while(n=w.nextNode()){
+      const t=n.nodeValue,tt=t.trim();
+      if(tt&&I18N[tt]&&t.indexOf(I18N[tt])<0)n.nodeValue=t.replace(tt,I18N[tt]);
+    }
+    document.querySelectorAll('[aria-label],[placeholder],[title]').forEach(el=>{
+      ['aria-label','placeholder','title'].forEach(a=>{const v=el.getAttribute(a);if(v&&I18N[v])el.setAttribute(a,I18N[v])});
+    });
+  }catch(e){}
+}
+let i18nRAF=null;
+function i18nSchedule(){if(i18nRAF)return;i18nRAF=requestAnimationFrame(()=>{i18nRAF=null;i18nApply()})}
+addEventListener('DOMContentLoaded',()=>{
+  try{new MutationObserver(i18nSchedule).observe(document.body,{childList:true,subtree:true,characterData:true})}catch(e){}
+  i18nSchedule();
+});
+
 /* ========== الأقسام ========== */
 const SEC=[
   {id:'home',n:'الرئيسية',sub:'نظرة واحدة على يومك كله',skin:'nile',em:'armillary',c:'#e2bf76'},
@@ -2619,6 +2687,7 @@ function buildShell(){
 }
 ACT.more=()=>sheet('<h3>كل الأقسام</h3>'+MGRP.map(g=>'<div class="mgh">'+g[0]+'</div><div class="moregrid">'+g[1].map(id=>tabBtn(secOf(id),id===curSec?' on':'')).join('')+'</div>').join('')+'<button class="btn g mglock" data-a="pinset" type="button">🔒 قفل التطبيق بـ ٤ أرقام</button><label class="mgsw"><input type="checkbox" data-c="fullmode" '+(FULLM()?'checked':'')+'><span><b>عرض كل الأقسام في الشريط</b><small>الوضع المبسّط يُبقي الأساسيات فقط: الرئيسية والمذاكرة والاختبارات والمهام</small></span></label>');
 CHG.fullmode=t=>{try{localStorage.setItem('ab:full',t.checked?'1':'0')}catch(e){}buildShell();if(typeof renderSec==='function')renderSec(curSec);if(typeof go==='function')go(curSec)};
+ACT.langtoggle=()=>{setLang(lang()==='en'?'ar':'en');buildShell();if(typeof go==='function')go(curSec);toast(lang()==='en'?'Language: English':'اللغة: العربية')};
 /* هاتف: إخفاء الشروحات الطويلة، تبقى الأساسيات فقط */
 function declutter(el){if(!matchMedia('(max-width:700px)').matches)return;el.querySelectorAll('.mut.sm,p.mut,.sm.mut').forEach(e=>{if(e.textContent.trim().length>45&&!e.closest('li,table,.row.sp,.ringbox,.hero,.warn'))e.classList.add('xl')})}
 const ART={home:['l3','بردية علم'],study:['l4','بردية علم: المذاكرة'],lib:['l2','بردية علم: المكتبة'],fit:['l1','بردية علم: الصحة والرياضة']};
@@ -4690,7 +4759,7 @@ ACT.exfinish=()=>{
     const items=EX.qs.map((q,i)=>({id:q.id,s:q.s,t:q.t||'',sn:q.sn||'',ok:EX.ans[i]===q.a,u:EX.ans[i]<0}));
     const score=items.filter(x=>x.ok).length,h=XH();
     h.push({at:Date.now(),type:EX.meta.type,subj:EX.meta.subj||'',score:score,total:EX.qs.length,items:items,mins:Math.round((Date.now()-EX.t0)/60000)});
-    saveXH(h);try{const r=mbRecord(EX.qs,EX.ans,!!EX.meta.rev);if(r.add||r.done)setTimeout(()=>toast((r.add?'حُفظ '+r.add+' سؤالاً في بنك أخطائك. ':'')+(r.done?'ثبّتَّ '+r.done+' سؤالاً نهائياً 🎉':''),4000),400)}catch(e){console.error(e)}if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);if(EX.meta.md&&typeof mdFinish==='function')try{mdFinish(h[h.length-1])}catch(e){console.error(e)}EX.done=true;EX.i=0;EX.rf='all';exTop();
+    saveXH(h);try{const r=mbRecord(EX.qs,EX.ans,!!EX.meta.rev);if(r.add||r.done)setTimeout(()=>toast((r.add?'حُفظ '+r.add+' سؤالاً في بنك أخطائك. ':'')+(r.done?'ثبّتَّ '+r.done+' سؤالاً نهائياً 🎉':''),4000),400)}catch(e){console.error(e)}if(EX.meta.hb&&typeof hbMark==='function')hbMark(EX.meta.hb,h[h.length-1]);if(EX.meta.md&&typeof mdFinish==='function')try{mdFinish(h[h.length-1])}catch(e){console.error(e)}if(EX.meta.wk&&typeof wkFinish==='function')try{wkFinish(h[h.length-1])}catch(e){console.error(e)}EX.done=true;EX.i=0;EX.rf='all';exTop();
   };
   if(un&&!EX.force)ask('بقيت '+un+' أسئلة بلا إجابة. إنهاء الامتحان؟','إنهاء',fin);else fin();
 };
@@ -5921,7 +5990,7 @@ function hbCard(){
     '<div class="chips hbr">'+stages+'</div><div class="chips hbr">'+grades+'</div>'+tr+sj+lvs+info+
     (S.subj?cntRow+row('t','اختبارات ('+hbCnt(S)+' سؤالاً)')+(HB_QUANT(S)?row('p','مسائل (مسألة بحلها)'):''):'')+'</div>';
 }
-RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+mdCard()+exPracCard()+mbCard()+tpCard()+fcCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
+RD.tests=()=>EX.on?_rdExam():'<div class="grid">'+mdCard()+wkCard()+exPracCard()+mbCard()+tpCard()+fcCard()+hbCard()+'</div><p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخًا منها.</p>'+exHistory();
 const _rdExam=()=>RD.exam();
 const hbUp=f=>{const S=hbSt();f(S);hbSave(S);renderSec('tests')};
 ACT.hbstage=t=>hbUp(S=>{S.stage=t.dataset.k;S.grade=EDU[S.stage].g[0];S.track=eduNeedsTrack(S.stage,S.grade)?Object.keys(TRACKS[S.stage])[0]:'';S.subj=''});
@@ -5940,6 +6009,56 @@ const S=hbSt(),kind=t.dataset.k;
   if(kind==='t'&&qs.length&&qs.length<qs.want)toast('المتاح لهذه المادة والمستوى '+qs.length+' سؤالاً غير مكرر فقط، فبدأ الاختبار بها.',4500);
   exStart(qs,meta);
 };
+
+/* ========== اختبار المنهج الأسبوعي: أصعب أسئلة من مواد الطالب الفعلية (كمّية)، تتجدد كل أسبوع ==========
+   متاح فقط من الصف الثالث الإعدادي فما فوق (إعدادي٣، كل الثانوي، البكالوريا).
+   يُعاد استخدام محرك الأسئلة المُتحقَّق منه فعلياً في «الاختبارات» (hbStream/hbAt بالضبط نفس المولّدات)
+   عند أعلى مستوى صعوبة متاح (lv:'h' — نفس مستوى «قوي/متفوق»)، فلا أسئلة جديدة غير مُختبَرة،
+   فقط تدوير أسبوعي جديد فوق مولّدات مُثبَتة الصحة أصلاً. */
+const WK_PER_SUBJ=12;
+function wkEligible(e){return !!(e&&e.stage&&((e.stage==='prep'&&+e.grade===3)||e.stage==='sec'||e.stage==='bac'))}
+function wkWeekId(){
+  const now=mdNow(),p=cairoParts(now),back=(p.wd-6+7)%7,civ=Date.UTC(p.y,p.m-1,p.d)-back*864e5,f=new Date(civ);
+  return f.getUTCFullYear()+'-'+pad(f.getUTCMonth()+1)+'-'+pad(f.getUTCDate());
+}
+function wkSubjects(e){return eduSubjects(e).filter(s=>HB_QUANT({stage:e.stage,grade:+e.grade,track:e.track||'',subj:s.k}))}
+function wkAt(sm,wsalt,idx){
+  const base=(sm.salt^wsalt)>>>0;
+  const r0=elRng((base+idx*2654435761)>>>0);let x=r0()*sm.tot,gi=0;
+  for(;gi<sm.gens.length;gi++){x-=(sm.gens[gi].w||1);if(x<0)break}
+  if(gi>=sm.gens.length)gi=sm.gens.length-1;
+  return sm.gens[gi].f(elRng((((base^(idx*40503))+gi)>>>0)));
+}
+function wkBuild(){
+  const e=eduOf();if(!wkEligible(e))return [];
+  const wk=wkWeekId();let wsalt=0;for(let i=0;i<wk.length;i++)wsalt=(wsalt*131+wk.charCodeAt(i))>>>0;
+  const subs=wkSubjects(e),seen=new Set(),out=[];
+  subs.forEach(s=>{
+    const S={stage:e.stage,grade:+e.grade,track:e.track||'',subj:s.k,lv:'h'};
+    let sm;try{sm=hbStream(S)}catch(err){return}
+    if(!sm||!sm.gens||!sm.gens.length)return;
+    let added=0,guard=0;
+    while(added<WK_PER_SUBJ&&guard++<WK_PER_SUBJ*25){
+      let q;try{q=wkAt(sm,wsalt,guard)}catch(err){continue}
+      if(!q||!q.o||q.o.length<3||q.a<0)continue;
+      const key=hbNorm(q.q);if(seen.has(key))continue;seen.add(key);
+      out.push(hbToQ(q,s.n,'wk'+wk+'_'+s.k+'_'+added));added++;
+    }
+  });
+  return out;
+}
+const wkDone=()=>st.get('wkdone',{});
+function wkFinish(rec){const wk=wkWeekId(),d=wkDone();d[wk]={score:rec.score,total:rec.total,pct:rec.total?Math.round(rec.score/rec.total*100):0,at:Date.now()};st.set('wkdone',d)}
+function wkCard(){
+  const e=eduOf();
+  if(!wkEligible(e))return '';
+  const subs=wkSubjects(e);
+  if(!subs.length)return card('📘 اختبار المنهج الأسبوعي','<p class="mut sm">لا توجد مواد كمّية في مسارك الحالي تصلح لهذا الاختبار بعد.</p>');
+  const wk=wkWeekId(),d=wkDone()[wk],names=subs.map(s=>s.n).join('، ');
+  if(d)return card('📘 اختبار المنهج الأسبوعي','<p class="ok sm"><b>نتيجتك هذا الأسبوع: '+d.score+' من '+d.total+' ('+d.pct+'٪).</b></p><p class="mut sm">اختبار جديد بالكامل يتجدد الأسبوع القادم من: '+esc(names)+'.</p>');
+  return card('📘 اختبار المنهج الأسبوعي','<p class="mut sm">أعلى مستوى صعوبة من مواد مسارك الدراسية الفعلية: '+esc(names)+' ('+WK_PER_SUBJ+' سؤالاً لكل مادة). أسئلة جديدة كل أسبوع.</p><button class="btn big" data-a="wkstart">ابدأ اختبار الأسبوع</button>');
+}
+ACT.wkstart=()=>{const qs=wkBuild();if(!qs.length){toast('تعذّر إعداد الاختبار الآن');return}exStart(qs,{wk:1,type:'wk',title:'اختبار المنهج الأسبوعي'})};
 
 /* ========== بنوك الحقائق: أسئلة المواد غير الكمية (بلا ذكاء اصطناعي) ==========
    كل سطر: «مفتاح|الإجابة الصحيحة|ثالث» حيث الثالث إمّا وسم مجموعة (حرف) يُسحب منه المشتّتات من الإجابات المشابهة،
@@ -6777,6 +6896,7 @@ function welcome(){const n=firstName();setTimeout(()=>toast(greeting()+(n?' يا
 let booted=false;
 function boot(){
   if(booted)return;booted=true;
+  try{setLang(lang())}catch(e){}
   buildShell();
   loadBgImg().then(()=>applySkin());
   if(cfg.bg.ver!==3){if(cfg.bg.fixed!=='custom'){cfg.bg.mode='fixed';cfg.bg.fixed='vd';cfg.bg.per={}}cfg.bg.ver=3;saveCfg()}
