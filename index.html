@@ -3189,7 +3189,9 @@ RD.gym=()=>{
   if(gd){
     const A1=dayItems(k,{gymOpt:'a'}),B1=dayItems(k,{gymOpt:'b'}),gA=A1.items.find(x=>x.id==='gym'),gB=B1.items.find(x=>x.id==='gym');
     const best=A1.sleepMin>=B1.sleepMin?'a':'b';
+    if(gA&&gB){
     cmp=card('أي وقت أنسب اليوم؟','<div class="grid w2"><div class="tile"><b>'+on.a+'</b><span>'+t12(gA.t0)+' – '+t12(gA.t1)+'</span><div class="'+sleepClass(A1.sleepMin)+' b" style="margin-top:4px">نوم '+(A1.sleepMin/60).toFixed(1)+' س</div>'+(gA.warn?'<div class="warn sm">'+gA.warn+'</div>':'')+'</div><div class="tile"><b>'+on.b+'</b><span>'+t12(gB.t0)+' – '+t12(gB.t1)+'</span><div class="'+sleepClass(B1.sleepMin)+' b" style="margin-top:4px">نوم '+(B1.sleepMin/60).toFixed(1)+' س</div></div></div><p style="margin:10px 0 0">'+(best==='a'?'الخيار «'+on.a+'» يمنحك نوماً أطول، وهو الأفضل لتركيزك وللتعافي بعد التمرين.':'الخيار «'+on.b+'» يمنحك نوماً أطول اليوم.')+' الحالي: <b>'+on[opt]+'</b>.</p>');
+    }
   }
   const rows=(g.rows||[]).map(r=>{const l=lastEx(r.ex,k);return '<li style="flex-wrap:wrap;align-items:flex-start"><div class="t" style="min-width:150px"><input type="text" list="exl" value="'+esc(r.ex)+'" data-i="gx" data-id="'+r.id+'" data-f="ex" placeholder="التمرين" style="width:100%">'+(l?'<div class="mut sm">آخر مرة: '+(l.s||'-')+'×'+(l.r||'-')+' @ '+(l.w||'-')+' كجم</div>':'')+'</div><input type="number" inputmode="numeric" placeholder="مجموعات" value="'+(r.s||'')+'" data-i="gx" data-id="'+r.id+'" data-f="s" style="width:76px"><input type="number" inputmode="numeric" placeholder="تكرار" value="'+(r.r||'')+'" data-i="gx" data-id="'+r.id+'" data-f="r" style="width:70px"><input type="number" inputmode="decimal" placeholder="كجم" value="'+(r.w||'')+'" data-i="gx" data-id="'+r.id+'" data-f="w" style="width:76px"><button class="x" data-a="gxdel" data-id="'+r.id+'" aria-label="حذف">×</button></li>'}).join('');
   const log=card('تمرين اليوم'+(gd?'':' (يوم راحة)'),'<label class="f">النوع<input type="text" value="'+esc(g.type||cfg.split[w]||'')+'" data-i="gtype" placeholder="مثال: صدر + ترايسبس"></label>'+
@@ -4040,7 +4042,7 @@ function alarmTick(){
 function alarmInit(){ensureOverlay();setInterval(alarmTick,1000);alarmTick()}
 
 /* المنبه اختياري: من لم يستخدمه من قبل يبدأ متوقفاً (مرة واحدة) */
-(()=>{try{if(!st.get('almOpt1',0)){st.set('almOpt1',1);if(cfg.alarm.on&&!Object.keys(cfg.alarm.log||{}).length){cfg.alarm.on=false;saveCfg()}}}catch(e){}})();
+(()=>{try{if(!st.get('almopt1',0)){st.set('almopt1',1);if(cfg.alarm.on&&!Object.keys(cfg.alarm.log||{}).length){cfg.alarm.on=false;saveCfg()}}}catch(e){}})();
 
 /* ========== الحسابات والمزامنة السحابية (اختيارية) ==========
    - تسجيل باسم + اسم مستخدم + كلمة مرور فقط.
@@ -5139,7 +5141,7 @@ function tpCard(){
 ACT.mbtopic=t=>{const a=MB().filter(m=>m.q.t===t.dataset.t&&m.q.sn===t.dataset.s);if(!a.length)return toast('لا أخطاء محفوظة في هذا الدرس');exStart(mbQs(a,20),{type:'prac',rev:1,title:'مراجعة: '+t.dataset.t})};
 
 /* ترحيل مفاتيح كانت بأحرف كبيرة (لا تُرفع للسحابة) إلى أحرف صغيرة */
-(()=>{try{[['exLessons','exlessons'],['fcLast','fclast'],['lbOn','lbon']].forEach(([o,n])=>{const v=localStorage.getItem('ab:'+o);if(v!==null){if(localStorage.getItem('ab:'+n)===null)st.set(n,JSON.parse(v));localStorage.removeItem('ab:'+o)}})}catch(e){}})();
+(()=>{try{[['exLessons','exlessons'],['fcLast','fclast'],['lbOn','lbon'],['almOpt1','almopt1'],['cmIsTeacher','cmisteacher']].forEach(([o,n])=>{const v=localStorage.getItem('ab:'+o);if(v!==null){if(localStorage.getItem('ab:'+n)===null)st.set(n,JSON.parse(v));localStorage.removeItem('ab:'+o)}})}catch(e){}})();
 /* ========== التقرير الأسبوعي (صورة) + بطاقات المراجعة ========== */
 function weekStats(){
   const k=td(),days=[];for(let i=6;i>=0;i--){const d=addDays(k,-i);days.push({d:d,v:Math.round(D.study(d)||0)})}
@@ -6442,7 +6444,7 @@ RD.comm=()=>{
   if(typeof CLOUD==='undefined'||!CLOUD.client||!CLOUD.user)return '<div class="card"><b>المجتمع يحتاج حساباً</b><p class="mut sm">سجّل دخولك بحسابك لتشارك زملاءك ومعلميك.</p>'+(typeof CLOUD!=='undefined'&&CLOUD.client&&!CLOUD.user?'<button class="btn big" data-a="guestout" type="button">إنشاء حساب / تسجيل الدخول</button>':'')+'</div>';
   if(cmOff)return '<div class="card cm-off"><b>المجتمع قيد التجهيز</b><p class="mut sm">سيُفتح قريباً بإذن الله. تابع التحديثات.</p></div>';
   /* تغيّر صفّه الدراسي: اخرج من غرفة الصف القديم وحدّث الخادم فوراً */
-  if(!window.__cmTv&&st.get('cmIsTeacher',0)){window.__cmTv=1;if(!cmRoom)cmView='teach'}/* معلم معتمد: يفتح قسم مجتمعه على «أنا معلم» مباشرة، وهو مسجّل بحسابه فلا يُطلب منه شيء */
+  if(!window.__cmTv&&st.get('cmisteacher',0)){window.__cmTv=1;if(!cmRoom)cmView='teach'}/* معلم معتمد: يفتح قسم مجتمعه على «أنا معلم» مباشرة، وهو مسجّل بحسابه فلا يُطلب منه شيء */
   if(cmRoom&&!cmRoom.startsWith('g:')&&!cmRoom.startsWith('s:')&&!cmRoom.startsWith('sj:')&&cmRoom!==cmKey()){cmRoom='';cmPend=null}
   if(typeof CLOUD!=='undefined'&&CLOUD.user&&cmKey()&&cmSynced.split('|')[0]!==cmKey())cmSync().then(()=>{if(curSec==='comm')renderSec('comm')}).catch(()=>{});
   if(cmRoom)return cmRoomHtml();
@@ -6682,7 +6684,7 @@ function cmTeachHtml(){return '<div id="cm-teach"><p class="mut sm" style="text-
 async function cmLoadTeacher(){
   const el=document.getElementById('cm-teach');if(!el)return;
   try{
-    const r=await cmRpc('cm_my_teacher');cmTeacher=r&&r[0]||null;st.set('cmIsTeacher',cmTeacher&&cmTeacher.approved?1:0);
+    const r=await cmRpc('cm_my_teacher');cmTeacher=r&&r[0]||null;st.set('cmisteacher',cmTeacher&&cmTeacher.approved?1:0);
     if(!cmTeacher){el.innerHTML='<div class="card cm-hero"><div class="b">سجّل كمعلم</div><p class="mut sm">أنشئ مجموعة لطلابك برمز من 10 أرقام. تصل بياناتك للمشرف (للمراجعة فقط، ولا تظهر للطلاب) وتُفعَّل مجموعتك بعد موافقته.</p>'+
       '<label class="f">الاسم الظاهر<input id="cm-tn" maxlength="40" placeholder="أ. أحمد"></label><label class="f">اسم المجموعة (يظهر للطلاب)<input id="cm-tg" maxlength="40" placeholder="مجموعة أ. أحمد للرياضيات"></label><label class="f">المادة<input id="cm-ts" maxlength="40" placeholder="الرياضيات"></label><label class="f">رقم هاتفك (للمشرف فقط ولا يظهر للطلاب)<input id="cm-tp" dir="ltr" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX"></label>'+
       '<label class="f">رمز مجموعتك (10 أرقام)<div class="row"><input id="cm-tc" dir="ltr" inputmode="numeric" maxlength="10" value="'+cmGen()+'" style="flex:1;text-align:center;letter-spacing:3px"><button class="btn g" data-a="cmgen" type="button">رمز جديد</button></div></label>'+
