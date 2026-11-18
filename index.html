@@ -2426,13 +2426,17 @@ const rtDone=k=>st.get('rtdone',{})[k]||{};
 function setRtDone(k,id,v){const a=st.get('rtdone',{});a[k]=a[k]||{};if(v)a[k][id]=1;else delete a[k][id];st.set('rtdone',a)}
 const TAGN={study:'مذاكرة',pray:'عبادة',lesson:'درس',gym:'تمرين',food:'أكل',rest:'راحة',read:'قراءة',sleep:'نوم',move:'تنقّل',school:'مدرسة',custom:'خاص'};
 
-/* ========== تعدد اللغات: عربي/إنجليزي ==========
-   المنهج: لا تعديل على منطق أي ملف آخر. مفتاح واحد lang (ar/en) في التخزين،
-   وقاموس ترجمة يُطبَّق تلقائياً على كل نص يظهر في الصفحة (TreeWalker + MutationObserver)،
-   فتُترجم كل الواجهة (عناوين الأقسام، الأزرار، التسميات) أولاً بأول دون الحاجة لتمرير على كل ملف. */
-const lang=()=>st.get('lang','ar');
+/* ========== تعدد اللغات: عربي/إنجليزي — ترجمة كاملة لكل حرف ==========
+   عند اختيار English تتحول الصفحة كلها: الاتجاه LTR، وكل نص ظاهر (واجهة، محتوى، أسئلة،
+   اقتباسات، تواريخ، أرقام، رسائل، عناصر مرسومة على Canvas في التصدير) يُترجم.
+   الطبقات: (1) قاموس يدوي دقيق لتسميات الواجهة، (2) ترجمة آلية مجانية (Google gtx) لكل ما
+   تبقّى، بدفعات مجمّعة، وتُحفظ النتائج في IndexedDB على الجهاز فلا يُطلب أي نص مرتين،
+   (3) تحويل الأرقام العربية-الهندية وعلامات الترقيم محلياً.
+   العودة للعربية تعيد تحميل الصفحة فتعود كل النصوص الأصلية كما هي. */
+let LANG_=null;
+const lang=()=>LANG_||(LANG_=st.get('lang','ar'));
 function setLang(l){
-  st.set('lang',l);
+  LANG_=l;st.set('lang',l);
   document.documentElement.lang=l;
   document.documentElement.dir=l==='en'?'ltr':'rtl';
 }
@@ -2475,59 +2479,167 @@ const I18N={
   'إحصاءات':'Stats','تقدّمك':'Your progress','منبه الصباح':'Morning alarm',
   'متوقف':'Off','يعمل':'On','نشط':'Active','مغلق':'Closed','مفتوح':'Open',
 };
-/* قاموس موسّع: كل تسميات الواجهة الثابتة (عناوين البطاقات، الأزرار، الحقول، رسائل Toast)
-   عبر كامل التطبيق — مستخرج آلياً من كل الملفات. محتوى الدروس والأسئلة والاقتباسات
-   يبقى عربياً عمداً (ليست «واجهة»، وترجمتها الحرفية تُفسد دقتها التعليمية). */
-let I18N_KEYS=null;
-function i18nKeys(){
-  if(I18N_KEYS)return I18N_KEYS;
-  I18N_KEYS=Object.keys(I18N).sort((a,b)=>b.length-a.length);
-  return I18N_KEYS;
+const I18N2={'آخر 7 أيام':'Last 7 days','آخر الجلسات':'Recent sessions','أ. أحمد':'Mr. Ahmed','أبكر موعد نوم':'Earliest bedtime','أحسنت':'Well done','أحسنت، تمرين مكتمل':'Well done, exercise complete','أخبرنا عنك لنضبط الرياضة على مقاسك':'Tell us about yourself to tailor your fitness plan','أخرى':'Other','أدخل مدة صحيحة':'Enter a valid duration','أسبوع الجيم':'Gym week','أشارك باسمي في القائمة':'Show my name on the list','أشارك نقاطي مع مجموعتي':'Share my points with my group','أضف':'Add','أضف المهمة':'Add task','أضف درساً':'Add a lesson','أضف مسار البداية':'Add a starting point','أضف نشاطاً أو عدّل أي نشاط (✏️)':'Add an activity or edit any activity (✏️)','أضف نشاطاً أولاً':'Add an activity first','أظهر الإجابة':'Show answer','أعضاء المجموعة':'Group members','أفضل وقت':'Best time','ألوان الخط والورق':'Text and paper colors','ألواني':'My colors','أنا من النوع الذي...':'I\'m the type who...','أنثى':'Female','أنجزت هدف الماء اليوم':'Water goal reached today','أنجزتها':'Done it','أنهيت اختبار هذا الأسبوع. انتظر الجمعة القادمة.':'You finished this week\'s exam. Wait for next Friday.','أنهيت المراجعة 🎉':'Review finished 🎉','أنهيته':'Finished it','أهدافي':'My goals','أوقفت المشاركة. اسمك لن يُضاف للأسابيع القادمة.':'Participation stopped. Your name won\'t be added in future weeks.','أي وقت أنسب اليوم؟':'Which time suits today better?','أيام سابقة':'Previous days','أُرسل الطلب للمعلم':'Request sent to the teacher','أُرسل طلبك للمشرف':'Your request was sent to the admin','أُزيل البريد':'Email removed','أُزيلت صورتك':'Your photo was removed','أُضيف':'Added','أُضيف الكتاب':'Book added','أُضيف المشرف @':'Admin added @','أُضيف النشاط':'Activity added','أُضيف مسار البداية':'Starting point added','أُلغي الطلب':'Request canceled','أُوقف قفل التطبيق':'App lock turned off','إبلاغ':'Report','إجابة خاطئة. تحتاج أن تستيقظ تماماً.':'Wrong answer. You need to wake up fully.','إحصاءات':'Stats','إخفاء':'Hide','إدارة':'Manage','إرجاع الألوان الافتراضية':'Restore default colors','إرجاع الخلفية الافتراضية':'Restore default background','إرسال':'Send','إرسال الطلب':'Send request','إرسال الطلب للمشرف':'Send request to admin','إزالة':'Remove','إزالة المرفق':'Remove attachment','إزالة صورتي':'Remove my photo','إضافة':'Add','إضافة مادة جديدة':'Add a new subject','إعادة الكاميرا':'Restart camera','إعداد المنبه':'Alarm setup','إغلاق':'Close','إلغاء':'Cancel','إلغاء الطلب وإعادة التسجيل':'Cancel request and re-register','إلى':'To','إنشاء حساب / تسجيل الدخول':'Create account / Log in','إنهاء':'Finish','إنهاء الاختبار':'Finish exam','إنهاء وتصحيح':'Finish and grade','إيقاف القفل':'Turn off lock','إيقاف وضع الليل':'Turn off night mode','ابحث عن طعام':'Search for food','ابحث في ملاحظاتك':'Search your notes','ابدأ':'Start','ابدأ اختبار':'Start exam','ابدأ اختبار الأسبوع':'Start this week\'s exam','ابدأ الآن':'Start now','ابدأ الاختبار الآن':'Start the exam now','ابدأ الجولة':'Start the tour','ابدأ القراءة':'Start reading','ابدأ بملء الشاشة':'Start in fullscreen','ابدأ تركيز':'Start focus','ابدأ رحلة القمر الصناعي':'Start the satellite journey','اختبار المنبه':'Test alarm','اختر ذكر أو أنثى':'Choose male or female','اختر صفك أولاً':'Choose your grade first','اختر صورة أو ملف PDF فقط.':'Choose an image or PDF file only.','اختر صورة من جهازك':'Choose a photo from your device','اختر مرحلتك':'Choose your stage','اختر مرحلتك أولاً':'Choose your stage first','اختر يوماً واحداً على الأقل':'Choose at least one day','اختصارات':'Shortcuts','اختيار المرحلة':'Choose stage','ادخل الدردشة':'Enter the chat','استئناف الاختبار':'Resume exam','استبدال':'Replace','استعادة الأصل':'Restore original','استيراد':'Import','استيراد من خطتي':'Import from my plan','استيقظت الساعة':'Woke up at','اسم الدرس':'Lesson name','اسم الكتاب':'Book name','اسم المجموعة (يظهر للطلاب)':'Group name (shown to students)','اسم المدرسة (الحكومية)':'School name (official)','اسم المدينة':'City name','اسم المستخدم':'Username','اسم النشاط':'Activity name','اسمك كما تحب أن يظهر':'Your name as you\'d like it shown','اشرب كوب ماء':'Drink a glass of water','افتح الرياضة والصحة':'Open Fitness & Health','اكتب اسم الكتاب':'Type the book\'s name','اكتب اسم المهمة أولاً':'Type the task name first','اكتب اسمك':'Type your name','اكتب اسمك من الإعدادات أولاً':'Type your name in Settings first','اكتب اسمك واختر صفك من الإعدادات أولاً':'Type your name and choose your grade in Settings first','اكتب الاسم والسعرات':'Type the name and calories','اكتب الاسم والوقت':'Type the name and time','اكتب الاسم والوقت واختر يوماً واحداً على الأقل':'Type the name and time, and choose at least one day','اكتب السؤال والإجابة':'Type the question and answer','اكتب الصورة التي تريد أن تصل إليها':'Describe the picture you want to reach','اكتب رسالتك…':'Type your message…','اكتب سؤالك':'Type your question','اكتب عنوان المهمة':'Type the task title','اكتب هنا...':'Type here...','اكتب وقت النوم والاستيقاظ':'Type your sleep and wake times','الآن والتالي':'Now and next','الأخطاء فقط':'Mistakes only','الأعضاء':'Members','الأنشطة حسب اليوم':'Activities by day','الأهمية':'Priority','الأيام':'Days','الإجابة (ظهر البطاقة)':'Answer (back of card)','الإدارة التعليمية':'Education directorate','الإشعارات':'Notifications','الإعدادات':'Settings','الاختبار مفتوح الآن.':'The exam is open now.','الاختبارات':'Tests','الاسم':'Name','الاسم (اختياري، يظهر في الملف)':'Name (optional, shown in the file)','الاسم الظاهر':'Display name','الاسم على الشهادة':'Name on the certificate','الانتقال (د)':'Transition (min)','البداية':'Start','البريد':'Email','البريد الإلكتروني':'Email address','البنك فارغ':'The bank is empty','التاريخ':'Date','التالي':'Next','التحقق تقريبي:':'Verification is approximate:','الترتيب':'Ranking','التصنيف':'Category','التقاط (0/3)':'Capture (0/3)','التقط الصورة':'Take the photo','التكرار':'Repetition','التمرين':'Exercise','الحساسية':'Allergies','الحلول والشرح':'Solutions and explanation','الخلفية':'Background','الدخول كضيف':'Continue as guest','الدردشة العامة للمدرسة':'School\'s general chat','الدرس القادم':'Next lesson','الدقائق':'Minutes','الرمز (10 أرقام)':'Code (10 digits)','الرياضيات':'Math','السؤال (وجه البطاقة)':'Question (front of card)','السابق':'Previous','الساعة':'Time','الصف':'Grade','الصفحات':'Pages','الصوت':'Sound','الطول (سم)':'Height (cm)','العمر':'Age','العنوان':'Title','القهوة والشاي':'Coffee and tea','القيمة خارج النطاق المسموح':'Value is out of the allowed range','المؤلف':'Author','الماء':'Water','الماء آخر 7 أيام':'Water, last 7 days','المادة':'Subject','المادة أو الدرس':'Subject or lesson','المتاح لهذه المادة والمستوى':'Available for this subject and level','المتصفح لا يدعم تحديد الموقع':'Your browser doesn\'t support location','المجتمع قيد التجهيز':'Community is being set up','المجتمع يحتاج حساباً':'Community needs an account','المحافظة':'Governorate','المدة (د)':'Duration (min)','المدة (دقيقة)':'Duration (minutes)','المدة بالدقائق':'Duration in minutes','المدرسة':'School','المرحلة':'Stage','المرحلة الدراسية':'Educational stage','المركز / الحي':'District / neighborhood','المزيد':'More','المنبه':'Alarm','الموقع ومواقيت الصلاة':'Location and prayer times','النتيجة':'Result','النسخ الاحتياطي':'Backup','النهاية':'End','النوع':'Type','النوم':'Sleep','الهدف (مل)':'Goal (ml)','الوزن (كجم)':'Weight (kg)','الوقت':'Time','اليوم':'Today','اليوم راحة':'Today is a rest day','انتهت الراحة، المجموعة التالية':'Rest is over, next set','انتهت رسائلك الحالية، تتجدد':'Your current messages ran out, they\'ll renew','انتهى الوقت، جارٍ التصحيح…':'Time\'s up, grading…','انتهى وقت المحاولة':'The attempt time has ended','انسخ الرمز يدوياً':'Copy the code manually','انضمام':'Join','بحث في المهام':'Search tasks','بداية الدراسة':'Start of study','بردية علم':'Bardiya Ilm','بروتين':'Protein','بريد الاسترجاع':'Recovery email','بطاقات المراجعة':'Flashcards','بطاقة':'Card','بطاقة جديدة':'New card','بنك أخطائي':'My mistake bank','بيانات الجدول':'Schedule details','بياناتي':'My data','بَرْدِيَّة':'Bardiya','تأكيد':'Confirm','تأكيد كلمة المرور':'Confirm password','تحتاج اتصالاً بالإنترنت.':'Needs an internet connection.','تحديث':'Update','تخطّ':'Skip','تخطّي':'Skip','تدريب حسب المادة':'Practice by subject','تدريب على كل الأخطاء':'Practice all mistakes','تدريب متنوع':'Mixed practice','تراجع':'Undo','تركيزك آخر 14 يوماً':'Your focus, last 14 days','تسجيل':'Register','تسجيل الخروج':'Log out','تسجيل سجادة الصلاة':'Log prayer mat use','تسجيل يدوي':'Manual entry','تشغيل المنبه':'Turn on alarm','تصحيح التباين تلقائياً':'Auto-correct contrast','تصدير':'Export','تصدير نسخة':'Export a copy','تعتيم صورتك لتسهيل القراءة':'Dim your photo for easier reading','تعديل':'Edit','تعديل الجدول':'Edit schedule','تعديل النشاط':'Edit activity','تعديل بياناتي':'Edit my data','تعذر الحفظ. ربما امتلأت مساحة التخزين.':'Couldn\'t save. Storage may be full.','تعذر تحديد الموقع':'Couldn\'t determine location','تعذر حفظ':'Couldn\'t save','تعذر حفظ الكتاب':'Couldn\'t save the book','تعذر حفظ بعض البيانات. حاول لاحقاً.':'Some data couldn\'t be saved. Try again later.','تعذر قراءة الصورة':'Couldn\'t read the image','تعذّر إعداد الاختبار الآن':'Couldn\'t set up the exam right now','تعذّر إنشاء التقرير':'Couldn\'t generate the report','تعذّر إنشاء الشهادة':'Couldn\'t generate the certificate','تعذّر إنشاء الصورة':'Couldn\'t generate the image','تعذّر إنشاء الملف':'Couldn\'t create the file','تعذّر تجهيز الاختبار، حاول لاحقاً':'Couldn\'t prepare the exam, try again later','تعذّر عرض الأسئلة':'Couldn\'t display the questions','تعذّر قراءة الملف.':'Couldn\'t read the file.','تعميم على كل الأيام':'Apply to all days','تغيير الخلفية':'Change background','تغيير الرمز':'Change code','تغيير المدرسة':'Change school','تغيير المرحلة':'Change stage','تغيير رمز المجموعة':'Change group code','تغيير كلمة المرور':'Change password','تفعيل الإشعارات':'Enable notifications','تقدّم اليوم':'Today\'s progress','تقدّمك':'Your progress','تكرار':'Repeat','تم':'Done','تم الإبلاغ، شكراً لك':'Reported, thank you','تم الانضمام لمجموعة':'Joined a group','تم الحفظ':'Saved','تم تحديث الموقع':'Location updated','تم تحديث موادك':'Your subjects were updated','تم تعيين صورتك كخلفية':'Your photo was set as background','تم تغيير كلمة المرور':'Password changed','تم تنزيل التقرير':'Report downloaded','تم تنزيل الجدول':'Schedule downloaded','تم تنزيل الشهادة':'Certificate downloaded','تم تنزيل الصورة':'Image downloaded','تم تنزيل الملف':'File downloaded','تم تنزيل النتيجة':'Result downloaded','تم حفظ اليوزر نيم':'Username saved','تم حفظ بياناتك':'Your data was saved','تم ربط البريد':'Email linked','تم نسخ الرمز':'Code copied','تمت':'Done','تمت إضافة':'Added','تمرين اليوم':'Today\'s exercise','تنبيهات التدقيق:':'Audit alerts:','تنزيل':'Download','تنزيل PDF':'Download PDF','تنزيل اختبار PDF':'Download exam PDF','تنزيل الامتحان PDF':'Download exam PDF','تنزيل صورة':'Download image','جارٍ الحفظ…':'Saving…','جارٍ المزامنة…':'Syncing…','جارٍ تجهيز التقرير…':'Preparing the report…','جارٍ تجهيز الشهادة…':'Preparing the certificate…','جارٍ تجهيز الصورة…':'Preparing the image…','جارٍ تجهيز ملف PDF…':'Preparing the PDF file…','جدول':'Schedule','جدول المذاكرة:':'Study schedule:','جلسة حرة':'Free session','جملة أخرى':'Another sentence','جولة سريعة':'Quick tour','جيم':'Gym','حجم الكوب':'Cup size','حدث خطأ غير متوقع':'An unexpected error occurred','حذف':'Delete','حذف المنجزة':'Delete completed','حذف حسابي وبياناتي نهائياً':'Permanently delete my account and data','حزمة ليلة الامتحان':'Exam-night bundle','حساب جديد':'New account','حسابي':'My account','حصلت على':'You got','حفظ':'Save','حُفظ التعديل':'Edit saved','حُفظ النوم':'Sleep saved','حُفظ الوزن':'Weight saved','حُفظت البطاقة (':'Card saved (','خرجت من التطبيق. عدد الخروج:':'Left the app. Exit count:','خروج':'Exit','خط الطول':'Longitude','خط العرض':'Latitude','خطة الأسبوع':'Weekly plan','خطتك حتى الامتحان':'Your plan until the exam','خطوات فرعية (سطر لكل خطوة)':'Sub-steps (one per line)','خلفية الملف':'File background','خيارات أكثر':'More options','دخول':'Log in','دخول غرفة مدرستي':'Enter my school\'s room','دروسي':'My lessons','دروسي الأضعف':'My weakest lessons','دقائق':'minutes','دقائق أخرى':'more minutes','ذكر':'Male','رؤيتي':'My vision','راجع أسئلته':'Review its questions','ربط / تغيير البريد':'Link / change email','رجعت الألوان الافتراضية':'Default colors restored','رجعت الخلفية الافتراضية':'Default background restored','رجوع':'Back','رجوع لتسجيل الدخول':'Back to log in','رجوع للاختبارات':'Back to tests','رفض':'Decline','رفع ملفات':'Upload files','رقم هاتفك (للمشرف فقط ولا يظهر للطلاب)':'Your phone number (admin only, not shown to students)','رمز جديد':'New code','رمز مجموعتك (10 أرقام)':'Your group\'s code (10 digits)','روتينات يومية جاهزة':'Ready-made daily routines','رياضات أخرى وروتينات':'Other sports and routines','رُفع':'Uploaded','سأذكّرك بعد 5 دقائق':'I\'ll remind you in 5 minutes','سجادة الصلاة':'Prayer mat','سجل':'Log','سجل الدردشة':'Chat log','سجلي':'My log','سجّل نشاطك اليوم':'Log today\'s activity','سعرات':'Calories','سعرات اليوم':'Today\'s calories','سكر مضاف':'Added sugar','سُجّل':'Logged','سُجّلت':'Logged','سُجّلت سجادة الصلاة':'Prayer mat logged','شاركت في قائمة المراكز':'Joined the rankings list','شاهد مدرستك بالأبعاد الثلاثية 🏫':'See your school in 3D 🏫','ضُبط التباين':'Contrast adjusted','طلب إزالة':'Removal request','طلب تغيير':'Change request','طوارئ: لا تعمل الكاميرا':'Emergency: camera not working','طُبّق على كل الأيام':'Applied to all days','عادت القيمة الأصلية':'Original value restored','عدد الأسئلة':'Number of questions','عدد الصفحات':'Number of pages','عرض كل الأقسام في الشريط':'Show all sections in the bar','عرفتها':'I knew it','عشوائي':'Random','عنوان الجدول':'Schedule title','عنوان على الورق':'Title on paper','غفوة 5 د':'5-min snooze','غير مدعومة':'Not supported','غيّرها الآن':'Change it now','فتح':'Open','فتح الدردشة':'Open chat','فتح المحفوظ':'Open saved','قائمة المهام':'Task list','قبعة تخرج وقلمان':'Graduation cap and pens','قبل المذاكرة بـ (دقيقة)':'Before studying by (minutes)','قراءة اليوم':'Today\'s reading','قفل التطبيق':'Lock the app','كتب مرحلتي':'My stage\'s books','كتبي':'My books','كجم':'kg','كل الأسئلة':'All questions','كل الأقسام':'All sections','كل الاقتباسات':'All quotes','كلمة المرور':'Password','كلمة المرور الجديدة':'New password','كم درساً بقي لك في المنهج؟':'How many lessons are left in the curriculum?','كم صفحة قرأت؟':'How many pages did you read?','كما سيُنزَّل':'As it will be downloaded','كيف يعمل الجدول':'How the schedule works','لا أخطاء محفوظة في هذا الدرس':'No saved mistakes in this lesson','لا أسئلة كافية':'Not enough questions','لا أسئلة لمرحلتك بعد':'No questions for your stage yet','لا بطاقات مستحقة':'No cards due','لا توجد أسئلة متاحة لهذه المادة بعد':'No questions available for this subject yet','لا شيء مستحق الآن':'Nothing due right now','لا ملاحظات':'No notes','لا، أبقني خارج القائمة':'No, keep me off the list','لتقليل السكر':'To reduce sugar','لك اليوم':'For you today','لم أعرفها':'I didn\'t know it','لم تبدأ التاريخ بعد؟':'Haven\'t started History yet?','لماذا أفعل كل هذا؟':'Why do all this?','لن يظهر اسمك في القائمة':'Your name won\'t appear on the list','لنبدأ':'Let\'s start','لوحة الشرف':'Honor board','لون ثابت':'Solid color','مؤقت الراحة بين المجموعات':'Rest timer between sets','ما يجب أن تعرفه':'What you should know','مادة':'Subject','ماذا تريد أن تنجز؟':'What do you want to get done?','ماذا يقدّم بردية علم؟':'What does Bardiya Ilm offer?','مبارك إنهاء الكتاب':'Congrats on finishing the book','مثال: 40':'Example: 40','مثال: أنهي منهج البرمجة قبل ديسمبر':'Example: finish the programming curriculum before December','مثال: إدارة شرق المنصورة':'Example: East Mansoura directorate','مثال: رياضيات':'Example: Math','مثال: صدر + ترايسبس':'Example: chest + triceps','مثال: كورس إضافي':'Example: an extra course','مثال: مدرسة النصر الثانوية بنين':'Example: Al-Nasr Secondary School for Boys','مجموعات':'Groups','مجموعة أ. أحمد للرياضيات':'Mr. Ahmed\'s Math group','مخرج الطوارئ':'Emergency exit','مخصص':'Custom','مدة التمرين (د)':'Exercise duration (min)','مذاكرتك آخر 7 أيام':'Your studying, last 7 days','مرحبًا، أنا ذكي. فاهمك':'Hi, I\'m Fahmak. I get you','مزامنة الآن':'Sync now','مستوى الصوت':'Volume','مستوى نشاطك المعتاد':'Your usual activity level','مسح':'Clear','مسح السجل كله':'Clear the whole log','مسح الكل':'Clear all','مسح المحادثة':'Clear chat','مسح كل البيانات':'Erase all data','مصمّم الجدول':'Schedule designer','معاينة الجدول':'Schedule preview','ملاحظات':'Notes','ملاحظة سريعة':'Quick note','ملف غير صالح':'Invalid file','ملفي الصحي':'My health file','من':'From','منبه الصباح':'Morning alarm','منطقة حساسة':'Sensitive area','مهام اليوم':'Today\'s tasks','مهمة جديدة':'New task','موادي':'My subjects','موافقة':'Approve','موعد الامتحان':'Exam date','موقعي الحالي':'My current location','نسخ':'Copy','نسيت الرمز؟':'Forgot the code?','نسيت كلمة المرور؟':'Forgot password?','نشاطك في آخر 7 أيام':'Your activity, last 7 days','نظرة سريعة':'Quick glance','نعم، أظهر اسمي':'Yes, show my name','نمت الساعة':'Slept at','هدف السعرات':'Calorie goal','هدف القراءة اليومي':'Daily reading goal','هدف النوم (ساعات)':'Sleep goal (hours)','هدف تحقق، ما شاء الله':'Goal achieved, Mashallah','هذا الأسبوع':'This week','هويتي':'My identity','وجبات اليوم':'Today\'s meals','وزن الجسم اليوم (كجم)':'Today\'s body weight (kg)','وسم (مثال: برمجة)':'Tag (e.g. programming)','وصلت إلى الصفحة':'Reached page','وضع الضيف':'Guest mode','وضع الليل (ينام الهاتف مفتوحاً)':'Night mode (phone stays on while sleeping)','وقت الرنين':'Ring time','يبدأ إذا اخترت الأول':'Starts if you choose the first','يبدأ إذا اخترت الثاني':'Starts if you choose the second','يذاكر من الفجر ويتمرن ويقرأ كل يوم':'Studies from dawn, exercises, and reads every day','يظهر اسمك ودرجتك لطلاب صفك ومسارك فقط.':'Your name and score are shown only to students in your grade and track.','يعمل والتطبيق مفتوح':'Works while the app is open','يوزر نيم المشرف':'Admin\'s username','🏆 قائمة المراكز الأولى':'🏆 Top ranks list','🏆 لوحة الشرف هذا الأسبوع':'🏆 This week\'s honor board','📘 اختبار المنهج الأسبوعي':'📘 Weekly Curriculum Exam','🧠 اختبار العقل الأسبوعي':'🧠 Weekly Mind Exam'};
+Object.assign(I18N,I18N2);
+
+Object.assign(I18N,{'د':'min','س':'h','ص':'AM','م':'PM','مل':'ml','جم':'g','سم':'cm','ث':'s',
+  'متوقف':'Off','يعمل':'On','نشط':'Active','مغلق':'Closed','مفتوح':'Open'});
+
+const I18N_AR=/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;
+const I18N_DIG=/[٠-٩۰-۹٪٫٬،؛؟]/g,I18N_DIGT=/[٠-٩۰-۹٪٫٬،؛؟]/;
+function i18nDigits(s){
+  return s.replace(I18N_DIG,c=>{const k=c.charCodeAt(0);
+    if(k>=0x660&&k<=0x669)return String(k-0x660);if(k>=0x6F0&&k<=0x6F9)return String(k-0x6F0);
+    return {'٪':'%','٫':'.','٬':',','،':',','؛':';','؟':'?'}[c]||c});
 }
-/* مطابقة كاملة فقط لنص العقدة بعد التجريد من الفراغات — لا نعوّض كلمة واحدة
-   وسط جملة أطول (اقتباس/حكمة/محتوى) فتصبح جملة مخلوطة اللغتين؛ هذا هو العيب
-   الذي كان يجعل الترجمة «جزئية» وتظهر كلمات إنجليزية مبعثرة داخل جمل عربية.
-   نسمح فقط ببادئة ثابتة في بداية النص (رسائل toast الديناميكية مثل
-   "حُفظت البطاقة ("+n+")") شرط أن يتبعها فاصل غير حرف عربي، لا أي موضع آخر. */
-function i18nText(t){
-  const tt=t.trim();
-  if(tt&&I18N[tt])return t.replace(tt,I18N[tt]);
-  /* النص أطول من بادئة toast نمطية (مثل "حُفظت البطاقة (12)") → غالباً جملة
-     محتوى/حكمة قد تبدأ بالصدفة بكلمة موجودة في القاموس (مثل "المذاكرة الهادئة...")،
-     فلا نلمسها لتبقى كاملة بالعربية ولا تتحوّل لجملة مخلوطة اللغتين. */
-  if(t.length<4||t.length>28)return t;
-  for(const k of i18nKeys()){
-    if(k.length<4)continue;
-    if(t.indexOf(k)!==0)continue;
-    const rest=t.slice(k.length);
-    if(rest&&/^[؀-ۿ]/.test(rest))continue; /* امتداد لكلمة عربية أطول، تجاهل */
-    const rt=rest.trim();
-    if(rt&&I18N[rt])return I18N[k]+rest.replace(rt,I18N[rt]);
-    return I18N[k]+rest;
+/* الوقت بصيغة "٠٩:٤٥ ص" أو "8:00 مساءً" يُحوَّل محلياً بلا شبكة */
+function i18nLocal(t){
+  const m=t.match(/^([\d٠-٩:\s.\-–]+)\s*(ص|م|صباحاً|مساءً|صباحا|مساء)$/);
+  if(m)return i18nDigits(m[1]).trim()+' '+(/^ص/.test(m[2])?'AM':'PM');
+  return null;
+}
+
+/* ---- ذاكرة الترجمة الآلية (IndexedDB) ---- */
+const MTC=new Map();let MTDB=null;
+const mtReady=new Promise(res=>{
+  try{const rq=indexedDB.open('ab-i18n',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('mt');
+    rq.onsuccess=()=>{MTDB=rq.result;try{const tx=MTDB.transaction('mt','readonly'),os=tx.objectStore('mt'),c=os.openCursor();
+      c.onsuccess=()=>{const cur=c.result;if(cur){MTC.set(cur.key,cur.value);cur.continue()}else res()};c.onerror=()=>res()}catch(e){res()}};
+    rq.onerror=()=>res();
+  }catch(e){res()}
+  setTimeout(res,1500);
+});
+function mtSave(pairs){
+  if(!MTDB||!pairs.length)return;
+  try{const tx=MTDB.transaction('mt','readwrite'),os=tx.objectStore('mt');pairs.forEach(([k,v])=>os.put(v,k))}catch(e){}
+}
+
+/* ---- طابور الترجمة الآلية بدفعات ---- */
+const MTQ=new Set(),MTBUSY=new Set(),MTFAIL=new Map();let mtTimer=null,mtActive=0;
+const MT_URL='https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t';
+function mtQueue(t){
+  if(MTC.has(t)||MTBUSY.has(t))return;
+  const f=MTFAIL.get(t);if(f&&Date.now()-f<30000)return;
+  MTQ.add(t);if(!mtTimer)mtTimer=setTimeout(mtFlush,120);
+}
+async function mtReq(text){
+  const r=await fetch(MT_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'q='+encodeURIComponent(text)});
+  if(!r.ok)throw new Error('mt '+r.status);
+  const j=await r.json();return (j&&j[0]||[]).map(x=>x&&x[0]||'').join('');
+}
+async function mtBatch(list){
+  mtActive++;list.forEach(t=>MTBUSY.add(t));
+  const got=[];
+  try{
+    const multi=list.filter(t=>t.indexOf('\n')<0);
+    const single=list.filter(t=>t.indexOf('\n')>=0);
+    if(multi.length){
+      const out=(await mtReq(multi.join('\n'))).split('\n');
+      if(out.length===multi.length)multi.forEach((t,i)=>got.push([t,out[i].trim()]));
+      else for(const t of multi)got.push([t,(await mtReq(t)).trim()]);
+    }
+    for(const t of single)got.push([t,(await mtReq(t)).trim()]);
+  }catch(e){list.forEach(t=>{if(!got.find(g=>g[0]===t))MTFAIL.set(t,Date.now())})}
+  got.forEach(([k,v])=>{if(v)MTC.set(k,v);else MTFAIL.set(k,Date.now())});
+  mtSave(got.filter(g=>g[1]));
+  list.forEach(t=>MTBUSY.delete(t));mtActive--;
+  if(got.length)i18nSchedule();
+  if(MTQ.size)mtTimer=mtTimer||setTimeout(mtFlush,60);
+}
+function mtFlush(){
+  mtTimer=null;if(lang()!=='en'||!MTQ.size)return;
+  if(!navigator.onLine){mtTimer=setTimeout(mtFlush,5000);return}
+  while(MTQ.size&&mtActive<4){
+    const batch=[];let len=0;
+    for(const t of MTQ){const l=encodeURIComponent(t).length;if(batch.length&&len+l>4500)break;batch.push(t);len+=l+3;if(batch.length>=80)break}
+    batch.forEach(t=>MTQ.delete(t));mtBatch(batch);
   }
-  return t;
+  if(MTQ.size&&!mtTimer)mtTimer=setTimeout(mtFlush,250);
 }
+
+/* ترجمة نص واحد متزامنة: القاموس ← المحلي ← الذاكرة؛ وإلا يُطلب آلياً ويُعاد null */
+function i18nTr(t){
+  if(I18N[t])return I18N[t];
+  const loc=i18nLocal(t);if(loc)return loc;
+  const c=MTC.get(t);if(c)return i18nDigits(c);
+  mtQueue(t);return null;
+}
+
+/* ---- تطبيق على DOM ---- */
+const I18N_SKIP='script,style,textarea,noscript,[translate="no"],.notranslate,[contenteditable="true"]';
+const I18ST=new WeakMap(),I18AT=new WeakMap();
+function i18nNode(n){
+  const v=n.nodeValue;if(!v)return;
+  const s=I18ST.get(n);let orig;
+  if(s&&s.v===v){if(s.done)return;orig=s.o}else orig=v;
+  if(!I18N_AR.test(orig)){
+    if(I18N_DIGT.test(orig)){const o=i18nDigits(orig);if(o!==v)n.nodeValue=o;I18ST.set(n,{o:orig,v:o,done:true})}
+    return;
+  }
+  const t=orig.trim(),tr=i18nTr(t);
+  if(tr==null){I18ST.set(n,{o:orig,v:v,done:false});return}
+  const out=orig.replace(t,tr);
+  if(out!==v)n.nodeValue=out;
+  I18ST.set(n,{o:orig,v:out,done:true});
+}
+const I18N_ATTRS=['placeholder','aria-label','title','alt'];
+function i18nAttrs(el){
+  let m=I18AT.get(el);if(!m){m={};I18AT.set(el,m)}
+  for(const a of I18N_ATTRS){
+    const v=el.getAttribute(a);if(!v)continue;
+    const s=m[a];let orig;
+    if(s&&s.v===v){if(s.done)continue;orig=s.o}else orig=v;
+    if(!I18N_AR.test(orig))continue;
+    const t=orig.trim(),tr=i18nTr(t);
+    if(tr==null){m[a]={o:orig,v:v,done:false};continue}
+    if(tr!==v)el.setAttribute(a,tr);
+    m[a]={o:orig,v:tr,done:true};
+  }
+}
+let i18nTitle=null;
 function i18nApply(){
   if(lang()!=='en')return;
   try{
-    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
-    let n;while(n=w.nextNode()){
-      const t=n.nodeValue;if(!t||!t.trim())continue;
-      const nt=i18nText(t);if(nt!==t)n.nodeValue=nt;
-    }
-    document.querySelectorAll('[aria-label],[placeholder],[title]').forEach(el=>{
-      ['aria-label','placeholder','title'].forEach(a=>{const v=el.getAttribute(a);if(v){const nv=i18nText(v);if(nv!==v)el.setAttribute(a,nv)}});
-    });
+    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>{
+      const p=n.parentElement;return (p&&p.closest(I18N_SKIP))?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}});
+    let n;while(n=w.nextNode())i18nNode(n);
+    document.body.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach(i18nAttrs);
+    if(I18N_AR.test(document.title)){if(i18nTitle==null)i18nTitle=document.title;const tr=i18nTr(i18nTitle.trim());if(tr)document.title=tr}
   }catch(e){}
+  if(MTQ.size&&!mtTimer)mtTimer=setTimeout(mtFlush,60);
 }
 let i18nRAF=null;
-function i18nSchedule(){if(i18nRAF)return;i18nRAF=requestAnimationFrame(()=>{i18nRAF=null;i18nApply()})}
-addEventListener('DOMContentLoaded',()=>{
+function i18nSchedule(){if(i18nRAF||lang()!=='en')return;i18nRAF=requestAnimationFrame(()=>{i18nRAF=null;i18nApply()})}
+
+/* ---- Canvas: التصدير (جدول PDF/صورة، الشهادات، التقارير) يُرسم بالإنجليزية أيضاً ---- */
+function i18nCanvas(t){
+  if(typeof t!=='string'||lang()!=='en')return t;
+  if(!I18N_AR.test(t))return I18N_DIGT.test(t)?i18nDigits(t):t;
+  const tt=t.trim(),tr=I18N[tt]||i18nLocal(tt)||MTC.get(tt);
+  if(tr)return t.replace(tt,i18nDigits(tr));
+  mtQueue(tt);return t;
+}
+try{
+  const P=CanvasRenderingContext2D.prototype,F=P.fillText,S=P.strokeText,M=P.measureText;
+  P.fillText=function(t,...a){return F.call(this,i18nCanvas(t),...a)};
+  P.strokeText=function(t,...a){return S.call(this,i18nCanvas(t),...a)};
+  P.measureText=function(t){return M.call(this,i18nCanvas(t))};
+}catch(e){}
+
+/* ---- التشغيل ---- */
+function i18nStart(){
+  const h=document.documentElement;
+  if(lang()==='en'){
+    h.lang='en';h.dir='ltr';
+    const st0=document.createElement('style');st0.id='i18n-wait';st0.textContent='#main,#tabs,header.top{visibility:hidden}';
+    document.head.appendChild(st0);
+    const show=()=>{const e=document.getElementById('i18n-wait');if(e)e.remove()};
+    mtReady.then(()=>{i18nApply();setTimeout(show,250)});setTimeout(show,2000);
+  }
   try{new MutationObserver(i18nSchedule).observe(document.body,{childList:true,subtree:true,characterData:true})}catch(e){}
-  i18nSchedule();
-});
-const I18N2={'آخر 7 أيام':'Last 7 days','آخر الجلسات':'Recent sessions','أ. أحمد':'Mr. Ahmed','أبكر موعد نوم':'Earliest bedtime','أحسنت':'Well done','أحسنت، تمرين مكتمل':'Well done, exercise complete','أخبرنا عنك لنضبط الرياضة على مقاسك':'Tell us about yourself to tailor your fitness plan','أخرى':'Other','أدخل مدة صحيحة':'Enter a valid duration','أسبوع الجيم':'Gym week','أشارك باسمي في القائمة':'Show my name on the list','أشارك نقاطي مع مجموعتي':'Share my points with my group','أضف':'Add','أضف المهمة':'Add task','أضف درساً':'Add a lesson','أضف مسار البداية':'Add a starting point','أضف نشاطاً أو عدّل أي نشاط (✏️)':'Add an activity or edit any activity (✏️)','أضف نشاطاً أولاً':'Add an activity first','أظهر الإجابة':'Show answer','أعضاء المجموعة':'Group members','أفضل وقت':'Best time','ألوان الخط والورق':'Text and paper colors','ألواني':'My colors','أنا من النوع الذي...':'I\'m the type who...','أنثى':'Female','أنجزت هدف الماء اليوم':'Water goal reached today','أنجزتها':'Done it','أنهيت اختبار هذا الأسبوع. انتظر الجمعة القادمة.':'You finished this week\'s exam. Wait for next Friday.','أنهيت المراجعة 🎉':'Review finished 🎉','أنهيته':'Finished it','أهدافي':'My goals','أوقفت المشاركة. اسمك لن يُضاف للأسابيع القادمة.':'Participation stopped. Your name won\'t be added in future weeks.','أي وقت أنسب اليوم؟':'Which time suits today better?','أيام سابقة':'Previous days','أُرسل الطلب للمعلم':'Request sent to the teacher','أُرسل طلبك للمشرف':'Your request was sent to the admin','أُزيل البريد':'Email removed','أُزيلت صورتك':'Your photo was removed','أُضيف':'Added','أُضيف الكتاب':'Book added','أُضيف المشرف @':'Admin added @','أُضيف النشاط':'Activity added','أُضيف مسار البداية':'Starting point added','أُلغي الطلب':'Request canceled','أُوقف قفل التطبيق':'App lock turned off','إبلاغ':'Report','إجابة خاطئة. تحتاج أن تستيقظ تماماً.':'Wrong answer. You need to wake up fully.','إحصاءات':'Stats','إخفاء':'Hide','إدارة':'Manage','إرجاع الألوان الافتراضية':'Restore default colors','إرجاع الخلفية الافتراضية':'Restore default background','إرسال':'Send','إرسال الطلب':'Send request','إرسال الطلب للمشرف':'Send request to admin','إزالة':'Remove','إزالة المرفق':'Remove attachment','إزالة صورتي':'Remove my photo','إضافة':'Add','إضافة مادة جديدة':'Add a new subject','إعادة الكاميرا':'Restart camera','إعداد المنبه':'Alarm setup','إغلاق':'Close','إلغاء':'Cancel','إلغاء الطلب وإعادة التسجيل':'Cancel request and re-register','إلى':'To','إنشاء حساب / تسجيل الدخول':'Create account / Log in','إنهاء':'Finish','إنهاء الاختبار':'Finish exam','إنهاء وتصحيح':'Finish and grade','إيقاف القفل':'Turn off lock','إيقاف وضع الليل':'Turn off night mode','ابحث عن طعام':'Search for food','ابحث في ملاحظاتك':'Search your notes','ابدأ':'Start','ابدأ اختبار':'Start exam','ابدأ اختبار الأسبوع':'Start this week\'s exam','ابدأ الآن':'Start now','ابدأ الاختبار الآن':'Start the exam now','ابدأ الجولة':'Start the tour','ابدأ القراءة':'Start reading','ابدأ بملء الشاشة':'Start in fullscreen','ابدأ تركيز':'Start focus','ابدأ رحلة القمر الصناعي':'Start the satellite journey','اختبار المنبه':'Test alarm','اختر ذكر أو أنثى':'Choose male or female','اختر صفك أولاً':'Choose your grade first','اختر صورة أو ملف PDF فقط.':'Choose an image or PDF file only.','اختر صورة من جهازك':'Choose a photo from your device','اختر مرحلتك':'Choose your stage','اختر مرحلتك أولاً':'Choose your stage first','اختر يوماً واحداً على الأقل':'Choose at least one day','اختصارات':'Shortcuts','اختيار المرحلة':'Choose stage','ادخل الدردشة':'Enter the chat','استئناف الاختبار':'Resume exam','استبدال':'Replace','استعادة الأصل':'Restore original','استيراد':'Import','استيراد من خطتي':'Import from my plan','استيقظت الساعة':'Woke up at','اسم الدرس':'Lesson name','اسم الكتاب':'Book name','اسم المجموعة (يظهر للطلاب)':'Group name (shown to students)','اسم المدرسة (الحكومية)':'School name (official)','اسم المدينة':'City name','اسم المستخدم':'Username','اسم النشاط':'Activity name','اسمك كما تحب أن يظهر':'Your name as you\'d like it shown','اشرب كوب ماء':'Drink a glass of water','افتح الرياضة والصحة':'Open Fitness & Health','اكتب اسم الكتاب':'Type the book\'s name','اكتب اسم المهمة أولاً':'Type the task name first','اكتب اسمك':'Type your name','اكتب اسمك من الإعدادات أولاً':'Type your name in Settings first','اكتب اسمك واختر صفك من الإعدادات أولاً':'Type your name and choose your grade in Settings first','اكتب الاسم والسعرات':'Type the name and calories','اكتب الاسم والوقت':'Type the name and time','اكتب الاسم والوقت واختر يوماً واحداً على الأقل':'Type the name and time, and choose at least one day','اكتب السؤال والإجابة':'Type the question and answer','اكتب الصورة التي تريد أن تصل إليها':'Describe the picture you want to reach','اكتب رسالتك…':'Type your message…','اكتب سؤالك':'Type your question','اكتب عنوان المهمة':'Type the task title','اكتب هنا...':'Type here...','اكتب وقت النوم والاستيقاظ':'Type your sleep and wake times','الآن والتالي':'Now and next','الأخطاء فقط':'Mistakes only','الأعضاء':'Members','الأنشطة حسب اليوم':'Activities by day','الأهمية':'Priority','الأيام':'Days','الإجابة (ظهر البطاقة)':'Answer (back of card)','الإدارة التعليمية':'Education directorate','الإشعارات':'Notifications','الإعدادات':'Settings','الاختبار مفتوح الآن.':'The exam is open now.','الاختبارات':'Tests','الاسم':'Name','الاسم (اختياري، يظهر في الملف)':'Name (optional, shown in the file)','الاسم الظاهر':'Display name','الاسم على الشهادة':'Name on the certificate','الانتقال (د)':'Transition (min)','البداية':'Start','البريد':'Email','البريد الإلكتروني':'Email address','البنك فارغ':'The bank is empty','التاريخ':'Date','التالي':'Next','التحقق تقريبي:':'Verification is approximate:','الترتيب':'Ranking','التصنيف':'Category','التقاط (0/3)':'Capture (0/3)','التقط الصورة':'Take the photo','التكرار':'Repetition','التمرين':'Exercise','الحساسية':'Allergies','الحلول والشرح':'Solutions and explanation','الخلفية':'Background','الدخول كضيف':'Continue as guest','الدردشة العامة للمدرسة':'School\'s general chat','الدرس القادم':'Next lesson','الدقائق':'Minutes','الرمز (10 أرقام)':'Code (10 digits)','الرياضيات':'Math','السؤال (وجه البطاقة)':'Question (front of card)','السابق':'Previous','الساعة':'Time','الصف':'Grade','الصفحات':'Pages','الصوت':'Sound','الطول (سم)':'Height (cm)','العمر':'Age','العنوان':'Title','القهوة والشاي':'Coffee and tea','القيمة خارج النطاق المسموح':'Value is out of the allowed range','المؤلف':'Author','الماء':'Water','الماء آخر 7 أيام':'Water, last 7 days','المادة':'Subject','المادة أو الدرس':'Subject or lesson','المتاح لهذه المادة والمستوى':'Available for this subject and level','المتصفح لا يدعم تحديد الموقع':'Your browser doesn\'t support location','المجتمع قيد التجهيز':'Community is being set up','المجتمع يحتاج حساباً':'Community needs an account','المحافظة':'Governorate','المدة (د)':'Duration (min)','المدة (دقيقة)':'Duration (minutes)','المدة بالدقائق':'Duration in minutes','المدرسة':'School','المرحلة':'Stage','المرحلة الدراسية':'Educational stage','المركز / الحي':'District / neighborhood','المزيد':'More','المنبه':'Alarm','الموقع ومواقيت الصلاة':'Location and prayer times','النتيجة':'Result','النسخ الاحتياطي':'Backup','النهاية':'End','النوع':'Type','النوم':'Sleep','الهدف (مل)':'Goal (ml)','الوزن (كجم)':'Weight (kg)','الوقت':'Time','اليوم':'Today','اليوم راحة':'Today is a rest day','انتهت الراحة، المجموعة التالية':'Rest is over, next set','انتهت رسائلك الحالية، تتجدد':'Your current messages ran out, they\'ll renew','انتهى الوقت، جارٍ التصحيح…':'Time\'s up, grading…','انتهى وقت المحاولة':'The attempt time has ended','انسخ الرمز يدوياً':'Copy the code manually','انضمام':'Join','بحث في المهام':'Search tasks','بداية الدراسة':'Start of study','بردية علم':'Bardiya Ilm','بروتين':'Protein','بريد الاسترجاع':'Recovery email','بطاقات المراجعة':'Flashcards','بطاقة':'Card','بطاقة جديدة':'New card','بنك أخطائي':'My mistake bank','بيانات الجدول':'Schedule details','بياناتي':'My data','بَرْدِيَّة':'Bardiya','تأكيد':'Confirm','تأكيد كلمة المرور':'Confirm password','تحتاج اتصالاً بالإنترنت.':'Needs an internet connection.','تحديث':'Update','تخطّ':'Skip','تخطّي':'Skip','تدريب حسب المادة':'Practice by subject','تدريب على كل الأخطاء':'Practice all mistakes','تدريب متنوع':'Mixed practice','تراجع':'Undo','تركيزك آخر 14 يوماً':'Your focus, last 14 days','تسجيل':'Register','تسجيل الخروج':'Log out','تسجيل سجادة الصلاة':'Log prayer mat use','تسجيل يدوي':'Manual entry','تشغيل المنبه':'Turn on alarm','تصحيح التباين تلقائياً':'Auto-correct contrast','تصدير':'Export','تصدير نسخة':'Export a copy','تعتيم صورتك لتسهيل القراءة':'Dim your photo for easier reading','تعديل':'Edit','تعديل الجدول':'Edit schedule','تعديل النشاط':'Edit activity','تعديل بياناتي':'Edit my data','تعذر الحفظ. ربما امتلأت مساحة التخزين.':'Couldn\'t save. Storage may be full.','تعذر تحديد الموقع':'Couldn\'t determine location','تعذر حفظ':'Couldn\'t save','تعذر حفظ الكتاب':'Couldn\'t save the book','تعذر حفظ بعض البيانات. حاول لاحقاً.':'Some data couldn\'t be saved. Try again later.','تعذر قراءة الصورة':'Couldn\'t read the image','تعذّر إعداد الاختبار الآن':'Couldn\'t set up the exam right now','تعذّر إنشاء التقرير':'Couldn\'t generate the report','تعذّر إنشاء الشهادة':'Couldn\'t generate the certificate','تعذّر إنشاء الصورة':'Couldn\'t generate the image','تعذّر إنشاء الملف':'Couldn\'t create the file','تعذّر تجهيز الاختبار، حاول لاحقاً':'Couldn\'t prepare the exam, try again later','تعذّر عرض الأسئلة':'Couldn\'t display the questions','تعذّر قراءة الملف.':'Couldn\'t read the file.','تعميم على كل الأيام':'Apply to all days','تغيير الخلفية':'Change background','تغيير الرمز':'Change code','تغيير المدرسة':'Change school','تغيير المرحلة':'Change stage','تغيير رمز المجموعة':'Change group code','تغيير كلمة المرور':'Change password','تفعيل الإشعارات':'Enable notifications','تقدّم اليوم':'Today\'s progress','تقدّمك':'Your progress','تكرار':'Repeat','تم':'Done','تم الإبلاغ، شكراً لك':'Reported, thank you','تم الانضمام لمجموعة':'Joined a group','تم الحفظ':'Saved','تم تحديث الموقع':'Location updated','تم تحديث موادك':'Your subjects were updated','تم تعيين صورتك كخلفية':'Your photo was set as background','تم تغيير كلمة المرور':'Password changed','تم تنزيل التقرير':'Report downloaded','تم تنزيل الجدول':'Schedule downloaded','تم تنزيل الشهادة':'Certificate downloaded','تم تنزيل الصورة':'Image downloaded','تم تنزيل الملف':'File downloaded','تم تنزيل النتيجة':'Result downloaded','تم حفظ اليوزر نيم':'Username saved','تم حفظ بياناتك':'Your data was saved','تم ربط البريد':'Email linked','تم نسخ الرمز':'Code copied','تمت':'Done','تمت إضافة':'Added','تمرين اليوم':'Today\'s exercise','تنبيهات التدقيق:':'Audit alerts:','تنزيل':'Download','تنزيل PDF':'Download PDF','تنزيل اختبار PDF':'Download exam PDF','تنزيل الامتحان PDF':'Download exam PDF','تنزيل صورة':'Download image','جارٍ الحفظ…':'Saving…','جارٍ المزامنة…':'Syncing…','جارٍ تجهيز التقرير…':'Preparing the report…','جارٍ تجهيز الشهادة…':'Preparing the certificate…','جارٍ تجهيز الصورة…':'Preparing the image…','جارٍ تجهيز ملف PDF…':'Preparing the PDF file…','جدول':'Schedule','جدول المذاكرة:':'Study schedule:','جلسة حرة':'Free session','جملة أخرى':'Another sentence','جولة سريعة':'Quick tour','جيم':'Gym','حجم الكوب':'Cup size','حدث خطأ غير متوقع':'An unexpected error occurred','حذف':'Delete','حذف المنجزة':'Delete completed','حذف حسابي وبياناتي نهائياً':'Permanently delete my account and data','حزمة ليلة الامتحان':'Exam-night bundle','حساب جديد':'New account','حسابي':'My account','حصلت على':'You got','حفظ':'Save','حُفظ التعديل':'Edit saved','حُفظ النوم':'Sleep saved','حُفظ الوزن':'Weight saved','حُفظت البطاقة (':'Card saved (','خرجت من التطبيق. عدد الخروج:':'Left the app. Exit count:','خروج':'Exit','خط الطول':'Longitude','خط العرض':'Latitude','خطة الأسبوع':'Weekly plan','خطتك حتى الامتحان':'Your plan until the exam','خطوات فرعية (سطر لكل خطوة)':'Sub-steps (one per line)','خلفية الملف':'File background','خيارات أكثر':'More options','دخول':'Log in','دخول غرفة مدرستي':'Enter my school\'s room','دروسي':'My lessons','دروسي الأضعف':'My weakest lessons','دقائق':'minutes','دقائق أخرى':'more minutes','ذكر':'Male','رؤيتي':'My vision','راجع أسئلته':'Review its questions','ربط / تغيير البريد':'Link / change email','رجعت الألوان الافتراضية':'Default colors restored','رجعت الخلفية الافتراضية':'Default background restored','رجوع':'Back','رجوع لتسجيل الدخول':'Back to log in','رجوع للاختبارات':'Back to tests','رفض':'Decline','رفع ملفات':'Upload files','رقم هاتفك (للمشرف فقط ولا يظهر للطلاب)':'Your phone number (admin only, not shown to students)','رمز جديد':'New code','رمز مجموعتك (10 أرقام)':'Your group\'s code (10 digits)','روتينات يومية جاهزة':'Ready-made daily routines','رياضات أخرى وروتينات':'Other sports and routines','رُفع':'Uploaded','سأذكّرك بعد 5 دقائق':'I\'ll remind you in 5 minutes','سجادة الصلاة':'Prayer mat','سجل':'Log','سجل الدردشة':'Chat log','سجلي':'My log','سجّل نشاطك اليوم':'Log today\'s activity','سعرات':'Calories','سعرات اليوم':'Today\'s calories','سكر مضاف':'Added sugar','سُجّل':'Logged','سُجّلت':'Logged','سُجّلت سجادة الصلاة':'Prayer mat logged','شاركت في قائمة المراكز':'Joined the rankings list','شاهد مدرستك بالأبعاد الثلاثية 🏫':'See your school in 3D 🏫','ضُبط التباين':'Contrast adjusted','طلب إزالة':'Removal request','طلب تغيير':'Change request','طوارئ: لا تعمل الكاميرا':'Emergency: camera not working','طُبّق على كل الأيام':'Applied to all days','عادت القيمة الأصلية':'Original value restored','عدد الأسئلة':'Number of questions','عدد الصفحات':'Number of pages','عرض كل الأقسام في الشريط':'Show all sections in the bar','عرفتها':'I knew it','عشوائي':'Random','عنوان الجدول':'Schedule title','عنوان على الورق':'Title on paper','غفوة 5 د':'5-min snooze','غير مدعومة':'Not supported','غيّرها الآن':'Change it now','فتح':'Open','فتح الدردشة':'Open chat','فتح المحفوظ':'Open saved','قائمة المهام':'Task list','قبعة تخرج وقلمان':'Graduation cap and pens','قبل المذاكرة بـ (دقيقة)':'Before studying by (minutes)','قراءة اليوم':'Today\'s reading','قفل التطبيق':'Lock the app','كتب مرحلتي':'My stage\'s books','كتبي':'My books','كجم':'kg','كل الأسئلة':'All questions','كل الأقسام':'All sections','كل الاقتباسات':'All quotes','كلمة المرور':'Password','كلمة المرور الجديدة':'New password','كم درساً بقي لك في المنهج؟':'How many lessons are left in the curriculum?','كم صفحة قرأت؟':'How many pages did you read?','كما سيُنزَّل':'As it will be downloaded','كيف يعمل الجدول':'How the schedule works','لا أخطاء محفوظة في هذا الدرس':'No saved mistakes in this lesson','لا أسئلة كافية':'Not enough questions','لا أسئلة لمرحلتك بعد':'No questions for your stage yet','لا بطاقات مستحقة':'No cards due','لا توجد أسئلة متاحة لهذه المادة بعد':'No questions available for this subject yet','لا شيء مستحق الآن':'Nothing due right now','لا ملاحظات':'No notes','لا، أبقني خارج القائمة':'No, keep me off the list','لتقليل السكر':'To reduce sugar','لك اليوم':'For you today','لم أعرفها':'I didn\'t know it','لم تبدأ التاريخ بعد؟':'Haven\'t started History yet?','لماذا أفعل كل هذا؟':'Why do all this?','لن يظهر اسمك في القائمة':'Your name won\'t appear on the list','لنبدأ':'Let\'s start','لوحة الشرف':'Honor board','لون ثابت':'Solid color','مؤقت الراحة بين المجموعات':'Rest timer between sets','ما يجب أن تعرفه':'What you should know','مادة':'Subject','ماذا تريد أن تنجز؟':'What do you want to get done?','ماذا يقدّم بردية علم؟':'What does Bardiya Ilm offer?','مبارك إنهاء الكتاب':'Congrats on finishing the book','مثال: 40':'Example: 40','مثال: أنهي منهج البرمجة قبل ديسمبر':'Example: finish the programming curriculum before December','مثال: إدارة شرق المنصورة':'Example: East Mansoura directorate','مثال: رياضيات':'Example: Math','مثال: صدر + ترايسبس':'Example: chest + triceps','مثال: كورس إضافي':'Example: an extra course','مثال: مدرسة النصر الثانوية بنين':'Example: Al-Nasr Secondary School for Boys','مجموعات':'Groups','مجموعة أ. أحمد للرياضيات':'Mr. Ahmed\'s Math group','مخرج الطوارئ':'Emergency exit','مخصص':'Custom','مدة التمرين (د)':'Exercise duration (min)','مذاكرتك آخر 7 أيام':'Your studying, last 7 days','مرحبًا، أنا ذكي. فاهمك':'Hi, I\'m Fahmak. I get you','مزامنة الآن':'Sync now','مستوى الصوت':'Volume','مستوى نشاطك المعتاد':'Your usual activity level','مسح':'Clear','مسح السجل كله':'Clear the whole log','مسح الكل':'Clear all','مسح المحادثة':'Clear chat','مسح كل البيانات':'Erase all data','مصمّم الجدول':'Schedule designer','معاينة الجدول':'Schedule preview','ملاحظات':'Notes','ملاحظة سريعة':'Quick note','ملف غير صالح':'Invalid file','ملفي الصحي':'My health file','من':'From','منبه الصباح':'Morning alarm','منطقة حساسة':'Sensitive area','مهام اليوم':'Today\'s tasks','مهمة جديدة':'New task','موادي':'My subjects','موافقة':'Approve','موعد الامتحان':'Exam date','موقعي الحالي':'My current location','نسخ':'Copy','نسيت الرمز؟':'Forgot the code?','نسيت كلمة المرور؟':'Forgot password?','نشاطك في آخر 7 أيام':'Your activity, last 7 days','نظرة سريعة':'Quick glance','نعم، أظهر اسمي':'Yes, show my name','نمت الساعة':'Slept at','هدف السعرات':'Calorie goal','هدف القراءة اليومي':'Daily reading goal','هدف النوم (ساعات)':'Sleep goal (hours)','هدف تحقق، ما شاء الله':'Goal achieved, Mashallah','هذا الأسبوع':'This week','هويتي':'My identity','وجبات اليوم':'Today\'s meals','وزن الجسم اليوم (كجم)':'Today\'s body weight (kg)','وسم (مثال: برمجة)':'Tag (e.g. programming)','وصلت إلى الصفحة':'Reached page','وضع الضيف':'Guest mode','وضع الليل (ينام الهاتف مفتوحاً)':'Night mode (phone stays on while sleeping)','وقت الرنين':'Ring time','يبدأ إذا اخترت الأول':'Starts if you choose the first','يبدأ إذا اخترت الثاني':'Starts if you choose the second','يذاكر من الفجر ويتمرن ويقرأ كل يوم':'Studies from dawn, exercises, and reads every day','يظهر اسمك ودرجتك لطلاب صفك ومسارك فقط.':'Your name and score are shown only to students in your grade and track.','يعمل والتطبيق مفتوح':'Works while the app is open','يوزر نيم المشرف':'Admin\'s username','🏆 قائمة المراكز الأولى':'🏆 Top ranks list','🏆 لوحة الشرف هذا الأسبوع':'🏆 This week\'s honor board','📘 اختبار المنهج الأسبوعي':'📘 Weekly Curriculum Exam','🧠 اختبار العقل الأسبوعي':'🧠 Weekly Mind Exam'};
-Object.assign(I18N,I18N2);
+}
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',i18nStart);else i18nStart();
 
 /* ========== الأقسام ========== */
 const SEC=[
@@ -2722,7 +2834,7 @@ function buildShell(){
 }
 ACT.more=()=>sheet('<h3>كل الأقسام</h3>'+MGRP.map(g=>'<div class="mgh">'+g[0]+'</div><div class="moregrid">'+g[1].map(id=>tabBtn(secOf(id),id===curSec?' on':'')).join('')+'</div>').join('')+'<button class="btn g mglock" data-a="pinset" type="button">🔒 قفل التطبيق بـ ٤ أرقام</button><label class="mgsw"><input type="checkbox" data-c="fullmode" '+(FULLM()?'checked':'')+'><span><b>عرض كل الأقسام في الشريط</b><small>الوضع المبسّط يُبقي الأساسيات فقط: الرئيسية والمذاكرة والاختبارات والمهام</small></span></label>');
 CHG.fullmode=t=>{try{localStorage.setItem('ab:full',t.checked?'1':'0')}catch(e){}buildShell();if(typeof renderSec==='function')renderSec(curSec);if(typeof go==='function')go(curSec)};
-ACT.langtoggle=()=>{setLang(lang()==='en'?'ar':'en');buildShell();if(typeof go==='function')go(curSec);toast(lang()==='en'?'Language: English':'اللغة: العربية')};
+ACT.langtoggle=()=>{if(lang()==='en'){setLang('ar');location.reload();return}setLang('en');i18nApply();toast('Language: English')};
 /* هاتف: إخفاء الشروحات الطويلة، تبقى الأساسيات فقط */
 function declutter(el){if(!matchMedia('(max-width:700px)').matches)return;el.querySelectorAll('.mut.sm,p.mut,.sm.mut').forEach(e=>{if(e.textContent.trim().length>45&&!e.closest('li,table,.row.sp,.ringbox,.hero,.warn'))e.classList.add('xl')})}
 const ART={home:['l3','بردية علم'],study:['l4','بردية علم: المذاكرة'],lib:['l2','بردية علم: المكتبة'],fit:['l1','بردية علم: الصحة والرياضة']};
