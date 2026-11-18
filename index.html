@@ -5282,7 +5282,44 @@ const MD_RANKS=[[90,'المرتبة الأولى','عقل ذهبي','#c9962a','#
 const MD_NAMES=['أحمد','سلمى','يوسف','منى','كريم','هدى','عمر','نور','مصطفى','ليلى','زياد','مريم'];
 const MD_DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const mdHash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h>>>0};
-function mdWeek(){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+1)%7));return dk(d)}
+/* نافذة واحدة لكل البرنامج: الجمعة 8 مساءً بتوقيت القاهرة، وتُغلق 10 مساءً للجميع */
+const MD_TZ='Africa/Cairo',MD_OPEN_H=20,MD_WIN_MIN=120;
+const mdNow=()=>window.__mdNow||Date.now();
+const MD_WD={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+let MD_DTF=null;
+function cairoParts(t){
+  try{
+    if(!MD_DTF)MD_DTF=new Intl.DateTimeFormat('en-US',{timeZone:MD_TZ,hour12:false,weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const p={};MD_DTF.formatToParts(new Date(t)).forEach(x=>p[x.type]=x.value);
+    return{y:+p.year,m:+p.month,d:+p.day,H:+p.hour%24,M:+p.minute,S:+p.second,wd:MD_WD[p.weekday]};
+  }catch(e){const d=new Date(t+2*36e5);return{y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),H:d.getUTCHours(),M:d.getUTCMinutes(),S:d.getUTCSeconds(),wd:d.getUTCDay()}}
+}
+function cairoOff(t){const p=cairoParts(t);return Date.UTC(p.y,p.m-1,p.d,p.H,p.M,p.S)-Math.floor(t/1000)*1000}
+function cairoAt(y,m,d,H,M){let t=Date.UTC(y,m-1,d,H,M,0);for(let i=0;i<3;i++)t=Date.UTC(y,m-1,d,H,M,0)-cairoOff(t);return t}
+function mdWindow(){
+  const now=mdNow(),p=cairoParts(now),back=(p.wd-5+7)%7,civ=Date.UTC(p.y,p.m-1,p.d)-back*864e5,f=new Date(civ);
+  const y=f.getUTCFullYear(),m=f.getUTCMonth()+1,d=f.getUTCDate();
+  const open=cairoAt(y,m,d,MD_OPEN_H,0),close=open+MD_WIN_MIN*6e4,id=y+'-'+pad(m)+'-'+pad(d);
+  if(now>=close){const n=new Date(civ+7*864e5);return{id:id,open:open,close:close,state:'closed',next:cairoAt(n.getUTCFullYear(),n.getUTCMonth()+1,n.getUTCDate(),MD_OPEN_H,0)}}
+  return{id:id,open:open,close:close,state:now<open?'before':'open',next:open};
+}
+const mdWeek=()=>mdWindow().id;
+function mdLeft(ms){const s=Math.max(0,Math.round(ms/1000)),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);
+  return d?d+' يوماً و'+h+' ساعة و'+m+' دقيقة':h?h+' ساعة و'+pad(m)+' دقيقة':m+':'+pad(s%60)+' دقيقة';}
+let mdCdIv=null;
+function mdCdStart(){clearInterval(mdCdIv);mdCdIv=setInterval(()=>{
+  const e=document.getElementById('mdcd');if(!e){clearInterval(mdCdIv);mdCdIv=null;return}
+  const t=+e.dataset.t;e.textContent=mdLeft(t-mdNow());
+  if(mdNow()>=t){clearInterval(mdCdIv);mdCdIv=null;renderSec('tests')}},1000)}
+/* محاولة بقيت من نافذة أُغلقت: تُصحَّح بما أُجيب بدل أن تضيع */
+function mdCloseStale(){
+  const S=mdRun();if(!S)return false;const w=mdWindow();
+  if(S.wk===w.id&&w.state==='open'&&mdNow()<S.end)return false;
+  const sc=S.qs.reduce((n,q,i)=>n+(S.ans[i]===q.a?1:0),0),tot=S.qs.length,p=tot?Math.round(sc/tot*100):0,R=mdRank(p);
+  const d=mdDone();if(!d[S.wk])d[S.wk]={pct:p,score:sc,total:tot,rank:R[1],at:mdNow()};st.set('mddone',d);
+  st.set('mdrun',null);try{mdSubmit({pct:p,score:sc,total:tot,secs:0},S.wk)}catch(e){}
+  return true;
+}
 const mdRank=p=>MD_RANKS.find(x=>p>=x[0]);
 const mdC=(n,k)=>{let v=1;for(let i=1;i<=k;i++)v=v*(n-k+i)/i;return Math.round(v)};
 /* يلتقط 3 بدائل نصية مختلفة، أو null إذا تعذّر */
@@ -5419,46 +5456,63 @@ function mdFinish(rec){
 /* ---- الواجهة ---- */
 function mdCard(){
   const e=eduOf();if(!e)return '';
-  const C=MD_CFG[e.stage]||MD_CFG.sec,wk=mdWeek(),done=mdDone()[wk],run=mdRun();
-  const nxt=Math.max(1,7-Math.round((Date.now()-new Date(wk+'T12:00:00').getTime())/864e5));
-  const head='<div class="mut sm">أسئلة تفكير وذكاء، جديدة كلياً كل أسبوع، لا تتكرر أبداً. '+C.n+' سؤالاً في '+(C.min>=60?(C.min/60)+' ساعة'+(C.min/60>=2?'':''):C.min+' دقيقة')+'.</div>';
+  mdCloseStale();
+  const C=MD_CFG[e.stage]||MD_CFG.sec,w=mdWindow(),done=mdDone()[w.id],run=mdRun();
+  const hrs=C.min>=60?(C.min%60?(C.min/60).toFixed(1):C.min/60)+' ساعة':C.min+' دقيقة';
+  const head='<div class="mut sm">أسئلة تفكير وذكاء، جديدة كلياً كل أسبوع ولا تتكرر أبداً. '+C.n+' سؤالاً في '+hrs+'.</div>'+
+    '<div class="sm" style="margin-top:6px"><b>يفتح الجمعة 8:00 مساءً ويُغلق 10:00 مساءً بتوقيت القاهرة</b>، في وقت واحد لكل طلاب البرنامج.</div>';
+  const board='<button class="btn g" data-a="mdboard">🏆 المراكز الأولى</button>';
+  const cd=(t,lbl)=>'<p class="sm" style="margin:10px 0 0">'+lbl+' <b id="mdcd" data-t="'+t+'">'+mdLeft(t-mdNow())+'</b></p>';
+  setTimeout(mdCdStart,0);
   if(done){const R=MD_RANKS.find(x=>x[1]===done.rank)||MD_RANKS[3];
-    return card('🧠 اختبار العقل الأسبوعي',head+'<div class="tiles" style="margin-top:10px"><div class="tile"><b style="color:'+R[3]+'">'+done.pct+'٪</b><span>'+done.rank+' · '+done.score+' من '+done.total+'</span></div><div class="tile"><b>'+nxt+'</b><span>يوماً على الاختبار القادم</span></div></div>'+
-      '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" data-a="mdcert">🏅 شهادة '+esc(R[2])+'</button><button class="btn g" data-a="mdboard">🏆 المراكز الأولى</button><button class="btn g" data-a="mdrev">راجع أسئلته</button></div>')}
-  if(run&&run.wk===wk&&Date.now()<run.end){const left=Math.round((run.end-Date.now())/60000);
-    return card('🧠 اختبار العقل الأسبوعي',head+'<p class="warn sm" style="margin:10px 0 0">لديك محاولة جارية، تبقّى منها نحو '+left+' دقيقة. الوقت يمضي حتى وأنت خارج الاختبار.</p><div class="row" style="margin-top:10px"><button class="btn" data-a="mdres">استئناف الاختبار</button><button class="btn g" data-a="mdboard">🏆 المراكز الأولى</button></div>')}
-  return card('🧠 اختبار العقل الأسبوعي',head+'<p class="mut sm" style="margin:10px 0 0">محاولة واحدة في الأسبوع، بمؤقّت لا يتوقف. أربع مراتب ولكل مرتبة شهادتها.</p><div class="chips" style="flex-wrap:wrap;margin-top:8px">'+MD_RANKS.map(x=>'<span class="chip" style="--c:'+x[3]+'">'+x[1]+' · '+(x[0]?x[0]+'٪ فأكثر':'أقل من ٦٠٪')+'</span>').join('')+'</div><div class="row" style="margin-top:10px"><button class="btn" data-a="mdgo">ابدأ اختبار هذا الأسبوع</button><button class="btn g" data-a="mdboard">🏆 المراكز الأولى</button></div>');
+    return card('🧠 اختبار العقل الأسبوعي',head+'<div class="tiles" style="margin-top:10px"><div class="tile"><b style="color:'+R[3]+'">'+done.pct+'٪</b><span>'+done.rank+' · '+done.score+' من '+done.total+'</span></div></div>'+
+      cd(w.state==='closed'?w.next:w.close,w.state==='closed'?'الاختبار القادم بعد':'يُغلق الاختبار خلال')+
+      '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" data-a="mdcert">🏅 شهادة '+esc(R[2])+'</button>'+board+'<button class="btn g" data-a="mdrev">راجع أسئلته</button></div>')}
+  if(w.state==='open'&&run&&run.wk===w.id&&mdNow()<run.end)
+    return card('🧠 اختبار العقل الأسبوعي',head+'<p class="warn sm" style="margin:10px 0 0">لديك محاولة جارية. الوقت يمضي حتى وأنت خارج الاختبار.</p>'+cd(Math.min(run.end,w.close),'تبقّى لك')+
+      '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" data-a="mdres">استئناف الاختبار</button>'+board+'</div>');
+  const ranks='<div class="chips" style="flex-wrap:wrap;margin-top:8px">'+MD_RANKS.map(x=>'<span class="chip" style="--c:'+x[3]+'">'+x[1]+' · '+(x[0]?x[0]+'٪ فأكثر':'أقل من ٦٠٪')+'</span>').join('')+'</div>';
+  if(w.state==='open')
+    return card('🧠 اختبار العقل الأسبوعي',head+'<p class="ok sm" style="margin:10px 0 0"><b>الاختبار مفتوح الآن.</b> محاولة واحدة، ولكل مرتبة شهادتها.</p>'+ranks+cd(w.close,'يُغلق للجميع خلال')+
+      '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" data-a="mdgo">ابدأ الاختبار الآن</button>'+board+'</div>');
+  const last=Object.keys(mdDone()).sort().pop(),L=last?mdDone()[last]:null;
+  return card('🧠 اختبار العقل الأسبوعي',head+ranks+cd(w.state==='before'?w.open:w.next,'يفتح الاختبار بعد')+
+    (L?'<p class="mut sm" style="margin:6px 0 0">نتيجتك في آخر اختبار: '+L.pct+'٪ · '+esc(L.rank)+'</p>':'')+
+    '<div class="row" style="margin-top:10px;flex-wrap:wrap">'+board+(L?'<button class="btn g" data-a="mdcert2">🏅 آخر شهادة</button>':'')+'</div>');
 }
 ACT.mdgo=()=>{
   const e=eduOf();if(!e)return toast('اختر مرحلتك أولاً');
-  const C=MD_CFG[e.stage]||MD_CFG.sec,wk=mdWeek();
-  if(mdDone()[wk])return toast('أنهيت اختبار هذا الأسبوع. انتظر الأسبوع القادم.');
-  ask('سيبدأ المؤقّت فوراً: '+C.n+' سؤالاً في '+C.min+' دقيقة، ومحاولة واحدة لا تتكرر هذا الأسبوع. هل أنت مستعد؟','ابدأ',()=>{
+  const C=MD_CFG[e.stage]||MD_CFG.sec,w=mdWindow(),wk=w.id;
+  if(w.state!=='open')return toast(w.state==='before'?'يفتح الاختبار الجمعة 8 مساءً بتوقيت القاهرة':'أُغلق اختبار هذا الأسبوع');
+  if(mdDone()[wk])return toast('أنهيت اختبار هذا الأسبوع. انتظر الجمعة القادمة.');
+  const mins=Math.min(C.min,Math.floor((w.close-mdNow())/6e4));
+  ask('سيبدأ المؤقّت فوراً: '+C.n+' سؤالاً، ومحاولة واحدة لا تتكرر.'+(mins<C.min?' تنبيه: تبقّى على إغلاق الاختبار '+mins+' دقيقة فقط.':' أمامك '+C.min+' دقيقة.')+' هل أنت مستعد؟','ابدأ',()=>{
     const qs=mdBuild(e);if(qs.length<5)return toast('تعذّر تجهيز الاختبار، حاول لاحقاً');
     mdMarkUsed(qs);
-    exStart(qs,{type:'prac',title:'اختبار العقل · '+eduLabel(e),md:{wk:wk,end:Date.now()+C.min*60000}});
+    exStart(qs,{type:'prac',title:'اختبار العقل · '+eduLabel(e),md:{wk:wk,end:Math.min(mdNow()+C.min*6e4,w.close)}});
     mdSave();mdTick();
   });
 };
 ACT.mdres=()=>{
-  const S=mdRun();if(!S)return renderSec('tests');
-  if(Date.now()>=S.end){st.set('mdrun',null);toast('انتهى وقت المحاولة');return renderSec('tests')}
-  exStart(S.qs,{type:'prac',title:S.title,md:{wk:S.wk,end:S.end}});
+  const S=mdRun(),w=mdWindow();if(!S)return renderSec('tests');
+  if(mdNow()>=S.end||w.state!=='open'||S.wk!==w.id){mdCloseStale();toast('انتهى وقت المحاولة');return renderSec('tests')}
+  exStart(S.qs,{type:'prac',title:S.title,md:{wk:S.wk,end:Math.min(S.end,w.close)}});
   EX.ans=S.ans.slice();EX.i=Math.min(S.i,S.qs.length-1);mdTick();renderSec('tests');
 };
 ACT.mdrev=()=>{const e=eduOf();if(!e)return;const qs=mdBuild(e);if(!qs.length)return toast('تعذّر عرض الأسئلة');
   exStart(qs,{type:'prac',title:'مراجعة اختبار العقل'});EX.ans=new Array(qs.length).fill(-1);EX.done=true;EX.rf='all';renderSec('tests')};
-ACT.mdcert=()=>{
-  const wk=mdWeek(),d=mdDone()[wk];if(!d)return;const R=MD_RANKS.find(x=>x[1]===d.rank)||MD_RANKS[3];
+ACT.mdcert2=()=>ACT.mdcert(null,Object.keys(mdDone()).sort().pop());
+ACT.mdcert=(t,wk2)=>{
+  const wk=wk2||mdWeek(),d=mdDone()[wk];if(!d)return;const R=MD_RANKS.find(x=>x[1]===d.rank)||MD_RANKS[3];
   certSheet({name:me(),title:'اختبار العقل الأسبوعي',score:d.score,total:d.total,pct:d.pct,head:'شهادة اختبار العقل',sub:d.rank+' · '+R[2],tier:[0,R[2],R[3],R[4]]});
 };
 /* ---- قائمة المراكز الأولى: تظهر لكل طلاب نفس الصف والمسار ---- */
 const mdGrp=e=>(e.stage||'')+'|'+(e.grade||'')+'|'+(e.track||'');
 const mdSec=t=>{t=Math.max(0,Math.round(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
-async function mdSubmit(d){
+async function mdSubmit(d,wk){
   if(!st.get('mdshare',0)||typeof CLOUD==='undefined'||!CLOUD.on||!CLOUD.client||!CLOUD.user)return;
   const e=eduOf();if(!e)return;
-  try{await CLOUD.client.rpc('mind_submit',{p_week:mdWeek(),p_grp:mdGrp(e),p_pct:d.pct,p_score:d.score,p_total:d.total,p_secs:d.secs||0})}catch(x){}
+  try{await CLOUD.client.rpc('mind_submit',{p_week:wk||mdWeek(),p_grp:mdGrp(e),p_pct:d.pct,p_score:d.score,p_total:d.total,p_secs:d.secs||0})}catch(x){}
 }
 ACT.mdshareask=()=>{
   const d=mdDone()[mdWeek()];

@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 (async()=>{const b=await chromium.launch();const p=await (await b.newContext({viewport:{width:390,height:850}})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push('C:'+m.text().slice(0,120))});
 await p.goto((process.env.BASE||'http://localhost:8765')+'/index.html');await p.waitForTimeout(1500);
-const r=await p.evaluate(async()=>{buildShell();const o={};const sl=ms=>new Promise(r=>setTimeout(r,ms||300));
+const r=await p.evaluate(async()=>{buildShell();window.__mdNow=Date.parse('2026-11-20T18:30:00Z');const o={};const sl=ms=>new Promise(r=>setTimeout(r,ms||300));
  st.set('profile',Object.assign({},profile(),{name:'عبدالرحمن',edu:{stage:'sec',grade:3,track:'sci'}}));
  st.set('mdused',[]);st.set('mddone',{});st.set('mdrun',null);
  go('tests');await sl(400);o.card=document.body.innerHTML.includes('اختبار العقل الأسبوعي');

@@ -22,7 +22,10 @@ begin
   if me is null then raise exception 'denied'; end if;
   if p_grp !~ '^[a-z]+\|[0-9]{1,2}\|[a-z]*$' then raise exception 'denied'; end if;
   if p_total<5 or p_total>400 or p_score<0 or p_score>p_total then raise exception 'denied'; end if;
-  if p_week<(current_date-8) or p_week>current_date then raise exception 'denied'; end if;
+  if extract(dow from p_week)<>5 then raise exception 'denied'; end if;  -- لا بد أن يكون يوم جمعة
+  -- النافذة الواحدة للجميع: الجمعة 8 مساءً حتى 10 مساءً بتوقيت القاهرة (+10 دقائق مهلة للإرسال)
+  if (now() at time zone 'Africa/Cairo') < (p_week + interval '20 hours')
+     or (now() at time zone 'Africa/Cairo') > (p_week + interval '22 hours 10 minutes') then raise exception 'closed'; end if;
   if exists(select 1 from community_profiles where user_id=me and banned) then raise exception 'denied'; end if;
   select t.name into nm from teachers t where t.user_id=me and t.approved;
   if nm is null then select name into nm from community_profiles where user_id=me; end if;
